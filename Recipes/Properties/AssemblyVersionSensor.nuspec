@@ -1,0 +1,21 @@
+<?xml version="1.0"?>
+<package>
+  <metadata>
+    <id>Its.Recipes-AssemblyVersionSensor</id>
+    <title>Its.Recipes - AssemblyVersionSensor</title>
+    <version>1.0.0-beta</version>
+    <authors>josequ</authors>
+    <owners>Its</owners>
+    <projectUrl>http://codebox/itslog</projectUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>An embedded sensor for use with Its.Log, which exposes version and build information about the assembly it's installed into.</description>
+    <tags>sensor monitoring diagnostics Its.Log TiP</tags>
+    <frameworkAssemblies>
+      <frameworkAssembly assemblyName="System.ComponentModel.Composition" />
+    </frameworkAssemblies>
+  </metadata>
+  <files>
+    <file src="AssemblyVersionSensor.cs" 
+          target="content\(Its.Recipes)\Its.Log\AssemblyVersionSensor.cs" />
+  </files>
+</package>

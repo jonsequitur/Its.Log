@@ -1,0 +1,19 @@
+<?xml version="1.0"?>
+<package>
+  <metadata>
+    <id>Its.Log</id>
+    <version>2.7.2-beta</version>
+    <authors>josequ,bremor,mluther,vicrob</authors>
+    <title>Its.Log</title>
+    <owners>Its</owners>
+    <projectUrl>http://codebox/itslog</projectUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>The only logging / tracing / diagnostics / health monitoring API you need. Maximum flexibility and maintainability, minimum code.</description>
+    <tags>logging tracing instrumentation sensors diagnostics</tags>
+  </metadata>
+  <files>
+    <file src="Its.Log.dll" target="lib\net40" />
+    <file src="Its.Log.pdb" target="lib\net40" />
+    <file src="Its.Log.xml" target="lib\net40" />
+  </files>
+</package>

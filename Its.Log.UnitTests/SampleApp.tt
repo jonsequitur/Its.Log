@@ -1,0 +1,46 @@
+﻿<#@ template language="C#" hostspecific="True" debug="True" #>
+<#@ output extension="cs" #>
+<#@ assembly name="System.Core"#>
+<#@ assembly name="System.Xml"#>
+<#@ assembly name="System.Xml.Linq"#>
+<#@ import namespace="System"#>
+<#@ import namespace="System.Collections.Generic"#>
+<#@ import namespace="System.Linq"#>
+<#@ import namespace="System.Reflection"#>
+<#@ import namespace="System.Text"#>
+<#@ import namespace="System.Xml"#>
+<#@ import namespace="System.Xml.Linq"#>
+// ----------------------------------------------------------------------------------------------------
+// THIS .CS FILE WAS GENERATED USING T4. DO NOT EDIT IT DIRECTLY--EDIT THE ASSOCIATED .TT FILE INSTEAD.
+// ----------------------------------------------------------------------------------------------------
+
+using System;
+using System.Linq;
+
+namespace Its.Log.Instrumentation.UnitTests.SampleApp
+{
+	public interface ILoggable<T>
+	{
+		void ActionWithLogWrite();
+		void ActionWithLogEnter(T obj);
+	}
+
+	<# for (var i = 0; i < 1000; i++) { #>
+	public class GenericClass<#=i#><T> : ILoggable<T> 
+	{
+		public void ActionWithLogWrite() 
+		{
+			Log.Write(() => new { Self = this, Number = <#=i#> });
+		}
+		
+		public void ActionWithLogEnter(T param) 
+		{
+			using (var activity = Log.Enter(() => new { param }))
+			{
+			}
+		}
+	}
+	<# } #>
+	
+	 
+}

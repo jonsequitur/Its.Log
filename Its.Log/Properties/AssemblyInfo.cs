@@ -1,0 +1,30 @@
+﻿using System;
+using System.Linq;
+using System.Reflection;
+using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
+
+// General Information about an assembly is controlled through the following 
+// set of attributes. Change these attribute values to modify the information
+// associated with an assembly.
+
+
+[assembly: AssemblyVersion("2.7.0.0")]
+[assembly: AssemblyFileVersion("2.7.1-beta")]
+
+
+[assembly: AssemblyTrademark("Microsoft and Windows are registered trademarks of Microsoft Corporation.")]
+[assembly: AssemblyDelaySign(false)]
+
+// These May change from assembly to assembly, but not likely
+
+[assembly: ComVisible(false)]
+[assembly: CLSCompliant(true)]
+
+// These attributes should be changed for each assembly.
+
+[assembly: AssemblyTitle("Its.Log")]
+[assembly: InternalsVisibleTo("Its.Log.Monitoring")]
+[assembly: InternalsVisibleTo("Its.Log.UnitTests")]
+[assembly: InternalsVisibleTo("Its.Log.Incubation.UnitTests")]
+[assembly: InternalsVisibleTo("Its.Log.Incubation")]

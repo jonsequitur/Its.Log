@@ -1,0 +1,17 @@
+<?xml version="1.0"?>
+<package>
+  <metadata>
+    <id>Its.Log.js</id>
+    <version>0.1-beta</version>
+    <authors>bremor,josequ</authors>
+    <title>its.log.js</title>
+    <owners>Its</owners>
+    <projectUrl>http://codebox/itslog</projectUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>The only logging / tracing / diagnostics / health monitoring API you need for javascript. Maximum flexibility and maintainability, minimum code.</description>
+    <tags>javascript logging tracing instrumentation diagnostics</tags>
+  </metadata>
+  <files>
+    <file src="its.log.js" target="content\scripts\its.log-0.1-beta.js" />
+  </files>
+</package>

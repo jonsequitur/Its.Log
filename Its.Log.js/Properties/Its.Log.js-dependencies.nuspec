@@ -1,0 +1,19 @@
+<?xml version="1.0"?>
+<package>
+  <metadata>
+    <id>Its.Log.js-dependencies</id>
+    <version>0.1-beta</version>
+    <authors>bremor,josequ</authors>
+    <title>its.log.js dependencies</title>
+    <owners>Its</owners>
+    <projectUrl>http://codebox/itslog</projectUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>Optional, barebone dependencies for its.log.js</description>
+    <tags>javascript logging tracing instrumentation diagnostics dependencies</tags>
+  </metadata>
+  <files>
+    <file src="bus.js" target="content\scripts\its.log-bus-0.1-beta.js" />
+    <file src="stack.js" target="content\scripts\its.log-stack-0.1-beta.js" />
+    <file src="extend.js" target="content\scripts\its.log-extend-0.1-beta.js" />
+  </files>
+</package>

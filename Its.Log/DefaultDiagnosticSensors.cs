@@ -1,0 +1,64 @@
+using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.Linq;
+using System.Reflection;
+using System.Web;
+
+namespace Its.Log.Instrumentation
+{
+    internal static class DefaultDiagnosticSensors
+    {
+        // TODO: (DefaultDiagnosticSensors) make these public
+
+        private static readonly string appDomainStartTime = DateTimeOffset.Now.ToString("o");
+        private static readonly string processStartTime = new DateTimeOffset(Process.GetCurrentProcess().StartTime).ToString("o");
+        private static readonly int processId = Process.GetCurrentProcess().Id;
+
+        private static readonly string location = Assembly.GetExecutingAssembly().CodeBase.Maybe(c => c.Remove(c.LastIndexOf("/", StringComparison.InvariantCultureIgnoreCase)));
+
+        /// <summary>
+        ///   Returns diagnostic information related to the deployed application.
+        /// </summary>
+        [DiagnosticSensor]
+        public static IDictionary<string, object> Application()
+        {
+            return new Dictionary<string, object>
+            {
+                { "Location", location },
+                { "Process ID", processId },
+                { "AppDomain start time", appDomainStartTime },
+                { "Process start time", processStartTime },
+            };
+        }
+
+        /// <summary>
+        ///   Returns diagnostic information related to the runtime environment.
+        /// </summary>
+        [DiagnosticSensor]
+        public static IDictionary<string, object> Environment()
+        {
+            return new Dictionary<string, object>
+            {
+                { ".NET Version", System.Environment.Version.ToString() },
+                { "Server", System.Environment.MachineName }
+            };
+        }
+
+        /// <summary>
+        ///   Returns diagnostic information related to the <see cref="HttpRuntime.Cache" />.
+        /// </summary>
+        [DiagnosticSensor]
+        public static IDictionary<string, object> Cache()
+        {
+            return new Dictionary<string, object>
+            {
+                { "Count", HttpRuntime.Cache.Count },
+                { "EffectivePercentagePhysicalMemoryLimit", HttpRuntime.Cache.EffectivePercentagePhysicalMemoryLimit },
+                { "EffectivePrivateBytesLimit", HttpRuntime.Cache.EffectivePrivateBytesLimit },
+                { "Keys", HttpRuntime.Cache.Cast<DictionaryEntry>().Select(item => item.Key).OrderBy(key => key) },
+            };
+        }
+    }
+}
