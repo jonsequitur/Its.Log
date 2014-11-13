@@ -16,8 +16,8 @@
     </dependencies>
   </metadata>
   <files>
-    <file src="Its.Log.Monitoring.dll" target="lib\net45" />
-    <file src="Its.Log.Monitoring.pdb" target="lib\net45" />
-    <file src="Its.Log.Monitoring.xml" target="lib\net45" />
+    <file src="**\Its.Log.Monitoring.dll" target="lib\net45" />
+    <file src="**\Its.Log.Monitoring.pdb" target="lib\net45" />
+    <file src="**\Its.Log.Monitoring.xml" target="lib\net45" />
   </files>
 </package>
