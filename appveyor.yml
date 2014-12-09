@@ -1,0 +1,21 @@
+install:
+  - nuget restore
+
+configuration:
+  - Release
+
+build:
+  project: Its.Log.sln
+  publish_nuget: true
+
+test:
+  assemblies:
+    - '**\*Tests.dll'
+
+artifacts:
+  - path: Log\bin
+    name: Its.Log
+
+  - path: Log.Monitoring\bin
+    name: Its.Log.Monitoring
+
