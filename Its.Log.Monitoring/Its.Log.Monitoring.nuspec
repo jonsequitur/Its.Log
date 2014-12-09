@@ -4,6 +4,7 @@
     <id>Its.Log.Monitoring</id>
     <authors>jonsequitur</authors>
     <title>Its.Log.Monitoring</title>
+    <version>1.8.0-beta</version>
     <owners>Microsoft,jonsequitur</owners>
     <projectUrl>https://github.com/jonsequitur/its.log</projectUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
