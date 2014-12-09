@@ -1,6 +1,6 @@
 ﻿// THIS FILE IS NOT INTENDED TO BE EDITED. 
 // 
-// It has been imported using NuGet. The original source is located in the Its.Log project (http://codebox/ItsLog). 
+// It has been imported using NuGet. The original source is located in the Its.Log project (https://github.com/jonsequitur/its.log). 
 // 
 // This file can be updated in-place using the Package Manager Console. To check for updates, run the following command:
 // 

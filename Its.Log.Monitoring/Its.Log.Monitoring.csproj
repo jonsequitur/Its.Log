@@ -115,10 +115,8 @@
     <Compile Include="TracingFilter.cs" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="Its.Log.Monitoring.nuspec" />
     <None Include="packages.config" />
-    <None Include="Properties\Its.Log.Monitoring.nuspec">
-      <SubType>Designer</SubType>
-    </None>
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Its.Log\Its.Log.csproj">

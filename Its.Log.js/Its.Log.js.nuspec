@@ -3,12 +3,12 @@
   <metadata>
     <id>Its.Log.js</id>
     <version>0.1-beta</version>
-    <authors>bremor,josequ</authors>
+    <authors>jonsequitur</authors>
     <title>its.log.js</title>
     <owners>Its</owners>
-    <projectUrl>http://codebox/itslog</projectUrl>
+    <projectUrl>https://github.com/jonsequitur/its.log</projectUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
-    <description>The only logging / tracing / diagnostics / health monitoring API you need for javascript. Maximum flexibility and maintainability, minimum code.</description>
+    <description>It's the only logging / tracing / diagnostics / health monitoring library you need for JavaScript. Maximum flexibility and maintainability, minimum code.</description>
     <tags>javascript logging tracing instrumentation diagnostics</tags>
   </metadata>
   <files>

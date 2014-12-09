@@ -4,9 +4,9 @@
     <id>Its.Recipes-ItsLogLite</id>
     <title>Its.Recipes - ItsLogLite</title>
     <version>1.0.3</version>
-    <authors>josequ</authors>
-    <owners>Its</owners>
-    <projectUrl>http://codebox/itslog</projectUrl>
+    <authors>jonsequitur</authors>
+    <owners>Microsoft,jonsequitur</owners>
+    <projectUrl>https://github.com/jonsequitur/its.log</projectUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>A lightweight tracing and logging API in a single file that can be used with or without Its.Log, and which is 100% forward-compatible with the full Its.Log API, so code written against it is portable to Its.Log.</description>
     <tags>logging tracing instrumentation diagnostics</tags>

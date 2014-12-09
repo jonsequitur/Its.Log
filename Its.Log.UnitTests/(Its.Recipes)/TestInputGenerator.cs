@@ -1,7 +1,5 @@
 ﻿// THIS FILE IS NOT INTENDED TO BE EDITED. 
 // 
-// It has been imported using NuGet from the Its.Recipes project (http://codebox/ItsRecipes). 
-// 
 // This file can be updated in-place using the Package Manager Console. To check for updates, run the following command:
 // 
 // PM> Get-Package -Updates
@@ -19,9 +17,7 @@ namespace Its.Recipes
     ///     Generates values for test cases.
     /// </summary>
     /// <remarks>
-    ///     This class was inspired and refactored from the Any class presented in the Microsoft TDD class.
-    ///     <see href="http://mylearning/coursedetails.aspx?COURSENO=COUR2006051616181090700057" />
-    ///     Additional materials for the class can be found here:
+    ///     This class was inspired by the Any class found here:
     ///     <see href="http://www.netobjectives.com/downloads/TDD_Course_Materials.html" />
     /// </remarks>
 #if !RecipesProject

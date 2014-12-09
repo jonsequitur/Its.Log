@@ -4,9 +4,9 @@
     <id>Its.Recipes-AssemblyVersionSensor</id>
     <title>Its.Recipes - AssemblyVersionSensor</title>
     <version>1.0.0-beta</version>
-    <authors>josequ</authors>
-    <owners>Its</owners>
-    <projectUrl>http://codebox/itslog</projectUrl>
+    <authors>jonsequitur</authors>
+    <owners>Microsoft,jonsequitur</owners>
+    <projectUrl>https://github.com/jonsequitur/its.log</projectUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>An embedded sensor for use with Its.Log, which exposes version and build information about the assembly it's installed into.</description>
     <tags>sensor monitoring diagnostics Its.Log TiP</tags>

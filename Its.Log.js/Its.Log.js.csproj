@@ -53,8 +53,11 @@
     </Content>
   </ItemGroup>
   <ItemGroup>
-    <None Include="Properties\Its.Log.js-dependencies.nuspec" />
-    <None Include="Properties\Its.Log.js.nuspec" />
+    <None Include="Its.Log.js-dependencies.nuspec" />
+    <None Include="Its.Log.js.nuspec" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Properties\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
