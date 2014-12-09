@@ -7,6 +7,7 @@
     <version>1.8.0-beta</version>
     <owners>Microsoft,jonsequitur</owners>
     <projectUrl>https://github.com/jonsequitur/its.log</projectUrl>
+    <licenseUrl>http://opensource.org/licenses/MIT</licenseUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>Expose monitoring tests and sensors via HTTP for health monitoring, testing in production, integration testing, functionality testing, and smoke testing.</description>
     <tags>logging telemetry monitoring sensors diagnostics TiP testing</tags>

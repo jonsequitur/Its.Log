@@ -7,6 +7,7 @@
     <title>Its.Log</title>
     <owners>Microsoft,jonsequitur</owners>
     <projectUrl>https://github.com/jonsequitur/its.log</projectUrl>
+    <licenseUrl>http://opensource.org/licenses/MIT</licenseUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>It's the only logging / tracing / diagnostics / health monitoring library you need. Maximum flexibility and maintainability, minimum code.</description>
     <tags>logging tracing instrumentation sensors diagnostics</tags>

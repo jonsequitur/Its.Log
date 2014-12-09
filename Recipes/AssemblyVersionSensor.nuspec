@@ -7,6 +7,7 @@
     <authors>jonsequitur</authors>
     <owners>Microsoft,jonsequitur</owners>
     <projectUrl>https://github.com/jonsequitur/its.log</projectUrl>
+    <licenseUrl>http://opensource.org/licenses/MIT</licenseUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>An embedded sensor for use with Its.Log, which exposes version and build information about the assembly it's installed into.</description>
     <tags>sensor monitoring diagnostics Its.Log TiP</tags>

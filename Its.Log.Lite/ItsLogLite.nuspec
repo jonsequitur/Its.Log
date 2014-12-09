@@ -7,6 +7,7 @@
     <authors>jonsequitur</authors>
     <owners>Microsoft,jonsequitur</owners>
     <projectUrl>https://github.com/jonsequitur/its.log</projectUrl>
+    <licenseUrl>http://opensource.org/licenses/MIT</licenseUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>A lightweight tracing and logging API in a single file that can be used with or without Its.Log, and which is 100% forward-compatible with the full Its.Log API, so code written against it is portable to Its.Log.</description>
     <tags>logging tracing instrumentation diagnostics</tags>
