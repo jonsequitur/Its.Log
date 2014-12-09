@@ -5,7 +5,7 @@
     <version>2.8.0-beta</version>
     <authors>jonsequitur,Microsoft</authors>
     <title>Its.Log</title>
-    <owners>Its</owners>
+    <owners>Microsoft,jonsequitur</owners>
     <projectUrl>https://github.com/jonsequitur/its.log</projectUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>It's the only logging / tracing / diagnostics / health monitoring library you need. Maximum flexibility and maintainability, minimum code.</description>

@@ -1,5 +1,9 @@
 Its.Log.Monitoring Release Notes
 
+1.8.0-beta
+
+* Now on GitHub & NuGet.
+
 1.5.2
 
 * Fixed a bug where if a test tag was requested as false then no tests were being returned.
