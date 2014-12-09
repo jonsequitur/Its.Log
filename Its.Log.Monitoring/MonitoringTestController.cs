@@ -16,7 +16,7 @@ namespace Its.Log.Monitoring
 
             if (!Configuration.Routes.TryGetValue(HttpConfigurationExtensions.TestRootRouteName, out testRoute))
             {
-                //TODO(phpruett): add test for this and return not found
+                //TODO: add test for this and return not found
                 return NotFound();
             }
 
