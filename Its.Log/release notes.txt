@@ -1,5 +1,0 @@
-Its.Log Release Notes
-
-2.8.0-beta
-
-* Now on GitHub & NuGet.

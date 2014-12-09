@@ -124,9 +124,6 @@
       <Name>Its.Log</Name>
     </ProjectReference>
   </ItemGroup>
-  <ItemGroup>
-    <Content Include="release notes.txt" />
-  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="$(SolutionDir)\.nuget\NuGet.targets" Condition="Exists('$(SolutionDir)\.nuget\NuGet.targets')" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
