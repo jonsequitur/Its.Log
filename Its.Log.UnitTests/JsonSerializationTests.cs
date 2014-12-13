@@ -8,7 +8,6 @@ using Its.Log.Instrumentation.Extensions;
 using Its.Recipes;
 using NUnit.Framework;
 using Newtonsoft.Json;
-using Assert = NUnit.Framework.Assert;
 
 namespace Its.Log.Instrumentation.UnitTests
 {
@@ -21,7 +20,7 @@ namespace Its.Log.Instrumentation.UnitTests
             Formatter.ResetToDefault();
         }
 
-        [NUnit.Framework.Ignore("Scenario under development")]
+        [Ignore("Scenario under development")]
         [Test]
         public void All_Log_entries_can_be_formatted_to_JSON_by_registering_a_formatter_for_LogEntry()
         {
@@ -51,7 +50,7 @@ namespace Its.Log.Instrumentation.UnitTests
             Assert.Fail("Finish this test");
         }
 
-        [NUnit.Framework.Ignore("Scenario under development")]
+        [Ignore("Scenario under development")]
         [Test]
         public void All_Log_entries_can_be_formatted_to_JSON_by_setting_Formatter_Default()
         {
@@ -81,7 +80,7 @@ namespace Its.Log.Instrumentation.UnitTests
             Assert.Fail("Finish this test");
         }
 
-        [NUnit.Framework.Ignore("Scenario under development")]
+        [Ignore("Scenario under development")]
         [Test]
         public void Log_entries_can_be_deserialized_from_JSON_as_dynamic_types()
         {
@@ -104,7 +103,7 @@ namespace Its.Log.Instrumentation.UnitTests
                         Is.EqualTo("{\"$type\":\"System.IO.FileInfo, mscorlib\",\"OriginalPath\":\"c:\\\\temp\\\\1.log\",\"FullPath\":\"c:\\\\temp\\\\1.log\"}"));
         }
 
-        [NUnit.Framework.Ignore("Perf test")]
+        [Ignore("Perf test")]
         [Test]
         public void Perf_benchmarks_for_JSON_versus_formatter()
         {
