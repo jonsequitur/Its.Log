@@ -1,5 +1,7 @@
 ## Its.Log
 
+[![Build Status](https://ci.appveyor.com/api/projects/status/github/jonsequitur/its.log?svg=true)](https://ci.appveyor.com/project/jonsequitur/its.log)
+
 ### Code instrumentation
 
 Its.Log helps you instrument your code. It doesn't know anything about logging libraries, performance counters, or tracing, but it can be used to send a lot of information to all of them easily.
