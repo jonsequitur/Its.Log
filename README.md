@@ -8,7 +8,6 @@ Its.Log helps you instrument your code. It doesn't know anything about logging l
 
 Log any object:
 
-
 ```csharp
 Log.Write(() => ren);
 ```
@@ -18,8 +17,7 @@ Log.Write(() => ren);
 ```csharp
 Log.Write(() => new { ren, stimpy } );
           // writes this to the log:
-          // SampleApp.SomeClass.Feed,Inputs: { ren = { FirstName = Ren, LastName = Hoek, Species = chihuahua, Weight = 1 } |
-          // stimpy = { FirstName = Stimpy, LastName = , Species = cat, Weight = 5 } }
+          // { Information: CallingType = Characters | CallingMethod = Dinner | Subject = { ren = { FirstName = Ren, LastName = Hoek, Species = chihuahua, Weight = 1 } | stimpy = { FirstName = Stimpy, LastName = [null], Species = cat, Weight = 5 } } | TimeStamp = 2014-12-18 16:11:00Z }
 ```
 
 Send the output anywhere. Here's how you send it to the console:
@@ -32,18 +30,34 @@ Log boundaries:
 
 ```csharp
 using (Log.Enter(() => new { ren, stimpy } ))
-       // writes: Start: SampleApp.SomeClass.Feed,Inputs: { ren = { FirstName = Ren, LastName = Hoek, Species = chihuahua, Weight = 1 } |
-       // stimpy = { FirstName = Stimpy, LastName = , Species = cat, Weight = 5 } }
+       // writes: { Start: CallingType = Characters | CallingMethod = Dinner | Subject = { ren = { FirstName = Ren, LastName = Hoek, Species = chihuahua, Weight = 1 } | stimpy = { FirstName = Stimpy, LastName = [null], Species = cat, Weight = 5 } } | TimeStamp = 2014-12-18 16:11:00Z }
 {
      ren.Starve();
      stimpy.Feed();  
 
 } // writes:
-  // Stop:  SampleApp.SomeClass.Feed,Inputs: { ren = { FirstName = Ren, LastName = Hoek, Species = chihuahua, Weight = 0.5 } |
-  // stimpy = { FirstName = Stimpy, LastName = , Species = cat, Weight = 8 } },Elapsed Ms: 3412,
+  // { Stop: CallingType = Characters | CallingMethod = Dinner | ElapsedMilliseconds = 1402 | Subject = { ren = { FirstName = Ren, LastName = Hoek, Species = chihuahua, Weight = .5 } | stimpy = { FirstName = Stimpy, LastName = [null], Species = cat, Weight = 9 } } | TimeStamp = 2014-12-18 16:11:02Z }
 ```
 
-Format anything with the ToLogString() extension method:
+Confirm checkpoints along the way:
+
+```csharp
+using (var activity = Log.Enter(() => new { ren, stimpy } ))
+{
+    stimpy.Feed();  
+    activity.Confirm(() => "Stimpy fed");
+
+    ren.Starve();
+    activity.Confirm(() => "Ren starved");
+
+    throw new Exception("I want real food!"); 
+    
+    activity.Confirm(() => "Done!");
+} // writes:
+  // { Stop: CallingType = Characters | CallingMethod = Dinner | ElapsedMilliseconds = 1402 | Subject = { ren = { FirstName = Ren, LastName = Hoek, Species = chihuahua, Weight = .5 } | stimpy = { FirstName = Stimpy, LastName = [null], Species = cat, Weight = 9 } } | TimeStamp = 2014-12-18 16:11:02Z | Params = { { Confirmed = "Stimpy fed", "Ren starved"} } }
+```
+
+Format anything with the `ToLogString` extension method:
 
 ```csharp
 Console.WriteLine(episodes.ToLogString());
@@ -54,7 +68,7 @@ Console.WriteLine(episodes.ToLogString());
 Tell it to be more informative:
 
 ```csharp
-Log.Formatters.RegisterPropertiesFormatter<Episode>();
+Formatter<Episode>.RegisterForAllProperties();
 Console.WriteLine(episodes.ToLogString());  
 // now writes: { { Id = 4234, Title = Space Madness, Characters = { SampleApp.Character, SampleApp.Character } } }, (...12 more) }
 ```
@@ -71,7 +85,7 @@ Use The Reactive Extensions to query the log event stream...
 var errors = Log.Events().Where(e => e.Subject is Exception);
 ```
 
-...or throttle them...
+...or buffer and aggregate them...
 
 ```csharp
 var countOf404s = logEvents
@@ -81,3 +95,52 @@ var countOf404s = logEvents
                     .Select(es => es.Count());
 ```
 
+### Objects, not strings
+
+Its.Log works best when you pass objects rather than strings. 
+
+This works:
+
+```csharp
+  Log.Write(() => "An error occurred: " + anException.ToString());
+```
+
+But this is better:
+
+```csharp
+  Log.Write(() => anException);
+```
+
+Knowing the type lets you decide at a policy level how to route them, format them, or react to them. It also helps keep your log output more consistent and your logging code more terse.
+
+### Log levels - Info, Error, Warning, Verbose
+
+While log levels can be specified, Its.Log also sets them by convention based on the type of the object you pass. For example, if the subject of a log entry is an exception:
+
+```csharp
+  Log.Write(() => anException);
+```
+
+then the output log level will default to `Error`:
+
+```
+  { Error: CallingType = Demo | CallingMethod = Formatting3_Exception_formatting_is_very_descriptive_by_default | ExceptionId = 75743ddd-824f-4c1b-954c-09b249d00e90 | Subject = { ReflectionTypeLoadException: Types = { Demo } | LoaderExceptions = { { DataException: Message = oops! | Data = { [why?, because] } | InnerException = [null] | TargetSite = [null] | StackTrace = [null] | HelpLink = [null] | Source = [null] | HResult = -2146232032 } } | Message = Exception of type 'System.Reflection.ReflectionTypeLoadException' was thrown. | Data = {  } | InnerException = [null] | TargetSite = Void Formatting3_Exception_formatting_is_very_descriptive_by_default() | StackTrace =    at Its.Log.Instrumentation.UnitTests.Demo.Formatting3_Exception_formatting_is_very_descriptive_by_default() in c:\dev\github\Its.Log\Its.Log.UnitTests\Demo.cs:line 93 | HelpLink = [null] | Source = Its.Log.UnitTests | HResult = -2146232830 } | TimeStamp = 2014-12-18 16:23:28Z | Params = {  } }
+```
+
+### JSON
+
+Outputting logs as JSON rather than Its.Log's default format is simple. Here's an example using NewtonSoft.Json:
+
+```csharp
+  var serializer = new JsonSerializer
+                        {
+                           TypeNameHandling = TypeNameHandling.All,
+                           ReferenceLoopHandling = ReferenceLoopHandling.Ignore
+                        };
+                      
+                        Formatter<LogEntry>.Register((entry, writer) =>
+                        {
+                          serializer.Serialize(writer, entry);
+                          writer.WriteLine();
+                        });
+```
