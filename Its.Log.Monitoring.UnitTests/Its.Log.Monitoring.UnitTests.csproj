@@ -80,7 +80,6 @@
   <ItemGroup>
     <Compile Include="%28Its.Recipes%29\Its.Log\AssemblyVersionSensor.cs" />
     <Compile Include="%28Its.Recipes%29\MaybeExtensions.cs" />
-    <Compile Include="%28Its.Recipes%29\PocketContainer.cs" />
     <Compile Include="%28Its.Recipes%29\TestInputGenerator.cs" />
     <Compile Include="FakeHttpClient.cs" />
     <Compile Include="JsonContent.cs" />

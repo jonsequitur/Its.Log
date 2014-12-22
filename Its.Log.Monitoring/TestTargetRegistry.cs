@@ -7,7 +7,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
 using System.Web.Http;
-using Its.Recipes;
+using Pocket;
 
 namespace Its.Log.Monitoring
 {
@@ -55,9 +55,17 @@ namespace Its.Log.Monitoring
             };
 
             var container = new PocketContainer()
-                .IncludeDependencyResolver(configuration.DependencyResolver)
                 .Register(c => new HttpClient())
-                .Register(c => testTarget);
+                .Register(c => testTarget)
+                .AddStrategy(type =>
+            {
+                var dependencyResolver = configuration.DependencyResolver;
+                if (dependencyResolver.GetService(type) != null)
+                {
+                    return c => dependencyResolver.GetService(type);
+                }
+                return null;
+            });
 
             if (testDependencies != null)
             {
