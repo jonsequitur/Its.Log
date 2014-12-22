@@ -10,7 +10,7 @@
 using System;
 using System.Linq;
 
-namespace Its.Recipes
+namespace Pocket
 {
     internal partial class PocketContainer
     {
