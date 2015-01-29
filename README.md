@@ -1,6 +1,6 @@
 ## Its.Log
 
-[![Build Status](https://ci.appveyor.com/api/projects/status/github/jonsequitur/its.log?svg=true)](https://ci.appveyor.com/project/jonsequitur/its-log)
+[![Build Status](https://ci.appveyor.com/api/projects/status/github/jonsequitur/its.log?svg=true&branch=master)](https://ci.appveyor.com/project/jonsequitur/its-log)
 
 ### Code instrumentation
 
