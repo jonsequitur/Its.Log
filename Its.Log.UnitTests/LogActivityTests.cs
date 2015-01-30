@@ -483,6 +483,7 @@ namespace Its.Log.Instrumentation.UnitTests
             log.Last().ToString().Should().Contain("five");
         }
 
+        [Ignore("Under development")]
         [Test]
         public void Activity_Confirm_outputs_include_timings()
         {
