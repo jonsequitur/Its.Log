@@ -26,3 +26,4 @@ Artifacts
 *.psess
 Its.Log.Monitoring.UI/its.log.monitoring.js
 Its.Log.Monitoring.UI/styles/monitoring.css
+*.xml

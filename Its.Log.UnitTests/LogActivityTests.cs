@@ -403,7 +403,7 @@ namespace Its.Log.Instrumentation.UnitTests
             var log = new List<LogEntry>();
 
             using (Log.Events().Subscribe(log.Add))
-            using (var activity = Log.Enter(() => { }))
+            using (var activity = Log.Enter(() =>  {  } ))
             {
                 activity.Confirm(() => "getting started");
                 activity.Confirm(() => "almost there...");
@@ -464,7 +464,7 @@ namespace Its.Log.Instrumentation.UnitTests
             log.Last().ToString().Should().Contain("Confirmed = { True }");
         }
 
-        [Test, Ignore]
+        [Test]
         public void When_there_are_a_large_number_of_Confirm_calls_they_are_not_truncated_in_the_log_output()
         {
             var log = new List<LogEntry>();
@@ -483,7 +483,7 @@ namespace Its.Log.Instrumentation.UnitTests
             log.Last().ToString().Should().Contain("five");
         }
 
-        [Test, Ignore]
+        [Test]
         public void Activity_Confirm_outputs_include_timings()
         {
             var log = new List<LogEntry>();

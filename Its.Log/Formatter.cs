@@ -21,7 +21,7 @@ namespace Its.Log.Instrumentation
     public static class Formatter
     {
         private static Func<Type, bool> autoGenerateForType = t => false;
-        private static int listExpansionLimit;
+        private static int defaultListExpansionLimit;
         private static int recursionLimit;
         internal static readonly RecursionCounter RecursionCounter = new RecursionCounter();
 
@@ -54,7 +54,7 @@ namespace Its.Log.Instrumentation
         {
             get
             {
-                return listExpansionLimit;
+                return defaultListExpansionLimit;
             }
             set
             {
@@ -62,7 +62,7 @@ namespace Its.Log.Instrumentation
                 {
                     throw new ArgumentException("ListExpansionLimit must be at least 0.");
                 }
-                listExpansionLimit = value;
+                defaultListExpansionLimit = value;
             }
         }
 
@@ -203,28 +203,34 @@ namespace Its.Log.Instrumentation
 
         // TODO: (Formatter) make Join methods public and expose an override for iteration limit
 
-        internal static void Join(IEnumerable list, TextWriter writer)
+        internal static void Join(IEnumerable list,
+                                  TextWriter writer,
+                                  int? listExpansionLimit = null)
         {
-            Join(list.Cast<object>(), writer);
+            Join(list.Cast<object>(), writer, listExpansionLimit);
         }
 
-        internal static void Join<T>(IEnumerable<T> list, TextWriter writer)
+        internal static void Join<T>(IEnumerable<T> list,
+                                     TextWriter writer,
+                                     int? listExpansionLimit = null)
         {
             if (list == null)
             {
                 writer.Write(NullString);
                 return;
-            }
+            } 
 
             var i = 0;
 
             TextFormatter.WriteStartSequence(writer);
 
+            listExpansionLimit = listExpansionLimit ?? Formatter<T>.ListExpansionLimit;
+
             using (var enumerator = list.GetEnumerator())
             {
                 while (enumerator.MoveNext())
                 {
-                    if (i < Formatter<T>.ListExpansionLimit)
+                    if (i < listExpansionLimit)
                     {
                         // write out another item in the list
                         if (i > 0)

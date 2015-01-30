@@ -10,6 +10,18 @@ using Its.Log.Instrumentation.Extensions;
 
 namespace Its.Log.Instrumentation
 {
+    internal class ExpandAllList : List<object>
+    {
+        static ExpandAllList()
+        {
+            Formatter<ExpandAllList>.ListExpansionLimit = 100;
+        }
+
+        public ExpandAllList(IEnumerable<object> collection) : base(collection)
+        {
+        }
+    }
+
     /// <summary>
     /// A series of associated events.
     /// </summary>
@@ -22,11 +34,6 @@ namespace Its.Log.Instrumentation
         private bool confirmed = false;
         private readonly Queue<LogEntry> buffer;
         private HashSet<Confirmation> confirmations;
-
-        static LogActivity()
-        {
-            Formatter<HashSet<Confirmation>>.ListExpansionLimit = 100;
-        }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="LogActivity"/> class.
@@ -82,13 +89,16 @@ namespace Its.Log.Instrumentation
 
             if (confirmations != null)
             {
-                var extension = Log.WithParams(() => new { Confirmed = confirmations.Select(v => v.Accessor() ) });
+                var extension = Log.WithParams(() => new { Confirmed = new ExpandAllList(confirmations.Select(v => v.Accessor() )) });
                 extension.ApplyTo(clone);
             }
 
             Write(clone);
         }
 
+        /// <summary>
+        /// Writes out buffered entries in a log activity that was entered with requireConfirm set to true.
+        /// </summary>
         public void Confirm(Func<object> value = null)
         {
             confirmed = true;
@@ -232,8 +242,20 @@ namespace Its.Log.Instrumentation
 
         private struct Confirmation
         {
-            public Func<object> Accessor;
+            public Func<object> Accessor        
+            {
+                get
+                {
+                    return accessor;
+                }
+                set
+                {
+                    accessor = value;
+                }
+            }
+
             public long ElapsedMilliseconds;
+            private Func<object> accessor;
         }
 
         private class ConfirmationEqualityComparer : IEqualityComparer<Confirmation>

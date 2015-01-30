@@ -302,7 +302,7 @@ namespace Its.Log.Instrumentation
             var enumerable = obj as IEnumerable;
             if (enumerable != null)
             {
-                Formatter.Join(enumerable, writer);
+                Formatter.Join(enumerable, writer, listExpansionLimit);
             }
             else
             {

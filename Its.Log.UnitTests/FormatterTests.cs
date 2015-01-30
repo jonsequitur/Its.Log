@@ -76,7 +76,7 @@ namespace Its.Log.Instrumentation.UnitTests
                         Contains.Substring("o => o.DateProperty.ToShortDateString()"));
         }
 
-        [NUnit.Framework.Ignore("Scenario under development")]
+        [Ignore("Scenario under development")]
         [Test]
         public void GenerateForMembers_compiles_expressions_that_are_not_MemberExpressions()
         {
@@ -700,7 +700,7 @@ namespace Its.Log.Instrumentation.UnitTests
             }).Start());
         }
 
-        [NUnit.Framework.Ignore("Nice to have but currently not working")]
+        [Ignore("Nice to have but currently not working")]
         [Test]
         public void Params_formatters_are_not_subject_recursion_limits()
         {
@@ -779,7 +779,6 @@ namespace Its.Log.Instrumentation.UnitTests
             output.Should().Be(jArray.ToString());
         }
 
-        [NUnit.Framework.Ignore("Scenario under development")]
         [Test]
         public void ListExpansionLimit_can_be_specified_per_type()
         {
@@ -796,7 +795,7 @@ namespace Its.Log.Instrumentation.UnitTests
                 { "seven", 7 },
                 { "eight", 8 },
                 { "nine", 9 },
-                { "ninety-nine", 99 },
+                { "ninety-nine", 99 }
             };
 
             var output = dictionary.ToLogString();
