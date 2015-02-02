@@ -1,6 +1,6 @@
 ## Its.Log
 
-[![Build Status](https://ci.appveyor.com/api/projects/status/github/jonsequitur/its.log?svg=true&branch=master)](https://ci.appveyor.com/project/jonsequitur/its-log)
+[![Build Status](https://ci.appveyor.com/api/projects/status/github/jonsequitur/its.log?svg=true&branch=master)](https://ci.appveyor.com/project/jonsequitur/its-log)  [![NuGet Status](http://img.shields.io/nuget/v/Its.Log.svg?style=flat)](https://www.nuget.org/packages/Its.Log/)
 
 ### Code instrumentation
 
