@@ -153,66 +153,43 @@ namespace Its.Log.Instrumentation
         /// </summary>
         public static ConcurrentDictionary<string, DiagnosticSensor> Discover()
         {
-            // find all exported sensor functions across loaded assemblies
-            var assemblies = AppDomain.CurrentDomain.GetAssemblies()
-                                      .Where(a => !a.IsDynamic)
-                                      .Where(a => !a.GlobalAssemblyCache);
-            var discoveredSensors = new ConcurrentDictionary<string, DiagnosticSensor>();
-
-            using (var catalog = AggregateSafely(assemblies.Select(a => new AssemblyCatalog(a))))
-            using (var container = new CompositionContainer(catalog))
-            {
-                try
+            return AppDomain.CurrentDomain
+                .GetAssemblies()
+                .Where(a => !a.IsDynamic && !a.GlobalAssemblyCache)
+                .SelectMany(a =>
                 {
-                    var sensors = container.GetExports<object>("DiagnosticSensor")
-                                           .Select(lazy => lazy.Value)
-                                           .OfType<ExportedDelegate>()
-                                           .Select(sensorMethod => new DiagnosticSensor(sensorMethod))
-                                           .OrderBy(sensor => sensor.Name)
-                                           .ThenBy(sensor => sensor.DeclaringType.Assembly.FullName)
-                                           .ToArray();
-
-                    // FIX: (Discover) we should be graceful about collisions or deterministic about ordering
-                    foreach (var sensor in sensors)
+                    try
                     {
-                        discoveredSensors[sensor.Name] = sensor;
+                        return new CompositionContainer(new AggregateCatalog(new AssemblyCatalog(a)))
+                            .GetExports<object>("DiagnosticSensor")
+                            .Select(lazy => lazy.Value)
+                            .OfType<ExportedDelegate>()
+                            .Select(sensorMethod => new DiagnosticSensor(sensorMethod));
                     }
-                }
-                catch (ReflectionTypeLoadException ex)
+                    catch (Exception ex)
+                    {
+                        if (ex is TypeLoadException || ex is ReflectionTypeLoadException || ex is FileNotFoundException ||
+                            ex is FileLoadException)
+                        {
+                            return new[]
+                            {
+                                new DiagnosticSensor(typeof (Exception),
+                                    "AssemblyLoadError-" + a.FullName,
+                                    typeof (DiagnosticSensor),
+                                    new Func<Exception>(() => ex))
+                            };
+                        }
+                        throw;
+                    }
+                })
+                .OrderBy(sensor => sensor.Name)
+                .ThenBy(sensor => sensor.DeclaringType.Assembly.FullName)
+                .Aggregate(new ConcurrentDictionary<string, DiagnosticSensor>(), (sensors, sensor) =>
                 {
-                    discoveredSensors["SensorDiscoveryError"] = new DiagnosticSensor(typeof (Exception),
-                                                                                     "SensorDiscoveryError",
-                                                                                     typeof (DiagnosticSensor),
-                                                                                     new Func<Exception>(() => ex));
-                }
-
-                return discoveredSensors;
-            }
-        }
-
-        internal static AggregateCatalog AggregateSafely(IEnumerable<AssemblyCatalog> catalogs)
-        {
-            var catalog = new AggregateCatalog();
-
-            foreach (var assemblyCatalog in catalogs)
-            {
-                try
-                {
-                    // trigger possible exceptions due to missing assemblies. if these are going to cause a problem, let them do so on a code path that actually uses them directly, because otherwise it can be very hard to figure out the source of the problem.
-                    var parts = assemblyCatalog.Parts;
-                    catalog.Catalogs.Add(assemblyCatalog);
-                }
-                catch (ReflectionTypeLoadException ex)
-                {
-                    ex.RaiseErrorEvent();
-                }
-                catch (FileNotFoundException ex)
-                {
-                    ex.RaiseErrorEvent();
-                }
-            }
-
-            return catalog;
+                    // FIX: (Discover) we should be graceful about collisions or deterministic about ordering
+                    sensors[sensor.Name] = sensor;
+                    return sensors;
+                });
         }
 
         /// <summary>
