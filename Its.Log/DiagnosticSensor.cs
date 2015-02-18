@@ -192,31 +192,6 @@ namespace Its.Log.Instrumentation
                 });
         }
 
-        internal static AggregateCatalog AggregateSafely(IEnumerable<AssemblyCatalog> catalogs)
-        {
-            var catalog = new AggregateCatalog();
-
-            foreach (var assemblyCatalog in catalogs)
-            {
-                try
-                {
-                    // trigger possible exceptions due to missing assemblies. if these are going to cause a problem, let them do so on a code path that actually uses them directly, because otherwise it can be very hard to figure out the source of the problem.
-                    var parts = assemblyCatalog.Parts;
-                    catalog.Catalogs.Add(assemblyCatalog);
-                }
-                catch (ReflectionTypeLoadException ex)
-                {
-                    ex.RaiseErrorEvent();
-                }
-                catch (FileNotFoundException ex)
-                {
-                    ex.RaiseErrorEvent();
-                }
-            }
-
-            return catalog;
-        }
-
         /// <summary>
         /// Gets the name of a sensor.
         /// </summary>
