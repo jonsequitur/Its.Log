@@ -36,8 +36,7 @@ namespace Its.Log.Instrumentation
 
         public static bool IsAsync(this Type type)
         {
-            return type == typeof (Task) ||
-                   (type.IsGenericType && type.GetGenericTypeDefinition() == typeof (Task<>));
+            return typeof (Task).IsAssignableFrom(type);
         }
     }
 }
