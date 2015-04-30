@@ -39,7 +39,7 @@ namespace Its.Log.Monitoring
             {
                 if (!response.IsSuccessStatusCode)
                 {
-                    throw new HttpRequestException(string.Format("Response does not indicate succeedfulness: {0}: {1}",
+                    throw new HttpRequestException(string.Format("Response does not indicate success: {0}: {1}",
                                                                  response.StatusCode,
                                                                  response.ReasonPhrase));
                 }
@@ -60,12 +60,11 @@ namespace Its.Log.Monitoring
             return response;
         }
 
-        public static async Task<HttpResponseMessage> ShouldSucceed(
+        public static async Task<HttpResponseMessage> ShouldSucceedAsync(
             this Task<HttpResponseMessage> response,
             HttpStatusCode? expected = null)
         {
-            await response;
-            return response.Result.ShouldSucceed(expected);
+            return (await response).ShouldSucceed(expected);
         }
 
         public static HttpResponseMessage ShouldFailWith(
@@ -80,12 +79,11 @@ namespace Its.Log.Monitoring
             return response;
         }
 
-        public static async Task<HttpResponseMessage> ShouldFailWith(
+        public static async Task<HttpResponseMessage> ShouldFailWithAsync(
             this Task<HttpResponseMessage> response,
             HttpStatusCode code)
         {
-            await response;
-            return response.Result.ShouldFailWith(code);
+            return (await response).ShouldFailWith(code);
         }
 
         private static void ThrowVerboseAssertion(HttpResponseMessage response)
