@@ -56,11 +56,11 @@ namespace Its.Log.Monitoring.UnitTests
 
             // try production, which should be reachable
             var response = api.GetAsync("http://blammo.com/tests/production/widgets/is_reachable");
-            await response.ShouldSucceed();
+            await response.ShouldSucceedAsync();
 
             // then staging, which should not be reachable
             response = api.GetAsync("http://blammo.com/tests/staging/widgets/is_reachable");
-            await response.ShouldFailWith(HttpStatusCode.InternalServerError);
+            await response.ShouldFailWithAsync(HttpStatusCode.InternalServerError);
         }
 
         [Test]
@@ -193,7 +193,7 @@ namespace Its.Log.Monitoring.UnitTests
         public async Task<dynamic> is_reachable()
         {
             return await httpClient.GetAsync("/sensors")
-                                   .ShouldSucceed();
+                                   .ShouldSucceedAsync();
         }
 
         public string HttpClient_BaseAddress()

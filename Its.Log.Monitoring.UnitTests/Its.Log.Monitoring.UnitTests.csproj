@@ -81,6 +81,7 @@
     <Compile Include="%28Its.Recipes%29\Its.Log\AssemblyVersionSensor.cs" />
     <Compile Include="%28Its.Recipes%29\MaybeExtensions.cs" />
     <Compile Include="%28Its.Recipes%29\TestInputGenerator.cs" />
+    <Compile Include="AssertionExtensionsTests.cs" />
     <Compile Include="FakeHttpClient.cs" />
     <Compile Include="JsonContent.cs" />
     <Compile Include="JsonSerializationExtensions.cs" />

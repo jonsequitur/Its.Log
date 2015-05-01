@@ -372,7 +372,7 @@ namespace Its.Log.Monitoring.UnitTests
         {
             var response = apiClient.GetAsync("http://blammo.com/tests/");
 
-            await response.ShouldSucceed();
+            await response.ShouldSucceedAsync();
 
             JArray tests = response.Result.JsonContent().Tests;
 
