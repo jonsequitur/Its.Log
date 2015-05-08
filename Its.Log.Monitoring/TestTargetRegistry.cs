@@ -56,16 +56,7 @@ namespace Its.Log.Monitoring
 
             var container = new PocketContainer()
                 .Register(c => new HttpClient())
-                .Register(c => testTarget)
-                .AddStrategy(type =>
-            {
-                var dependencyResolver = configuration.DependencyResolver;
-                if (dependencyResolver.GetService(type) != null)
-                {
-                    return c => dependencyResolver.GetService(type);
-                }
-                return null;
-            });
+                .Register(c => testTarget);
 
             if (testDependencies != null)
             {
