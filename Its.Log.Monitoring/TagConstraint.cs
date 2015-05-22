@@ -51,14 +51,14 @@ namespace Its.Log.Monitoring
             }
 
             var includeTags = filterTags.Where(t => t.Value.Equals("true", StringComparison.OrdinalIgnoreCase))
-                                        .Select(t => t.Key.ToLower())
+                                        .Select(t => t.Key)
                                         .ToArray();
             var excludeTags = filterTags.Where(t => t.Value.Equals("false", StringComparison.OrdinalIgnoreCase))
-                                        .Select(t => t.Key.ToLower())
+                                        .Select(t => t.Key)
                                         .ToArray();
 
-            return excludeTags.Intersect(testTags).Count() == 0  &&
-                   includeTags.Intersect(testTags).Count() == includeTags.Count();
+            return !excludeTags.Intersect(testTags, StringComparer.OrdinalIgnoreCase).Any()  &&
+                   includeTags.Intersect(testTags, StringComparer.OrdinalIgnoreCase).Count() == includeTags.Count();
         }
     }
 }

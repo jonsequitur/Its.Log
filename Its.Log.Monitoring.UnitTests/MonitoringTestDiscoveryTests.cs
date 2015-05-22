@@ -401,6 +401,19 @@ namespace Its.Log.Monitoring.UnitTests
             json.Should().NotContain("tangerine");
         }
 
+        [Category("Tags")]
+        [Test]
+        public void when_a_tag_is_specific_the_casing_on_the_tag_does_not_matter()
+        {
+            var response = apiClient.GetAsync("http://blammo.com/tests/staging/widgetapi/?Brooklyn=true").Result;
+
+            response.ShouldSucceed();
+
+            var json = response.Content.ReadAsStringAsync().Result;
+
+            json.Should().Contain("manhattan");            
+        }
+
         [Test]
         public void properties_should_not_be_shows_as_tests()
         {
@@ -450,6 +463,25 @@ namespace Its.Log.Monitoring.UnitTests
         private dynamic also_not_a_test()
         {
             return null;
+        }
+    }
+
+    public class BigAppleTests : IHaveTags
+    {
+        public string[] Tags
+        {
+            get
+            {
+                return new[]
+                {
+                    "Brooklyn", "Queens"
+                };
+            }
+        }
+
+        public dynamic manhattan()
+        {
+            return "Empire State";
         }
     }
 
