@@ -88,8 +88,6 @@ namespace Its.Log.Monitoring.UnitTests
 
             var json = response.JsonContent();
 
-            Console.WriteLine(json);
-
             JArray tests = json.Tests;
 
             tests.Should().NotContain(o => o.Value<string>("Url") == "internal_only_test");
@@ -103,8 +101,6 @@ namespace Its.Log.Monitoring.UnitTests
             response.ShouldSucceed();
 
             var json = response.JsonContent();
-
-            Console.WriteLine(json);
 
             JArray tests = json.Tests;
 
@@ -120,8 +116,6 @@ namespace Its.Log.Monitoring.UnitTests
 
             var json = response.JsonContent();
 
-            Console.WriteLine(json);
-
             JArray tests = json.Tests;
 
             tests.Should().Contain(o => o.Value<string>("Url") == "http://blammo.com/tests/production/widgetapi/passing_test_returns_object");
@@ -136,8 +130,6 @@ namespace Its.Log.Monitoring.UnitTests
 
             var json = response.JsonContent();
 
-            Console.WriteLine(json);
-
             JArray tests = json.Tests;
 
             tests.Should().Contain(o =>
@@ -150,7 +142,6 @@ namespace Its.Log.Monitoring.UnitTests
             var response = apiClient.GetAsync("http://blammo.com/tests/production/widgetapi/TEST_NAME_COLLISION_1").Result;
 
             var message = response.Content.ReadAsStringAsync().Result;
-            Console.WriteLine(message);
 
             response.ShouldFailWith(HttpStatusCode.InternalServerError);
             message.Should().Contain("Test could not be routed");
@@ -163,7 +154,6 @@ namespace Its.Log.Monitoring.UnitTests
             var response = apiClient.GetAsync("http://blammo.com/tests/production/widgetapiz/is_reachable").Result;
 
             var message = response.Content.ReadAsStringAsync().Result;
-            Console.WriteLine(message);
 
             response.ShouldFailWith(HttpStatusCode.NotFound);
         }
@@ -172,9 +162,6 @@ namespace Its.Log.Monitoring.UnitTests
         public void When_an_undefined_environment_is_queried_then_an_informative_error_is_returned()
         {
             var response = apiClient.GetAsync("http://blammo.com/tests/productionz/widgetapi/is_reachable").Result;
-
-            var message = response.Content.ReadAsStringAsync().Result;
-            Console.WriteLine(message);
 
             response.ShouldFailWith(HttpStatusCode.NotFound);
         }
@@ -187,8 +174,6 @@ namespace Its.Log.Monitoring.UnitTests
             response.ShouldSucceed();
 
             var json = response.JsonContent();
-
-            Console.WriteLine(json);
 
             JArray tests = json.Tests;
 
@@ -216,8 +201,6 @@ namespace Its.Log.Monitoring.UnitTests
 
             var json = response.JsonContent();
 
-            Console.WriteLine(json);
-
             JArray tests = json.Tests;
 
             tests.Should()
@@ -243,19 +226,13 @@ namespace Its.Log.Monitoring.UnitTests
                                                           targets.Add("production", "widgetapi", new Uri("http://widgets.com")), testTypes: new[] { typeof (WidgetApiTests) });
             configuration.EnsureInitialized();
 
-            Console.WriteLine("Configuration initialized");
-
             var api = new HttpClient(new HttpServer(configuration));
-
-            Console.WriteLine("Calling API");
 
             var response = api.GetAsync("http://blammo.com/tests/").Result;
 
             response.ShouldSucceed();
 
             var json = response.JsonContent();
-
-            Console.WriteLine(json);
 
             JArray tests = json.Tests;
 
