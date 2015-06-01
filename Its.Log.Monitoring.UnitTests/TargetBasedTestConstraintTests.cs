@@ -17,21 +17,22 @@ namespace Its.Log.Monitoring.UnitTests
     [TestFixture]
     public class TargetBasedTestConstraintTests
     {
-        private static HttpClient apiClient;
-
         [SetUp]
         public void SetUp()
         {
             TestsConstrainedToTarget.AppliesTo = _ => false;
+        }
 
-            apiClient = new TestApi(targets =>
-                                    targets.Add("staging", "widgetapi",
-                                                new Uri("http://staging.widgets.com"),
-                                                dependencies =>
-                                                dependencies.Register(() =>
-                                                                      new HttpClient(new HttpServer(new HttpConfiguration()
-                                                                                                        .MapSensorRoutes(_ => true))))),
-                                    typeof (TestsConstrainedToTarget));
+        private static TestApi CreateApiClient()
+        {
+            return new TestApi(targets =>
+                                   targets.Add("staging", "widgetapi",
+                                               new Uri("http://staging.widgets.com"),
+                                               dependencies =>
+                                                   dependencies.Register(() =>
+                                                                             new HttpClient(new HttpServer(new HttpConfiguration()
+                                                                                                               .MapSensorRoutes(_ => true))))),
+                               typeof (TestsConstrainedToTarget));
         }
 
         [TearDown]
@@ -48,7 +49,7 @@ namespace Its.Log.Monitoring.UnitTests
         {
             TestsConstrainedToTarget.AppliesTo = BuildDateAfter(DateTime.Now);
 
-            var response = await apiClient.GetAsync("http://tests.com/tests");
+            var response = await CreateApiClient().GetAsync("http://tests.com/tests");
 
             JArray tests = response.JsonContent().Tests;
 
@@ -60,7 +61,7 @@ namespace Its.Log.Monitoring.UnitTests
         {
             TestsConstrainedToTarget.AppliesTo = BuildDateAfter(DateTime.Now.Subtract(TimeSpan.FromDays(1000)));
 
-            var response = await apiClient.GetAsync("http://tests.com/tests");
+            var response = await CreateApiClient().GetAsync("http://tests.com/tests");
 
             JArray tests = response.JsonContent().Tests;
 
@@ -78,11 +79,13 @@ namespace Its.Log.Monitoring.UnitTests
                 return false;
             };
 
+            var apiClient = CreateApiClient();
+
             await apiClient.GetAsync("http://tests.com/tests");
             await apiClient.GetAsync("http://tests.com/tests");
             await apiClient.GetAsync("http://tests.com/tests");
 
-            constraintCalls.Should().Be(1);
+            constraintCalls.Should().BeLessOrEqualTo(1);
         }
 
         private static Func<HttpClient, bool> BuildDateAfter(DateTime dateTime)

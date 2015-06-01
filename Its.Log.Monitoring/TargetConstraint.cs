@@ -19,23 +19,30 @@ namespace Its.Log.Monitoring
             }
         }
 
-        protected override bool Match(TestTarget target, HttpRequestMessage request)
+        protected override bool Match(TestTarget target, HttpRequestMessage _)
         {
             if (TestDefinition == null)
             {
                 return true;
             }
-            var key = string.Format("{0}{1}:{2}:{3}", "TargetConstraint:", target.Environment, target.Application, TestDefinition.TestType);
 
-            return HttpRuntime.Cache.GetOrAdd(key,
-                                              () =>
-                                              {
-                                                  var test = target.ResolveDependency(TestDefinition.TestType) as IApplyToTarget;
+            return Match(target);
+        }
 
-                                                  return test.IfNotNull()
-                                                             .Then(t => t.AppliesToTarget(target))
-                                                             .ElseDefault();
-                                              });
+        internal bool Match(TestTarget target)
+        {
+            var key = string.Format("{0}({1}:{2}):{3}", "TargetConstraint:", target.Environment, target.Application, TestDefinition.TestType);
+
+            Func<bool> resolve = () =>
+            {
+                var test = target.ResolveDependency(TestDefinition.TestType);
+
+                return test.IfTypeIs<IApplyToTarget>()
+                           .Then(t => t.AppliesToTarget(target))
+                           .ElseDefault();
+            };
+
+            return HttpRuntime.Cache.GetOrAdd(key, resolve);
         }
     }
 }

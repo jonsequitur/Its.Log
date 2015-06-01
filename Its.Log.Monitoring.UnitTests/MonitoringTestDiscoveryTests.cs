@@ -242,7 +242,12 @@ namespace Its.Log.Monitoring.UnitTests
             configuration.MapTestRoutes(configureTargets: targets =>
                                                           targets.Add("production", "widgetapi", new Uri("http://widgets.com")), testTypes: new[] { typeof (WidgetApiTests) });
             configuration.EnsureInitialized();
+
+            Console.WriteLine("Configuration initialized");
+
             var api = new HttpClient(new HttpServer(configuration));
+
+            Console.WriteLine("Calling API");
 
             var response = api.GetAsync("http://blammo.com/tests/").Result;
 

@@ -6,6 +6,7 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
+using System.Threading.Tasks;
 using System.Web.Http;
 using FluentAssertions;
 using Its.Log.Instrumentation;
@@ -163,6 +164,21 @@ namespace Its.Log.Monitoring.UnitTests
 
             name.Should().Be(value.Name);
             email.Should().Be(value.Email);
+        }
+
+        [Test]
+        public async Task When_one_sensor_throws_then_other_sensors_are_not_affected()
+        {
+            TestSensor.GetSensorValue = () => { throw new ApplicationException("oops!"); };
+
+            var response = await apiClient.GetAsync("http://blammo.com/sensors/sensormethod");
+
+            response.ShouldFailWith(HttpStatusCode.InternalServerError);
+
+            var body = await response.Content.ReadAsStringAsync();
+
+            body.Should().Contain("oops!");
+            body.Should().Contain(@"""_links"":");
         }
     }
 }
