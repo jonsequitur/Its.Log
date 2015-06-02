@@ -21,16 +21,16 @@ namespace Its.Log.Monitoring
 
         protected override bool Match(TestTarget target, HttpRequestMessage _)
         {
-            if (TestDefinition == null)
-            {
-                return true;
-            }
-
             return Match(target);
         }
 
         internal bool Match(TestTarget target)
         {
+            if (TestDefinition == null)
+            {
+                return true;
+            }
+
             var key = string.Format("{0}({1}:{2}):{3}", "TargetConstraint:", target.Environment, target.Application, TestDefinition.TestType);
 
             Func<bool> resolve = () =>
