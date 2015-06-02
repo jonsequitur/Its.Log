@@ -4,12 +4,13 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
-using System.Net.Http;
 using System.Web.Http;
-using System.Web.Http.Controllers;
 using Its.Log.Instrumentation;
 using Its.Recipes;
+using System.Linq;
+using System.Net.Http;
+using System.Threading.Tasks;
+using System.Web.Http.Controllers;
 
 namespace Its.Log.Monitoring
 {
@@ -94,7 +95,7 @@ namespace Its.Log.Monitoring
                 Trace.Listeners.Add(traceListener);
                 Instrumentation.Log.EntryPosted += (_, args) => traceListener.WriteLine(args.LogEntry.ToLogString());
             }
-           
+
             // set up specialized handling on the specified routes
             configuration.Filters.Add(new TestErrorFilter(baseUri));
             if (!string.IsNullOrEmpty(testUiScriptUrl) && Uri.IsWellFormedUriString(testUiScriptUrl, UriKind.RelativeOrAbsolute))
@@ -118,7 +119,7 @@ namespace Its.Log.Monitoring
                 },
                 constraints: null,
                 handler: handler);
-        
+
             // set up test execution routes
             var targetRegistry = new TestTargetRegistry(configuration);
             configuration.TestTargetsAre(targetRegistry);
@@ -133,27 +134,35 @@ namespace Its.Log.Monitoring
             var testDefinitions = testTypes.GetTestDefinitions();
             configuration.TestDefinitionsAre(testDefinitions);
 
-            foreach (var test in testDefinitions.Select(p => p.Value))
-            {
-                configuration.Routes.MapHttpRoute(
-                    test.RouteName,
-                    testRootRouteTemplate.AppendSegment(test.TestName),
-                    defaults: new
-                    {
-                        controller = "MonitoringTest",
-                        action = "run",
-                        testName = test.TestName
-                    },
-                    constraints: new
-                    {
-                        tag = new TagConstraint(test),
-                        application = new ApplicationConstraint(test),
-                        environment = new EnvironmentConstraint(test),
-                        target = new TargetConstraint(test)
-                    },
-                    handler: handler
-                    );
-            }
+            testDefinitions.Select(p => p.Value)
+                           .ForEach(test =>
+                           {
+                               var targetConstraint = new TargetConstraint(test);
+
+                               targetRegistry.ForEach(target =>
+                               {
+                                   Task.Run(() => targetConstraint.Match(target));
+                               });
+
+                               configuration.Routes.MapHttpRoute(
+                                   test.RouteName,
+                                   testRootRouteTemplate.AppendSegment(test.TestName),
+                                   defaults: new
+                                   {
+                                       controller = "MonitoringTest",
+                                       action = "run",
+                                       testName = test.TestName
+                                   },
+                                   constraints: new
+                                   {
+                                       tag = new TagConstraint(test),
+                                       application = new ApplicationConstraint(test),
+                                       environment = new EnvironmentConstraint(test),
+                                       target = targetConstraint
+                                   },
+                                   handler: handler
+                                   );
+                           });
 
             return configuration;
         }
@@ -170,7 +179,7 @@ namespace Its.Log.Monitoring
         }
 
         internal static void TestUiUriIs(this HttpConfiguration configuration,
-                                           string testUiUri)
+                                         string testUiUri)
         {
             configuration.Properties["Its.Log.Monitoring.TestUiUri"] = testUiUri;
         }

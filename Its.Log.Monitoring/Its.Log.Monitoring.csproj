@@ -86,6 +86,7 @@
     <Compile Include="AssertionExtensions.cs" />
     <Compile Include="AssertionFailedException.cs" />
     <Compile Include="AuthorizeSensorsAttribute.cs" />
+    <Compile Include="Enumerable.cs" />
     <Compile Include="TagConstraint.cs" />
     <Compile Include="CacheExtensions.cs" />
     <Compile Include="EnvironmentConstraint.cs" />
