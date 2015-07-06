@@ -10,6 +10,7 @@ using System.Web.Http.Routing;
 namespace Its.Log.Monitoring
 {
     [TestUiHtmlConfiguration]
+    [DefaultJsonFormatter]
     public class MonitoringTestController : ApiController
     {
         [HttpGet]
