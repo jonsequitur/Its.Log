@@ -14,8 +14,10 @@ namespace Its.Log.Monitoring
             HttpControllerSettings controllerSettings,
             HttpControllerDescriptor controllerDescriptor)
         {
-            controllerSettings.Formatters.Remove(controllerSettings.Formatters.JsonFormatter);
-            controllerSettings.Formatters.Add(new JsonMediaTypeFormatter());
+            if (controllerSettings.Formatters.JsonFormatter != null)
+            {
+                controllerSettings.Formatters[controllerSettings.Formatters.IndexOf(controllerSettings.Formatters.JsonFormatter)] = new JsonMediaTypeFormatter();
+            }
         }
     }
 }
