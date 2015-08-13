@@ -126,12 +126,10 @@ namespace Its.Log.Instrumentation.UnitTests
             traces.Should().Contain(name);
         }
 
-        [NUnit.Framework.Ignore("Scenario under development")]
+        [Ignore("Scenario under development")]
         [Test]
         public void When_WriteToTrace_is_called_multiple_times_then_duplicate_log_entries_are_not_written()
         {
-            
-
             // FIX (When_WriteToTrace_is_called_multiple_times_then_) write test
             Assert.Fail("Test not written yet.");
         }
