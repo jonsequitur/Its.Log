@@ -185,7 +185,7 @@ namespace Its.Log.Instrumentation
         /// </summary>
         /// <typeparam name="TExtension">The type of the extension.</typeparam>
         public static Extension With<TExtension>()
-            where TExtension : class, new()
+            where TExtension : new()
         {
             var chain = new Extension();
             chain.With<TExtension>();
@@ -197,7 +197,7 @@ namespace Its.Log.Instrumentation
         /// </summary>
         /// <typeparam name="TExtension">The type of the extension.</typeparam>
         public static Extension With<TExtension>(Action<TExtension> extend)
-            where TExtension : class, new()
+            where TExtension : new()
         {
             return new Extension().With(extend);
         }

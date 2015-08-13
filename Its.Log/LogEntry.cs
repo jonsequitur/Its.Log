@@ -436,14 +436,14 @@ namespace Its.Log.Instrumentation
             return AddExtension<TExtension>();
         }
 
-        internal TExtension Extend<TExtension>() where TExtension : class, new()
+        internal TExtension Extend<TExtension>()
+            where TExtension : new()
         {
-            // TODO: (Extend) a more performant, clearer WithExtension. test and measure.
             object extensionObj;
             var type = typeof (TExtension);
             if ((extensions ?? (extensions = new Dictionary<Type, object>())).TryGetValue(type, out extensionObj))
             {
-                return extensionObj as TExtension;
+                return (TExtension) extensionObj;
             }
 
             var extension = new TExtension();
