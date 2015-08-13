@@ -98,7 +98,7 @@ namespace Its.Log.Instrumentation.Extensions
         /// <param name="extend">An action to set properties of the extension instance.</param>
         /// <returns></returns>
         public Extension With<TExtension>(Action<TExtension> extend)
-            where TExtension : class, new()
+            where TExtension : new()
         {
             if (Extension<TExtension>.IsEnabled)
             {
@@ -119,7 +119,7 @@ namespace Its.Log.Instrumentation.Extensions
         /// Adds an extension of type <typeparamref name="TExtension" /> to the <see cref="LogEntry"/> if extension type <typeparamref name="TExtension" /> is enabled.
         /// </summary>
         public Extension With<TExtension>()
-            where TExtension : class, new()
+            where TExtension : new()
         {
             if (Extension<TExtension>.IsEnabled)
             {

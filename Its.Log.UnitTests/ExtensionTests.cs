@@ -80,7 +80,7 @@ namespace Its.Log.Instrumentation.UnitTests
             Assert.IsFalse(Extension<EventLogInfo>.IsEnabled);
         }
 
-        [NUnit.Framework.Ignore("Not supported")]
+        [Ignore("Not supported")]
         [Test]
         public virtual void When_same_extension_type_is_added_more_than_once_all_instances_are_logged()
         {

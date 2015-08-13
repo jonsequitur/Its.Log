@@ -306,17 +306,17 @@ namespace Its.Log.Instrumentation
         /// Gets an extension of the specified type if it has been applied to this <see cref="LogEntry" />.
         /// </summary>
         /// <typeparam name="TExtension">The <see cref="Type" /> of the extension.</typeparam>
-        /// <returns>An instance of <typeparamref name="TExtension" /> if it has been applied to the <see cref="LogEntry" />; otherwise, null.</returns>
-        public TExtension GetExtension<TExtension>() where TExtension : class
+        /// <returns>An instance of <typeparamref name="TExtension" /> if it has been applied to the <see cref="LogEntry" />; otherwise, the default value of <typeparamref name="TExtension" />.</returns>
+        public TExtension GetExtension<TExtension>()
         {
             if (extensions == null)
             {
-                return null;
+                return default(TExtension);
             }
             object value;
             if (!extensions.TryGetValue(typeof (TExtension), out value))
             {
-                return null;
+                return default(TExtension);
             }
             return (TExtension) value;
         }
@@ -412,7 +412,7 @@ namespace Its.Log.Instrumentation
         /// 	<c>true</c> if this instance has the extension; otherwise, <c>false</c>.
         /// </returns>
         public bool HasExtension<TExtension>() 
-            where TExtension : class, new()
+            where TExtension : new()
         {
             if (extensions == null)
             {
@@ -427,7 +427,7 @@ namespace Its.Log.Instrumentation
         /// <typeparam name="TExtension">The type of the extension.</typeparam>
         /// <returns>The extension of type <typeparamref name="TExtension" /> if it has already been added to the log entry; otherwise, a new instsance, which is immediately added to the log entry.</returns>
         public TExtension WithExtension<TExtension>() 
-            where TExtension : class, new()
+            where TExtension : new()
         {
             if (HasExtension<TExtension>())
             {
@@ -458,7 +458,6 @@ namespace Its.Log.Instrumentation
         /// <param name="ext">The extension to be added.</param>
         /// <returns>The same extension instance.</returns>
         public TExtension SetExtension<TExtension>(TExtension ext)
-            where TExtension : class
         {
             if (extensions == null)
             {
@@ -469,7 +468,7 @@ namespace Its.Log.Instrumentation
         }
 
         internal TExtension AddExtension<TExtension>() 
-            where TExtension : class, new()
+            where TExtension : new()
         {
             var ext = new TExtension();
             return SetExtension(ext);
