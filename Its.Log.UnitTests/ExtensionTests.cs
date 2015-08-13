@@ -272,7 +272,7 @@ namespace Its.Log.Instrumentation.UnitTests
         public void Params_usage_of_formatter_for_ToString_does_not_cause_stack_overflow()
         {
             var count = 0;
-            for (int i = 1; i <= 20; i++)
+            for (var i = 1; i <= 20; i++)
             {
                 Formatter.RecursionLimit = i;
                 using (TestHelper.LogToConsole())

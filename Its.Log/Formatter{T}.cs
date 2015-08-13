@@ -235,7 +235,13 @@ namespace Its.Log.Instrumentation
                     {
                         var accessor = accessors[i];
 
+                        if (accessor.Ignore)
+                        {
+                            continue;
+                        }
+
                         object value = accessor.GetValue(target);
+
 
                         if (accessor.SkipOnNull && value == null)
                         {

@@ -7,6 +7,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 using System.Threading;
+using System.Threading.Tasks;
 using FluentAssertions;
 using Its.Log.Instrumentation.Extensions;
 using Moq;
@@ -499,6 +500,24 @@ namespace Its.Log.Instrumentation.UnitTests
             }
 
             log.Last().ToString().Should().Contain("one (@12ms), two (@1000ms)");
+        }
+
+        [Test]
+        public async Task Activity_confirmations_are_verifiable_from_the_LogEntry()
+        {
+            var log = new List<LogEntry>();
+
+            using (Log.Events().Subscribe(log.Add))
+            using (var activity = Log.Enter(() => { }))
+            {
+                log.Single().Confirmations.Count().Should().Be(0);
+
+                activity.Confirm();
+
+                log.Single().Confirmations.Count().Should().Be(0, "the log has not been written yet");
+            }
+
+            log.Last().Confirmations.Count().Should().Be(1);
         }
     }
 }

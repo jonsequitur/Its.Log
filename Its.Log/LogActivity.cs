@@ -10,18 +10,6 @@ using Its.Log.Instrumentation.Extensions;
 
 namespace Its.Log.Instrumentation
 {
-    internal class ExpandAllList : List<object>
-    {
-        static ExpandAllList()
-        {
-            Formatter<ExpandAllList>.ListExpansionLimit = 100;
-        }
-
-        public ExpandAllList(IEnumerable<object> collection) : base(collection)
-        {
-        }
-    }
-
     /// <summary>
     /// A series of associated events.
     /// </summary>
@@ -76,7 +64,7 @@ namespace Its.Log.Instrumentation
                 entry.Message = null;
                 entry.AnonymousMethodInfo = magicBarbell.GetAnonymousMethodInfo();
             }
-            
+
             var clone = entry.Clone(false);
             clone.EventType = TraceEventType.Stop;
 
@@ -89,8 +77,11 @@ namespace Its.Log.Instrumentation
 
             if (confirmations != null)
             {
-                var extension = Log.WithParams(() => new { Confirmed = new ExpandAllList(confirmations.Select(v => v.Accessor() )) });
-                extension.ApplyTo(clone);
+                var confirmationResults = new ConfirmationResults(confirmations.Select(v => v.Accessor()).ToArray());
+
+                Log.WithParams(() => new { Confirmed = confirmationResults })
+                   .ApplyTo(clone);
+                clone.Confirmations = confirmationResults;
             }
 
             Write(clone);
@@ -242,7 +233,7 @@ namespace Its.Log.Instrumentation
 
         private struct Confirmation
         {
-            public Func<object> Accessor        
+            public Func<object> Accessor
             {
                 get
                 {
@@ -268,6 +259,18 @@ namespace Its.Log.Instrumentation
             public int GetHashCode(Confirmation obj)
             {
                 return obj.Accessor.Method.GetHashCode();
+            }
+        }
+
+        internal class ConfirmationResults : List<object>
+        {
+            static ConfirmationResults()
+            {
+                Formatter<ConfirmationResults>.ListExpansionLimit = 100;
+            }
+
+            public ConfirmationResults(object[] collection) : base(collection)
+            {
             }
         }
     }

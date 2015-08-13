@@ -44,6 +44,8 @@ namespace Its.Log.Instrumentation
         /// </summary>
         internal bool HasBeenPosted;
 
+        private IEnumerable<object> confirmations ;
+
         /// <summary>
         /// Initializes a new instance of the <see cref="LogEntry"/> class.
         /// </summary>
@@ -135,7 +137,7 @@ namespace Its.Log.Instrumentation
         /// Gets or sets the category.
         /// </summary>
         /// <value>The category.</value>
-        [SkipOnNull]
+        [FormatterSkipsOnNull]
         public string Category { get; set; }
 
         /// <summary>
@@ -180,7 +182,7 @@ namespace Its.Log.Instrumentation
         /// </summary>
         /// <value>The exception id.</value>
         /// <remarks>The exception id is unique per <see cref="Exception" /> instance</remarks>
-        [SkipOnNull]
+        [FormatterSkipsOnNull]
         public Guid? ExceptionId { get; private set; }
 
         /// <summary>
@@ -188,7 +190,7 @@ namespace Its.Log.Instrumentation
         /// </summary>
         /// <value>The message.</value>
         /// <remarks>IfTypeIs not explicitly set, the <see cref="Message"/> will be generated from the <see cref="Subject" />.</remarks>
-        [SkipOnNull]
+        [FormatterSkipsOnNull]
         public virtual string Message
         {
             get
@@ -207,7 +209,7 @@ namespace Its.Log.Instrumentation
         /// <summary>
         /// Gets or sets the object with which the log entry operation is concerned.
         /// </summary>
-        [SkipOnNull]
+        [FormatterSkipsOnNull]
         public virtual object Subject
         {
             get
@@ -343,8 +345,24 @@ namespace Its.Log.Instrumentation
                 }
             }
         }
-        
-        [SkipOnNull]
+
+        /// <summary>
+        /// If a log entry is part of a log activity, gets the objects passed to Confirm.
+        /// </summary>
+        [FormatterIgnores]
+        public IEnumerable<object> Confirmations
+        {
+            get
+            {
+                return confirmations ?? (confirmations = Enumerable.Empty<object>());
+            }
+            internal set
+            {
+                confirmations = value;
+            }
+        }
+
+        [FormatterSkipsOnNull]
         internal IEnumerable<object> Extensions
         {
             get
@@ -365,7 +383,10 @@ namespace Its.Log.Instrumentation
             }
         }
 
-        [SkipOnNull]
+        /// <summary>
+        /// If a log entry is part of a log activity, gets the number of milliseconds since the activity started.
+        /// </summary>
+        [FormatterSkipsOnNull]
         public long? ElapsedMilliseconds
         {
             get

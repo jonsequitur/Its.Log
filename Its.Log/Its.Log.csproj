@@ -96,6 +96,7 @@
     <Compile Include="ExceptionExtensions.cs" />
     <Compile Include="ExpressionExtensions.cs" />
     <Compile Include="Formatter.cs" />
+    <Compile Include="FormatterIgnoresAttribute.cs" />
     <Compile Include="Formatter{T}.cs" />
     <Compile Include="InstrumentationEventArgs{T}.cs">
       <SubType>Code</SubType>
@@ -129,7 +130,7 @@
     <Compile Include="RecursionCounter.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="SkipOnNullAttribute.cs" />
+    <Compile Include="FormatterSkipsOnNullAttribute.cs" />
     <Compile Include="Text\SingleLineTextFormatter.cs" />
     <Compile Include="TraceListener.cs" />
     <Compile Include="TypeExtensions.cs" />

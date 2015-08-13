@@ -16,7 +16,9 @@ namespace Its.Log.Instrumentation
 
             MemberName = member.Name;
 
-            SkipOnNull = member.GetCustomAttributes(typeof (SkipOnNullAttribute), true).Any();
+            SkipOnNull = member.GetCustomAttributes(typeof (FormatterSkipsOnNullAttribute), true).Any();
+
+            Ignore = member.GetCustomAttributes(typeof (FormatterIgnoresAttribute), true).Any();
 
             GetValue = (Func<T, object>) Expression.Lambda(
                 typeof (Func<T, object>),
@@ -26,6 +28,7 @@ namespace Its.Log.Instrumentation
                 targetParam).Compile();
         }
 
+        public bool Ignore { get; set; }
         public string MemberName { get; private set; }
         public bool SkipOnNull;
         public Func<T, object> GetValue { get; set; }
