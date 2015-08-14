@@ -2,12 +2,16 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.Diagnostics;
+using FluentAssertions;
 using System.Linq;
+using System.Reflection;
+using System.Threading.Tasks;
 using Its.Log.Instrumentation.Extensions;
 using Moq;
 using NUnit.Framework;
-using Assert = NUnit.Framework.Assert;
 
 namespace Its.Log.Instrumentation.UnitTests
 {
@@ -109,22 +113,20 @@ namespace Its.Log.Instrumentation.UnitTests
             var observer = new Mock<IObserver<LogEntry>>();
             observer.Setup(
                 o =>
-                o.OnNext(
-                    It.Is<LogEntry>(e =>
-                                    e.EventType == TraceEventType.Start &&
-                                    e.HasExtension<FooExtension>())));
+                    o.OnNext(
+                        It.Is<LogEntry>(e =>
+                                            e.EventType == TraceEventType.Start &&
+                                            e.HasExtension<FooExtension>())));
             observer.Setup(
                 o =>
-                o.OnNext(
-                    It.Is<LogEntry>(e =>
-                                    e.EventType == TraceEventType.Stop &&
-                                    e.HasExtension<FooExtension>())));
+                    o.OnNext(
+                        It.Is<LogEntry>(e =>
+                                            e.EventType == TraceEventType.Stop &&
+                                            e.HasExtension<FooExtension>())));
 
             using (observer.Object.SubscribeToLogEvents())
+            using (Log.With<FooExtension>().Enter(() => { }))
             {
-                using (Log.With<FooExtension>().Enter(() => { }))
-                {
-                }
             }
 
             observer.VerifyAll();
@@ -137,18 +139,18 @@ namespace Its.Log.Instrumentation.UnitTests
             var observer = new Mock<IObserver<LogEntry>>();
             observer.Setup(
                 o =>
-                o.OnNext(
-                    It.Is<LogEntry>(e =>
-                                    e.EventType == TraceEventType.Start &&
-                                    e.GetExtension<Counter>().Count == 1 &&
-                                    e.GetExtension<EventLogInfo>().EventId == eventId)));
+                    o.OnNext(
+                        It.Is<LogEntry>(e =>
+                                            e.EventType == TraceEventType.Start &&
+                                            e.GetExtension<Counter>().Count == 1 &&
+                                            e.GetExtension<EventLogInfo>().EventId == eventId)));
             observer.Setup(
                 o =>
-                o.OnNext(
-                    It.Is<LogEntry>(e =>
-                                    e.EventType == TraceEventType.Stop &&
-                                    e.GetExtension<Counter>().Count == 1 &&
-                                    e.GetExtension<EventLogInfo>().EventId == eventId)));
+                    o.OnNext(
+                        It.Is<LogEntry>(e =>
+                                            e.EventType == TraceEventType.Stop &&
+                                            e.GetExtension<Counter>().Count == 1 &&
+                                            e.GetExtension<EventLogInfo>().EventId == eventId)));
 
             using (Log.Events().LogToConsole())
             using (observer.Object.SubscribeToLogEvents())
@@ -170,18 +172,18 @@ namespace Its.Log.Instrumentation.UnitTests
             var observer = new Mock<IObserver<LogEntry>>();
             observer.Setup(
                 o =>
-                o.OnNext(
-                    It.Is<LogEntry>(e =>
-                                    e.EventType == TraceEventType.Start &&
-                                    e.GetExtension<Counter>().Count == 1 &&
-                                    e.GetExtension<EventLogInfo>().EventId == 123)));
+                    o.OnNext(
+                        It.Is<LogEntry>(e =>
+                                            e.EventType == TraceEventType.Start &&
+                                            e.GetExtension<Counter>().Count == 1 &&
+                                            e.GetExtension<EventLogInfo>().EventId == 123)));
             observer.Setup(
                 o =>
-                o.OnNext(
-                    It.Is<LogEntry>(e =>
-                                    e.EventType == TraceEventType.Stop &&
-                                    e.GetExtension<Counter>().Count == 1 &&
-                                    e.GetExtension<EventLogInfo>().EventId == 123)));
+                    o.OnNext(
+                        It.Is<LogEntry>(e =>
+                                            e.EventType == TraceEventType.Stop &&
+                                            e.GetExtension<Counter>().Count == 1 &&
+                                            e.GetExtension<EventLogInfo>().EventId == 123)));
 
             using (observer.Object.SubscribeToLogEvents())
             {
@@ -203,11 +205,11 @@ namespace Its.Log.Instrumentation.UnitTests
 
             var observer = new Mock<IObserver<LogEntry>>();
             observer.Setup(o => o.OnNext(It.Is<LogEntry>(e =>
-                                                         e.EventType == TraceEventType.Start &&
-                                                         e.GetExtension<EventLogInfo>().EventId == i)));
+                                                             e.EventType == TraceEventType.Start &&
+                                                             e.GetExtension<EventLogInfo>().EventId == i)));
             observer.Setup(o => o.OnNext(It.Is<LogEntry>(e =>
-                                                         e.EventType == TraceEventType.Stop &&
-                                                         e.GetExtension<EventLogInfo>().EventId == i)));
+                                                             e.EventType == TraceEventType.Stop &&
+                                                             e.GetExtension<EventLogInfo>().EventId == i)));
 
             using (TestHelper.LogToConsole())
             using (observer.Object.SubscribeToLogEvents())
@@ -229,11 +231,11 @@ namespace Its.Log.Instrumentation.UnitTests
 
             var observer = new Mock<IObserver<LogEntry>>();
             observer.Setup(o => o.OnNext(It.Is<LogEntry>(e =>
-                                                         e.EventType == TraceEventType.Start &&
-                                                         e.GetExtension<EventLogInfo>().EventId == i)));
+                                                             e.EventType == TraceEventType.Start &&
+                                                             e.GetExtension<EventLogInfo>().EventId == i)));
             observer.Setup(o => o.OnNext(It.Is<LogEntry>(e =>
-                                                         e.EventType == TraceEventType.Stop &&
-                                                         e.GetExtension<EventLogInfo>().EventId == i)));
+                                                             e.EventType == TraceEventType.Stop &&
+                                                             e.GetExtension<EventLogInfo>().EventId == i)));
 
             using (observer.Object.SubscribeToLogEvents())
             {
@@ -283,6 +285,96 @@ namespace Its.Log.Instrumentation.UnitTests
             }
 
             Assert.That(count, Is.EqualTo(20));
+        }
+
+        [Test]
+        public void Extension_classes_can_specify_that_they_evaluate_only_on_enter()
+        {
+            var events = new List<LogEntry>();
+            var methodName = MethodBase.GetCurrentMethod().Name;
+
+            using (Log.Events().Subscribe(events.Add))
+            using (Log.With<EnterCounter>().Enter(() => { }))
+            {
+                EnterCounter.Count(methodName).Should().Be(1);
+            }
+
+            EnterCounter.Count(methodName).Should().Be(1);
+        }
+
+        [Test]
+        public void Extension_classes_can_specify_that_they_evaluate_only_on_exit()
+        {
+            var events = new List<LogEntry>();
+            var methodName = MethodBase.GetCurrentMethod().Name;
+
+            using (Log.Events().Subscribe(events.Add))
+            using (Log.With<ExitCounter>().Enter(() => { }))
+            {
+                ExitCounter.Count(methodName).Should().Be(0);
+            }
+
+            ExitCounter.Count(methodName).Should().Be(1);
+        }
+
+        [Test]
+        public async Task Extension_classes_can_specify_that_they_evaluate_on_enter_and_exit()
+        {
+            var i = 1;
+            var events = new List<LogEntry>();
+
+            using (Log.Events().Subscribe(events.Add))
+            using (Log.With<CaptureResult>(c => c.Result = i).Enter(() => { }))
+            {
+                i = 2;
+
+                events.Last().GetExtension<CaptureResult>().Result.Should().Be(1);
+            }
+
+            events.Last().GetExtension<CaptureResult>().Result.Should().Be(2);
+        }
+    }
+
+    public class EnterCounter : IApplyOnEnter
+    {
+        private static readonly ConcurrentDictionary<string, int> count = new ConcurrentDictionary<string, int>();
+
+        public static int Count(string methodName)
+        {
+            return count.GetOrAdd(methodName, _ => 0);
+        }
+
+        public void OnEnter(LogEntry logEntry)
+        {
+            count.AddOrUpdate(logEntry.CallingMethod, _ => 1, (_, c) => c + 1);
+        }
+    }
+
+    public class ExitCounter : IApplyOnExit
+    {
+        private static readonly ConcurrentDictionary<string, int> count = new ConcurrentDictionary<string, int>();
+
+        public static int Count(string methodName)
+        {
+            return count.GetOrAdd(methodName, _ => 0);
+        }
+
+        public void OnExit(LogEntry logEntry)
+        {
+            count.AddOrUpdate(logEntry.CallingMethod, _ => 1, (_, c) => c + 1);
+        }
+    }
+
+    public class CaptureResult : IApplyOnExit, IApplyOnEnter
+    {
+        public object Result { get; set; }
+
+        public void OnExit(LogEntry logEntry)
+        {
+        }
+
+        public void OnEnter(LogEntry logEntry)
+        {
         }
     }
 

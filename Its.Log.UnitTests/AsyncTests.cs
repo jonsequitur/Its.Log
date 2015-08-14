@@ -2,10 +2,13 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 using System.Threading;
+using System.Threading.Tasks;
+using FluentAssertions;
 using Moq;
 using NUnit.Framework;
 
@@ -72,19 +75,29 @@ namespace Its.Log.Instrumentation.UnitTests
 
             observer.VerifyAll();
         }
+
+        [Test]
+        public async Task Log_Write_in_an_async_method_captures_the_current_method_name()
+        {
+            var events = new List<LogEntry>();
+
+            using(Log.Events().Subscribe(events.Add))
+            {
+                await new AsyncTestHelper().DoSomethingAsync();
+            }
+
+            events.Single().CallingMethod.Should().Be("DoSomethingAsync");
+        }
     }
 
     public class AsyncTestHelper
     {
         public IAsyncResult BeginSomething(AsyncCallback callback, object state)
         {
-            if (state != null)
+            var activity = state as ILogActivity;
+            if (activity != null)
             {
-                var activity = state as ILogActivity;
-                if (activity != null)
-                {
-                    activity.Trace(() => "hello");
-                }
+                activity.Trace(() => "hello");
             }
 
             return new AsyncResult
@@ -107,6 +120,11 @@ namespace Its.Log.Instrumentation.UnitTests
                     state.Item1.Invoke(result);
                 }
             }
+        }
+
+        public async Task DoSomethingAsync()
+        {
+            Log.Write(() => "hello");
         }
 
         private class AsyncResult : IAsyncResult

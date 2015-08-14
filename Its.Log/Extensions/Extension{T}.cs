@@ -20,6 +20,17 @@ namespace Its.Log.Instrumentation.Extensions
 
         static Extension()
         {
+            if (typeof (ILogExtension).IsAssignableFrom(typeof (T)))
+            {
+                ActivateOnEnter = typeof (IApplyOnEnter).IsAssignableFrom(typeof (T));
+                ActivateOnExit = typeof (IApplyOnExit).IsAssignableFrom(typeof (T));
+            }
+            else
+            {
+                ActivateOnEnter = true;
+                ActivateOnExit = false;
+            }
+
             // subscribe to the global change event
             EnableAllSignaled += (o, e) =>
                                      {
@@ -27,6 +38,10 @@ namespace Its.Log.Instrumentation.Extensions
                                          disabledExtensions.Clear();
                                      };
         }
+
+        public static bool ActivateOnEnter { get; private set; }
+
+        public static bool ActivateOnExit { get; private set; }
 
         /// <summary>
         ///   Gets a value indicating whether extension type <typeparamref name = "T" /> is enabled.

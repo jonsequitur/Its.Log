@@ -12,8 +12,8 @@ namespace Its.Log.Instrumentation.Extensions
     /// </summary>
     public class Extension
     {
-        private readonly List<KeyValuePair<Type, Func<LogEntry, object>>> extensionGetters =
-            new List<KeyValuePair<Type, Func<LogEntry, object>>>();
+        private readonly List<Func<LogEntry, object>> extendOnEnter = new List<Func<LogEntry, object>>();
+        private readonly List<Func<LogEntry, object>> extendOnExit = new List<Func<LogEntry, object>>();
 
         /// <summary>
         /// Initializes the <see cref="Extension"/> class.
@@ -53,16 +53,20 @@ namespace Its.Log.Instrumentation.Extensions
         public ILogActivity Enter<T>(Func<T> paramsAccessor, bool requireConfirm = false) where T : class
         {
             Func<Func<T>, ILogActivity> enter = action =>
-                                                    {
-                                                        if (!Extension<Boundaries>.IsEnabledFor(
-                                                            action.GetAnonymousMethodInfo().EnclosingType))
-                                                        {
-                                                            return NullLogActivity.Instance;
-                                                        }
-                                                        var entry = new LogEntry<T>(action);
-                                                        ExtendLogEntry(entry);
-                                                        return new LogActivity(entry, requireConfirm);
-                                                    };
+            {
+                if (!Extension<Boundaries>.IsEnabledFor(
+                    action.GetAnonymousMethodInfo().EnclosingType))
+                {
+                    return NullLogActivity.Instance;
+                }
+                var entry = new LogEntry<T>(action);
+
+                ExtendLogEntry(entry, extendOnEnter);
+
+                return new LogActivity(entry,
+                                       requireConfirm,
+                                       onComplete: e => ExtendLogEntry(e, extendOnExit));
+            };
 
             return enter.InvokeSafely(paramsAccessor);
         }
@@ -76,17 +80,21 @@ namespace Its.Log.Instrumentation.Extensions
         public ILogActivity Enter(Action magicBarbell)
         {
             Func<Action, ILogActivity> enter = action =>
-                                                   {
-                                                       AnonymousMethodInfo anonymousMethodInfo = action.GetAnonymousMethodInfo();
-                                                       if (!Extension<Boundaries>.IsEnabledFor(
-                                                           anonymousMethodInfo.EnclosingType))
-                                                       {
-                                                           return NullLogActivity.Instance;
-                                                       }
-                                                       var entry = new LogEntry(anonymousMethodInfo);
-                                                       ExtendLogEntry(entry);
-                                                       return new LogActivity(entry);
-                                                   };
+            {
+                var anonymousMethodInfo = action.GetAnonymousMethodInfo();
+                if (!Extension<Boundaries>.IsEnabledFor(
+                    anonymousMethodInfo.EnclosingType))
+                {
+                    return NullLogActivity.Instance;
+                }
+
+                var entry = new LogEntry(anonymousMethodInfo);
+
+                ExtendLogEntry(entry, extendOnEnter);
+
+                return new LogActivity(entry,
+                                       onComplete: e => ExtendLogEntry(e, extendOnExit));
+            };
 
             return enter.InvokeSafely(magicBarbell);
         }
@@ -102,15 +110,39 @@ namespace Its.Log.Instrumentation.Extensions
         {
             if (Extension<TExtension>.IsEnabled)
             {
-                extensionGetters.Add(
-                    new KeyValuePair<Type, Func<LogEntry, object>>(
-                        typeof (TExtension),
-                        entry =>
+                if (Extension<TExtension>.ActivateOnEnter)
+                {
+                    extendOnEnter.Add(entry =>
+                    {
+                        var extension = new TExtension();
+                        extend(extension);
+
+                        var applyOnEnter = extension as IApplyOnEnter;
+                        if (applyOnEnter != null)
                         {
-                            var extension = new TExtension();
-                            extend(extension);
-                            return extension;
-                        }));
+                            applyOnEnter.OnEnter(entry);
+                        }
+
+                        return extension;
+                    });
+                }
+
+                if (Extension<TExtension>.ActivateOnExit)
+                {
+                    extendOnExit.Add(entry =>
+                    {
+                        var extension = new TExtension();
+                        extend(extension);
+
+                        var applyOnExit = extension as IApplyOnExit;
+                        if (applyOnExit != null)
+                        {
+                            applyOnExit.OnExit(entry);
+                        }
+
+                        return extension;
+                    });
+                }
             }
             return this;
         }
@@ -121,18 +153,7 @@ namespace Its.Log.Instrumentation.Extensions
         public Extension With<TExtension>()
             where TExtension : new()
         {
-            if (Extension<TExtension>.IsEnabled)
-            {
-                extensionGetters.Add(
-                    new KeyValuePair<Type, Func<LogEntry, object>>(
-                        typeof (TExtension),
-                        entry =>
-                            {
-                                var extension = new TExtension();
-                                return extension;
-                            }));
-            }
-            return this;
+            return With<TExtension>(delegate { });
         }
 
         /// <summary>
@@ -147,7 +168,7 @@ namespace Its.Log.Instrumentation.Extensions
 
         internal void ApplyTo(LogEntry entry)
         {
-            Action<LogEntry> action = ExtendLogEntry;
+            Action<LogEntry> action = logEntry => ExtendLogEntry(logEntry, extendOnEnter);
             action.InvokeSafely(entry);
         }
 
@@ -171,28 +192,30 @@ namespace Its.Log.Instrumentation.Extensions
             Write(entry);
         }
 
-        private void ExtendLogEntry(LogEntry e)
+        private static void ExtendLogEntry(
+            LogEntry logEntry,
+            IEnumerable<Func<LogEntry, object>> extenders)
         {
-            foreach (var extensionGetter in extensionGetters)
+            foreach (var extend in extenders)
             {
-                var ext = extensionGetter.Value(e);
+                var ext = extend(logEntry);
 
                 var paramsExt = ext as Params;
                 if (paramsExt != null)
                 {
-                    if (e.AnonymousMethodInfo == null)
+                    if (logEntry.AnonymousMethodInfo == null)
                     {
-                        e.AnonymousMethodInfo = paramsExt.ParamsAccessor.GetAnonymousMethodInfo();
+                        logEntry.AnonymousMethodInfo = paramsExt.ParamsAccessor.GetAnonymousMethodInfo();
                     }
 
-                    if (Extension<Params>.IsEnabledFor(e.CallingType))
+                    if (Extension<Params>.IsEnabledFor(logEntry.CallingType))
                     {
-                        e.SetExtension(ext);
+                        logEntry.SetExtension(ext);
                     }
                 }
                 else
                 {
-                    e.SetExtension(ext);
+                    logEntry.SetExtension(ext);
                 }
             }
         }
