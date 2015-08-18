@@ -143,11 +143,6 @@ namespace Its.Log.Instrumentation
             return new LogEventsObservable();
         }
 
-        public static IObservable<Telemetry> Telemetry()
-        {
-            return new TelemetryObservable();
-        } 
-
         /// <summary>
         /// Returns an observable sequence of all log entries posted to Its.Log whose handlers throw an exception.
         /// </summary>
@@ -174,10 +169,10 @@ namespace Its.Log.Instrumentation
                 {
                     if (args.LogEntry.EventType == TraceEventType.Stop)
                     {
-                        var extension = args.LogEntry.GetExtension<Telemetry>();
-                        if (extension != null)
+                        var telemetry = args.LogEntry.GetExtension<Telemetry>();
+                        if (telemetry != null)
                         {
-                            observer.OnNext(extension);
+                            observer.OnNext(telemetry);
                         }
                     }
                 };
@@ -203,6 +198,11 @@ namespace Its.Log.Instrumentation
         public static string ToLogString<T>(this T obj)
         {
             return Formatter.Format(obj);
+        }
+
+        public static IObservable<Telemetry> TelemetryEvents()
+        {
+            return new TelemetryObservable();
         }
 
         /// <summary>

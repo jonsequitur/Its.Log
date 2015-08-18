@@ -24,7 +24,7 @@ namespace Its.Log.Instrumentation.UnitTests
             disposables = new CompositeDisposable();
             telemetryEvents = new List<Telemetry>();
 
-            disposables.Add(Log.Telemetry().Subscribe(e => { telemetryEvents.Add(e); }));
+            disposables.Add(Log.TelemetryEvents().Subscribe(e => { telemetryEvents.Add(e); }));
         }
 
         [TearDown]

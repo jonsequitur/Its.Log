@@ -17,7 +17,7 @@
     </dependencies>
   </metadata>
   <files>
-    <file src="WebApiTelemetryExtensions.cs" 
+    <file src="Telemetry\WebApiTelemetryExtensions.cs" 
           target="content\(Its.Recipes)\Its.Log\WebApiTelemetryExtensions.cs" />
   </files>
 </package>
