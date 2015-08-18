@@ -7,8 +7,8 @@
     <ProjectGuid>{3FFA626A-BE93-4DFB-A15D-D7AAB98769C3}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Its.Log.Recipes</RootNamespace>
-    <AssemblyName>Its.Log.Recipes</AssemblyName>
+    <RootNamespace>Its.Log.Instrumentation</RootNamespace>
+    <AssemblyName>Its.Log.Instrumentation</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\</SolutionDir>

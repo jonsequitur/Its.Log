@@ -17,9 +17,5 @@ test:
     - '**\*Tests.dll'
 
 artifacts:
-  - path: Log\bin
-    name: Its.Log
-
-  - path: Log.Monitoring\bin
-    name: Its.Log.Monitoring
+  - path: '**\*.nupkg'
 

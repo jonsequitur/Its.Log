@@ -20,7 +20,7 @@ namespace Its.Log.Instrumentation
     [System.Diagnostics.DebuggerStepThrough]
     [System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
 #endif
-    public static class WebApiTelemetryExtensions
+    internal static class WebApiTelemetryExtensions
     {
         public static void For(
             this Telemetry telemetry,
