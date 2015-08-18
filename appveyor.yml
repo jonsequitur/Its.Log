@@ -17,5 +17,5 @@ test:
     - '**\*Tests.dll'
 
 artifacts:
-  - path: '**\*.nupkg'
+  - path: '*.nupkg'
 
