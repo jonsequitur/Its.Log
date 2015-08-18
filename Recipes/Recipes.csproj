@@ -65,7 +65,7 @@
     <Compile Include="Telemetry\WebApiTelemetryExtensions.cs" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="WebApiTelemtry.nuspec" />
+    <None Include="WebApiTelemetry.nuspec" />
     <None Include="AssemblyVersionSensor.nuspec" />
     <None Include="packages.config" />
   </ItemGroup>
