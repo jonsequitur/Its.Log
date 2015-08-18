@@ -19,6 +19,7 @@ namespace Its.Log.Instrumentation
         private List<Delegate> paramsAccessors;
         private int isCompletedFlag;
         private bool requireConfirm = false;
+        private readonly Action<LogEntry> onComplete;
         private bool confirmed = false;
         private readonly Queue<LogEntry> buffer;
         private HashSet<Confirmation> confirmations;
@@ -27,7 +28,10 @@ namespace Its.Log.Instrumentation
         /// Initializes a new instance of the <see cref="LogActivity"/> class.
         /// </summary>
         /// <param name="entry">The entry.</param>
-        public LogActivity(LogEntry entry, bool requireConfirm = false)
+        public LogActivity(
+            LogEntry entry,
+            bool requireConfirm = false,
+            Action<LogEntry> onComplete = null)
         {
             entry.EventType = TraceEventType.Start;
             this.entry = entry;
@@ -39,6 +43,7 @@ namespace Its.Log.Instrumentation
             }
 
             this.requireConfirm = requireConfirm;
+            this.onComplete = onComplete;
 
             if (requireConfirm)
             {
@@ -82,6 +87,11 @@ namespace Its.Log.Instrumentation
                 Log.WithParams(() => new { Confirmed = confirmationResults })
                    .ApplyTo(clone);
                 clone.Confirmations = confirmationResults;
+            }
+
+            if (onComplete != null)
+            {
+                onComplete(clone);
             }
 
             Write(clone);
