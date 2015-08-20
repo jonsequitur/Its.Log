@@ -1,11 +1,14 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 
 namespace Its.Log.Instrumentation.Extensions
 {
-    public class Telemetry : IApplyOnExit
+    public sealed class Telemetry : IApplyOnExit
     {
+        private IDictionary<string, object> properties;
+
         static Telemetry()
         {
             Formatter<Telemetry>.RegisterForAllMembers();
@@ -20,6 +23,14 @@ namespace Its.Log.Instrumentation.Extensions
         public HttpStatusCode HttpStatusCode { get; set; }
 
         public Uri RequestUri { get; set; }
+
+        public IDictionary<string, object> Properties
+        {
+            get
+            {
+                return properties ?? (properties = new Dictionary<string, object>());
+            }
+        }
 
         public void OnExit(LogEntry logEntry)
         {
