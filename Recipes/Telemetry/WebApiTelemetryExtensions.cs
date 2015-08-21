@@ -82,7 +82,7 @@ namespace Its.Log.Instrumentation
             telemetry.Properties["CallerIpAddress"] = value;
         }
 
-        private static string CallerIpAddress(this HttpRequestMessage request)
+        internal static string CallerIpAddress(this HttpRequestMessage request)
         {
             object o;
 
