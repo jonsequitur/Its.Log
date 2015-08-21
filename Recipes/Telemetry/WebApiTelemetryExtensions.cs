@@ -12,6 +12,8 @@
 using System;
 using System.Linq;
 using System.Net.Http;
+using System.ServiceModel.Channels;
+using System.Web;
 using Its.Log.Instrumentation.Extensions;
 
 namespace Its.Log.Instrumentation
@@ -22,7 +24,7 @@ namespace Its.Log.Instrumentation
 #endif
     internal static class WebApiTelemetryExtensions
     {
-        public static void For(
+        public static Telemetry For(
             this Telemetry telemetry,
             HttpResponseMessage response)
         {
@@ -34,8 +36,69 @@ namespace Its.Log.Instrumentation
                 if (response.RequestMessage != null)
                 {
                     telemetry.RequestUri = response.RequestMessage.RequestUri;
+
+                    var callerIpAddress = response.RequestMessage.CallerIpAddress();
+
+                    if (!string.IsNullOrWhiteSpace(callerIpAddress))
+                    {
+                        telemetry.IsIncomingRequest(true);
+                        telemetry.CallerIpAddress(callerIpAddress);
+                    }
                 }
             }
+
+            return telemetry;
+        }
+
+        public static bool IsIncomingRequest(this Telemetry telemetry)
+        {
+            object isIncoming;
+            if (telemetry.Properties.TryGetValue("IsIncoming", out isIncoming))
+            {
+                return (bool) isIncoming;
+            }
+
+            return false;
+        }
+
+        public static void IsIncomingRequest(this Telemetry telemetry, bool value)
+        {
+            telemetry.Properties["IsIncoming"] = value;
+        }
+
+        public static string CallerIpAddress(this Telemetry telemetry)
+        {
+            object ipAddress;
+            if (telemetry.Properties.TryGetValue("CallerIpAddress", out ipAddress))
+            {
+                return (string) ipAddress;
+            }
+
+            return null;
+        }
+
+        public static void CallerIpAddress(this Telemetry telemetry, string value)
+        {
+            telemetry.Properties["CallerIpAddress"] = value;
+        }
+
+        private static string CallerIpAddress(this HttpRequestMessage request)
+        {
+            object o;
+
+            // for ASP.NET hosting
+            if (request.Properties.TryGetValue("MS_HttpContext", out o))
+            {
+                return ((HttpContextWrapper) o).Request.UserHostAddress;
+            }
+
+            // for in-memory hosting
+            if (request.Properties.TryGetValue(RemoteEndpointMessageProperty.Name, out o))
+            {
+                return ((RemoteEndpointMessageProperty) o).Address;
+            }
+
+            return null;
         }
     }
 }
