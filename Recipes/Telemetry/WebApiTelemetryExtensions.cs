@@ -69,13 +69,14 @@ namespace Its.Log.Instrumentation
         /// <summary>
         /// Sets a property indicating that the telemetry is for an incoming request.
         /// </summary>
-        /// <param name="telemetry">The telemetry.</param>
-        /// <param name="value">if set to <c>true</c> [value].</param>
         public static void IsIncomingRequest(this Telemetry telemetry, bool value)
         {
             telemetry.Properties["IsIncoming"] = value;
         }
 
+        /// <summary>
+        /// Gets a property indicating the caller's IP address.
+        /// </summary>
         public static string CallerIpAddress(this Telemetry telemetry)
         {
             object ipAddress;
@@ -87,6 +88,9 @@ namespace Its.Log.Instrumentation
             return null;
         }
 
+        /// <summary>
+        /// Sets the caller's the ip address in <see cref="Telemetry.Properties" />.
+        /// </summary>
         public static void CallerIpAddress(this Telemetry telemetry, string value)
         {
             telemetry.Properties["CallerIpAddress"] = value;
