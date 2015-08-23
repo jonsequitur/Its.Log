@@ -50,6 +50,7 @@ namespace Its.Log.Instrumentation.Extensions
         /// <typeparam name = "T">The <see cref = "Type" /> of the anonymous type of <paramref name = "paramsAccessor" /> used to enclose parameters to be logged at this boundary.</typeparam>
         /// <param name = "paramsAccessor">An anonymous type enclosing parameters to be logged.</param>
         /// <returns>An <see cref = "ILogActivity" />.</returns>
+        ///  /// <param name="requireConfirm">if set to <c>true</c>, then no log entries will be written if and until <see cref="ILogActivity.Confirm" /> is called on the returned log activity.</param>
         public ILogActivity Enter<T>(Func<T> paramsAccessor, bool requireConfirm = false) where T : class
         {
             Func<Func<T>, ILogActivity> enter = action =>
@@ -115,7 +116,6 @@ namespace Its.Log.Instrumentation.Extensions
                     extendOnEnter.Add(entry =>
                     {
                         var extension = new TExtension();
-                        extend(extension);
 
                         var applyOnEnter = extension as IApplyOnEnter;
                         if (applyOnEnter != null)
@@ -123,6 +123,8 @@ namespace Its.Log.Instrumentation.Extensions
                             applyOnEnter.OnEnter(entry);
                         }
 
+                        extend(extension);
+                        
                         return extension;
                     });
                 }
@@ -132,7 +134,6 @@ namespace Its.Log.Instrumentation.Extensions
                     extendOnExit.Add(entry =>
                     {
                         var extension = new TExtension();
-                        extend(extension);
 
                         var applyOnExit = extension as IApplyOnExit;
                         if (applyOnExit != null)
@@ -140,10 +141,13 @@ namespace Its.Log.Instrumentation.Extensions
                             applyOnExit.OnExit(entry);
                         }
 
+                        extend(extension);
+
                         return extension;
                     });
                 }
             }
+
             return this;
         }
 

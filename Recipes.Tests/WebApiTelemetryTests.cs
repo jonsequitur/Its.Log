@@ -55,10 +55,9 @@ namespace Recipes.Tests
         {
             HttpResponseMessage response = null;
 
-            using (var activity = Log.With<Telemetry>(t => t.For(response)).Enter(() => { }))
+            using (Log.With<Telemetry>(t => t.For(response)).Enter(() => { }))
             {
                 response = new HttpResponseMessage(HttpStatusCode.OK);
-                activity.MarkAsSuccessful();
             }
 
             telemetryEvents.Single()

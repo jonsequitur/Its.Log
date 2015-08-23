@@ -70,14 +70,13 @@ namespace Its.Log.Instrumentation
         }
 
         /// <summary>
-        ///     Indicates to the log that execution is entering a region.
+        /// Indicates to the log that execution is entering a region.
         /// </summary>
-        /// <typeparam name="T">
-        ///     The <see cref="Type" /> of the anonymous type of <paramref name="paramsAccessor" /> used to enclose parameters to be logged at this boundary.
-        /// </typeparam>
+        /// <typeparam name="T">The <see cref="Type" /> of the anonymous type of <paramref name="paramsAccessor" /> used to enclose parameters to be logged at this boundary.</typeparam>
         /// <param name="paramsAccessor">An anonymous type enclosing parameters to be logged.</param>
-         /// <returns>
-        ///     An <see cref="ILogActivity" /> that, when disposed, writes out the closing log entry, including the updated state of the return value of <paramref name="paramsAccessor" />.
+        /// <param name="requireConfirm">if set to <c>true</c>, then no log entries will be written if and until <see cref="ILogActivity.Confirm" /> is called on the returned log activity.</param>
+        /// <returns>
+        /// An <see cref="ILogActivity" /> that, when disposed, writes out the closing log entry, including the updated state of the return value of <paramref name="paramsAccessor" />.
         /// </returns>
         public static ILogActivity Enter<T>(Func<T> paramsAccessor, bool requireConfirm = false) where T : class
         {
