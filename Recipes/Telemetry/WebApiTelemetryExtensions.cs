@@ -50,6 +50,11 @@ namespace Its.Log.Instrumentation
             return telemetry;
         }
 
+        /// <summary>
+        /// Determines whether the telemetry is for an incoming request.
+        /// </summary>
+        /// <param name="telemetry">The telemetry.</param>
+        /// <returns></returns>
         public static bool IsIncomingRequest(this Telemetry telemetry)
         {
             object isIncoming;
@@ -61,6 +66,11 @@ namespace Its.Log.Instrumentation
             return false;
         }
 
+        /// <summary>
+        /// Sets a property indicating that the telemetry is for an incoming request.
+        /// </summary>
+        /// <param name="telemetry">The telemetry.</param>
+        /// <param name="value">if set to <c>true</c> [value].</param>
         public static void IsIncomingRequest(this Telemetry telemetry, bool value)
         {
             telemetry.Properties["IsIncoming"] = value;

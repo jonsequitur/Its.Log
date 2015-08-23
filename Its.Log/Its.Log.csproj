@@ -99,6 +99,9 @@
     <Compile Include="Formatter.cs" />
     <Compile Include="FormatterIgnoresAttribute.cs" />
     <Compile Include="Formatter{T}.cs" />
+    <Compile Include="IApplyOnEnter.cs" />
+    <Compile Include="IApplyOnExit.cs" />
+    <Compile Include="ILogExtension.cs" />
     <Compile Include="InstrumentationEventArgs{T}.cs">
       <SubType>Code</SubType>
     </Compile>
