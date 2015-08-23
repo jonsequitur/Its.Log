@@ -142,7 +142,7 @@ namespace Its.Log.Instrumentation
         {
             return new LogEventsObservable();
         }
-        
+
         /// <summary>
         /// Returns an observable sequence of all log entries posted to Its.Log whose handlers throw an exception.
         /// </summary>
@@ -156,6 +156,26 @@ namespace Its.Log.Instrumentation
             public IDisposable Subscribe(IObserver<LogEntry> observer)
             {
                 EventHandler<InstrumentationEventArgs> handler = (sender, args) => observer.OnNext(args.LogEntry);
+                EntryPosted += handler;
+                return new AnonymousDisposable(() => { EntryPosted -= handler; });
+            }
+        }
+
+        private class TelemetryObservable : IObservable<Telemetry>
+        {
+            public IDisposable Subscribe(IObserver<Telemetry> observer)
+            {
+                EventHandler<InstrumentationEventArgs> handler = (sender, args) =>
+                {
+                    if (args.LogEntry.EventType == TraceEventType.Stop)
+                    {
+                        var telemetry = args.LogEntry.GetExtension<Telemetry>();
+                        if (telemetry != null)
+                        {
+                            observer.OnNext(telemetry);
+                        }
+                    }
+                };
                 EntryPosted += handler;
                 return new AnonymousDisposable(() => { EntryPosted -= handler; });
             }
@@ -178,6 +198,11 @@ namespace Its.Log.Instrumentation
         public static string ToLogString<T>(this T obj)
         {
             return Formatter.Format(obj);
+        }
+
+        public static IObservable<Telemetry> TelemetryEvents()
+        {
+            return new TelemetryObservable();
         }
 
         /// <summary>

@@ -95,9 +95,13 @@
     <Compile Include="DiagnosticSensor.cs" />
     <Compile Include="ExceptionExtensions.cs" />
     <Compile Include="ExpressionExtensions.cs" />
+    <Compile Include="Extensions\Telemetry.cs" />
     <Compile Include="Formatter.cs" />
     <Compile Include="FormatterIgnoresAttribute.cs" />
     <Compile Include="Formatter{T}.cs" />
+    <Compile Include="IApplyOnEnter.cs" />
+    <Compile Include="IApplyOnExit.cs" />
+    <Compile Include="ILogExtension.cs" />
     <Compile Include="InstrumentationEventArgs{T}.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -122,6 +126,7 @@
     <Compile Include="MaybeExtensions.cs" />
     <Compile Include="MemberAccessor.cs" />
     <Compile Include="ObservableExtensions.cs" />
+    <Compile Include="TelemetryExtensions.cs" />
     <Compile Include="Text\ILogTextFormatter.cs" />
     <Compile Include="Text\MultiLineTextFormatter.cs" />
     <Compile Include="NullLogActivity.cs" />

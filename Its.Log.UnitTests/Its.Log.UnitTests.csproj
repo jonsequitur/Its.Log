@@ -143,6 +143,7 @@
     </Compile>
     <Compile Include="Demo.cs" />
     <Compile Include="DiagnosticSensorTests.cs" />
+    <Compile Include="TelemetryTests.cs" />
     <Compile Include="Test classes.cs" />
     <Compile Include="TestHelper.cs" />
     <Compile Include="Timer.cs" />

@@ -35,18 +35,4 @@ namespace Its.Log.Instrumentation
         /// </summary>
         void Confirm(Func<object> value = null);
     }
-
-    public interface IApplyOnEnter : ILogExtension
-    {
-        void OnEnter(LogEntry logEntry);
-    }
-
-    public interface IApplyOnExit : ILogExtension
-    {
-        void OnExit(LogEntry logEntry);
-    }
-
-    public interface ILogExtension
-    {
-    }
 }

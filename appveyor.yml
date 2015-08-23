@@ -8,14 +8,14 @@ build:
   project: Its.Log.sln
   publish_nuget: true
 
+after_build:
+    - nuget pack Recipes\AssemblyVersionSensor.nuspec -p "Configuration=Release;Platform=AnyCPU" 
+    - nuget pack Recipes\WebApiTelemetry.nuspec -p "Configuration=Release;Platform=AnyCPU" 
+
 test:
   assemblies:
     - '**\*Tests.dll'
 
 artifacts:
-  - path: Log\bin
-    name: Its.Log
-
-  - path: Log.Monitoring\bin
-    name: Its.Log.Monitoring
+  - path: '*.nupkg'
 
