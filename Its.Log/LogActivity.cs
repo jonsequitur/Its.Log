@@ -82,7 +82,7 @@ namespace Its.Log.Instrumentation
 
             if (confirmations != null)
             {
-                var confirmationResults = new ConfirmationResults(confirmations.Select(v => v.Accessor()).ToArray());
+                var confirmationResults = new ConfirmationResults(confirmations.Select(v => v.Accessor.InvokeSafely()).ToArray());
 
                 Log.WithParams(() => new { Confirmed = confirmationResults })
                    .ApplyTo(clone);

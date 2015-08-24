@@ -54,5 +54,22 @@ namespace Its.Log.Instrumentation
                 return NullLogActivity.Instance;
             }
         }
+        
+        internal static object InvokeSafely(this Func<object> func)
+        {
+            try
+            {
+                return func();
+            }
+            catch (Exception ex)
+            {
+                ex.RaiseErrorEvent();
+                if (ex.ShouldThrow())
+                {
+                    throw;
+                }
+                return ex;
+            }
+        }
     }
 }

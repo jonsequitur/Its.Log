@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Threading;
@@ -482,6 +483,25 @@ namespace Its.Log.Instrumentation.UnitTests
             }
 
             log.Last().ToString().Should().Contain("five");
+        }
+
+        [Test]
+        public async Task When_Confirm_delegate_throws_then_the_exception_is_handled()
+        {
+            FileInfo fileInfo = null;
+            var log = new List<LogEntry>();
+
+            using (Log.Events().Subscribe(log.Add))
+            using (var activity = Log.Enter(() => { }))
+            {
+                activity.Confirm(() => fileInfo.Name);
+            }
+
+            log.Should().ContainSingle(e => e.EventType == TraceEventType.Stop);
+            log.Single(e => e.EventType == TraceEventType.Stop)
+               .Confirmations
+               .Should()
+               .ContainSingle(c => c is NullReferenceException);
         }
 
         [Ignore("Under development")]
