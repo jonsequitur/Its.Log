@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
@@ -22,7 +23,8 @@ namespace Its.Log.Instrumentation
         private readonly Action<LogEntry> onComplete;
         private bool confirmed = false;
         private readonly Queue<LogEntry> buffer;
-        private HashSet<Confirmation> confirmations;
+        private ConfirmationList confirmations;
+        private Stopwatch stopwatch = null;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="LogActivity"/> class.
@@ -73,20 +75,16 @@ namespace Its.Log.Instrumentation
             var clone = entry.Clone(false);
             clone.EventType = TraceEventType.Stop;
 
-            // TODO: (Complete) generalize extensions that are triggered on boundary exit
-            if (clone.HasExtension<Stopwatch>())
+            if (stopwatch != null)
             {
-                var watch = entry.GetExtension<Stopwatch>();
-                watch.Stop();
+                stopwatch.Stop();
             }
 
             if (confirmations != null)
             {
-                var confirmationResults = new ConfirmationResults(confirmations.Select(v => v.Accessor.InvokeSafely()).ToArray());
-
-                Log.WithParams(() => new { Confirmed = confirmationResults })
+                Log.WithParams(() => new { Confirmed = confirmations })
                    .ApplyTo(clone);
-                clone.Confirmations = confirmationResults;
+                clone.Confirmations = confirmations.Select(c => c.ResolvedValue);
             }
 
             if (onComplete != null)
@@ -108,21 +106,17 @@ namespace Its.Log.Instrumentation
 
             if (confirmations == null)
             {
-                confirmations = new HashSet<Confirmation>(new ConfirmationEqualityComparer());
+                confirmations = new ConfirmationList();
             }
 
-            long elapsedMilliseconds = 0;
-            var stopwatch = entry.GetExtension<Stopwatch>();
+            long? elapsedMilliseconds = null;
+
             if (stopwatch != null)
             {
                 elapsedMilliseconds = stopwatch.ElapsedMilliseconds;
             }
 
-            confirmations.Add(new Confirmation
-            {
-                Accessor = value,
-                ElapsedMilliseconds = elapsedMilliseconds
-            });
+            confirmations.Add(new Confirmation(value, elapsedMilliseconds));
 
             if (requireConfirm)
             {
@@ -225,7 +219,8 @@ namespace Its.Log.Instrumentation
         {
             if (Extension<Stopwatch>.IsEnabledFor(entry.CallingType))
             {
-                entry.AddExtension<Stopwatch>().Start();
+                stopwatch = entry.AddExtension<Stopwatch>();
+                stopwatch.Start();
             }
         }
 
@@ -241,46 +236,65 @@ namespace Its.Log.Instrumentation
             }
         }
 
-        private struct Confirmation
+        private class Confirmation
         {
-            public Func<object> Accessor
+            private object value;
+            private readonly long? elapsedMilliseconds;
+
+            public Confirmation(Func<object> accessor, long? elapsedMilliseconds)
+            {
+                Accessor = accessor;
+                this.elapsedMilliseconds = elapsedMilliseconds;
+            }
+
+            public Func<object> Accessor { get; private set; }
+
+            public object ResolvedValue
             {
                 get
                 {
-                    return accessor;
+                    return value ?? (value = Accessor.InvokeSafely());
                 }
-                set
+            }
+
+            public override string ToString()
+            {
+                if (elapsedMilliseconds == null)
                 {
-                    accessor = value;
+                    return ResolvedValue.ToLogString();
                 }
+
+                return string.Format("{0} (@{1}ms)", ResolvedValue.ToLogString(), elapsedMilliseconds);
             }
 
-            public long ElapsedMilliseconds;
-            private Func<object> accessor;
-        }
-
-        private class ConfirmationEqualityComparer : IEqualityComparer<Confirmation>
-        {
-            public bool Equals(Confirmation x, Confirmation y)
+            public override int GetHashCode()
             {
-                return x.Accessor.Method == y.Accessor.Method;
-            }
-
-            public int GetHashCode(Confirmation obj)
-            {
-                return obj.Accessor.Method.GetHashCode();
+                return Accessor.Method.GetHashCode();
             }
         }
 
-        internal class ConfirmationResults : List<object>
+        private class ConfirmationList : IEnumerable<Confirmation>
         {
-            static ConfirmationResults()
+            private readonly Dictionary<int, Confirmation> confirmations = new Dictionary<int, Confirmation>();
+
+            static ConfirmationList()
             {
-                Formatter<ConfirmationResults>.ListExpansionLimit = 100;
+                Formatter<ConfirmationList>.ListExpansionLimit = 100;
             }
 
-            public ConfirmationResults(object[] collection) : base(collection)
+            public void Add(Confirmation confirmation)
             {
+                confirmations[confirmation.GetHashCode()] = confirmation;
+            }
+
+            public IEnumerator<Confirmation> GetEnumerator()
+            {
+                return confirmations.Values.GetEnumerator();
+            }
+
+            IEnumerator IEnumerable.GetEnumerator()
+            {
+                return GetEnumerator();
             }
         }
     }

@@ -5,15 +5,14 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using FluentAssertions;
 using System.Linq;
 using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
-using FluentAssertions;
 using Its.Log.Instrumentation.Extensions;
 using Moq;
 using NUnit.Framework;
-using StringAssert = NUnit.Framework.StringAssert;
 
 namespace Its.Log.Instrumentation.UnitTests
 {
@@ -221,7 +220,7 @@ namespace Its.Log.Instrumentation.UnitTests
                     w => w.OnNext(
                         It.Is(
                             (LogEntry e) =>
-                            e.EventType == TraceEventType.Stop && e.HasExtension<Stopwatch>() == false)));
+                                e.EventType == TraceEventType.Stop && e.HasExtension<Stopwatch>() == false)));
 
                 using (observer.Object.SubscribeToLogEvents())
                 using (Log.Enter(() => { }))
@@ -239,22 +238,17 @@ namespace Its.Log.Instrumentation.UnitTests
         [Test]
         public virtual void StopwatchExtension_records_amount_of_time_from_activity_enter()
         {
-            var observer = new Mock<IObserver<LogEntry>>();
-            observer.Setup(
-                w => w.OnNext(
-                    It.Is<LogEntry>(
-                        e =>
-                        e.EventType == TraceEventType.Stop &&
-                        e.GetExtension<Stopwatch>().ElapsedMilliseconds >= 900 &&
-                        e.GetExtension<Stopwatch>().IsRunning == false)));
+            var log = new List<LogEntry>();
 
-            using (observer.Object.SubscribeToLogEvents())
+            using (Log.Events().Subscribe(log.Add))
             using (Log.Enter(() => { }))
             {
                 Thread.Sleep(1000);
             }
 
-            observer.VerifyAll();
+            log.Should().Contain(e => e.EventType == TraceEventType.Stop &&
+                                      e.GetExtension<Stopwatch>().ElapsedMilliseconds >= 900 &&
+                                      e.GetExtension<Stopwatch>().IsRunning == false);
         }
 
         [Test]
@@ -352,17 +346,17 @@ namespace Its.Log.Instrumentation.UnitTests
                 Thread.Sleep(2000);
                 confirmTime = DateTime.UtcNow;
                 Console.WriteLine(new { confirmTime });
-              
+
                 activity.Confirm();
             }
 
             Console.WriteLine("after confirm: " + log.ToLogString());
 
             log.ElementAt(0)
-                .TimeStamp
-                .AddSeconds(1)
-                .Should()
-                .BeBefore(confirmTime);
+               .TimeStamp
+               .AddSeconds(1)
+               .Should()
+               .BeBefore(confirmTime);
         }
 
         [Test]
@@ -396,7 +390,7 @@ namespace Its.Log.Instrumentation.UnitTests
             }
 
             log.Count().Should().Be(2);
-            log.Last().ToString().Should().Contain("Confirmed = { { a = b } }");
+            log.Last().ToString().Should().Match(@"*Confirmed = { { a = b } (@*ms) }*");
         }
 
         [Test]
@@ -405,16 +399,19 @@ namespace Its.Log.Instrumentation.UnitTests
             var log = new List<LogEntry>();
 
             using (Log.Events().Subscribe(log.Add))
-            using (var activity = Log.Enter(() =>  {  } ))
+            using (var activity = Log.Enter(() => { }))
             {
                 activity.Confirm(() => "getting started");
                 activity.Confirm(() => "almost there...");
                 activity.Confirm(() => "done!");
             }
 
-            log.Last().ToString().Should().Contain("Confirmed = { getting started, almost there..., done! }");
+            log.Last()
+               .ToString()
+               .Should()
+               .Match(@"*Confirmed = { getting started (@*ms), almost there... (@*ms), done! (@*ms) }*");
         }
-        
+
         [Test]
         public void Confirm_can_be_used_to_track_checkpoints_within_an_iteration_block_without_writing_additional_entries()
         {
@@ -425,12 +422,12 @@ namespace Its.Log.Instrumentation.UnitTests
             {
                 for (var i = 0; i < 100; i++)
                 {
-                     activity.Confirm(() => i);
+                    activity.Confirm(() => i);
                 }
             }
 
-            log.Last().ToString().Should().NotContain("Confirmed = { 99 }");
-            log.Last().ToString().Should().Contain("Confirmed = { 100 }");
+            log.Last().ToString().Should().NotMatch(@"*Confirmed = { 99 (@*ms) }*");
+            log.Last().ToString().Should().Match(@"*Confirmed = { 100 (@*ms) }*");
         }
 
         [Test]
@@ -463,7 +460,7 @@ namespace Its.Log.Instrumentation.UnitTests
                 activity.Confirm();
             }
 
-            log.Last().ToString().Should().Contain("Confirmed = { True }");
+            log.Last().ToString().Should().Match(@"*Confirmed = { True (@*ms) }*");
         }
 
         [Test]
@@ -504,7 +501,6 @@ namespace Its.Log.Instrumentation.UnitTests
                .ContainSingle(c => c is NullReferenceException);
         }
 
-        [Ignore("Under development")]
         [Test]
         public void Activity_Confirm_outputs_include_timings()
         {
@@ -519,7 +515,31 @@ namespace Its.Log.Instrumentation.UnitTests
                 activity.Confirm(() => "two");
             }
 
-            log.Last().ToString().Should().Contain("one (@12ms), two (@1000ms)");
+            log.Last().ToString().Should().Match(@"*one (@*ms), two (@1*ms)*");
+        }
+
+        [Test]
+        public void Iterative_Activity_Confirm_captures_timing_of_final_confirmation()
+        {
+            var log = new List<LogEntry>();
+
+            using (Log.Events().Subscribe(log.Add))
+            using (var activity = Log.Enter(() => { }))
+            {
+                for (var i = 0; i < 100; i++)
+                {
+                    if (i == 99)
+                    {
+                        Thread.Sleep(1000);
+                    }
+                    activity.Confirm(() => i);
+                }
+            }
+
+            log.Last()
+               .ToString()
+               .Should()
+               .Match(@"*Confirmed = { 100 (@1*ms) }*");
         }
 
         [Test]
