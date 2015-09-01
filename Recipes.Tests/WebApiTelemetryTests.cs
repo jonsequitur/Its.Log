@@ -122,7 +122,7 @@ namespace Recipes.Tests
         }
 
         [Test]
-        public async Task Telemetry_events_based_on_HTTP_responses_contain_a_caller_IP_address()
+        public async Task Telemetry_events_based_on_HTTP_request_contains_a_caller_IP_address()
         {
             HttpResponseMessage response = null;
 
@@ -148,26 +148,7 @@ namespace Recipes.Tests
         }
 
         [Test]
-        public async Task Telemetry_events_based_on_HTTP_responses_do_not_contain_an_action_descriptor()
-        {
-            HttpResponseMessage response = null;
-
-            using (Log.With<Telemetry>(t => t.WithPropertiesBasedOn(response)).Enter(() => { }))
-            {
-                response = new HttpResponseMessage(HttpStatusCode.OK)
-                {
-                    RequestMessage = new HttpRequestMessage(HttpMethod.Get, @"http://contoso.com/operationName5")
-                };
-            }
-
-            telemetryEvents.Single()
-                           .OperationName
-                           .Should()
-                           .Be("operationName5");
-        }
-
-        [Test]
-        public async Task Telemetry_events_based_on_HTTP_responses_contain_an_action_descriptor()
+        public async Task Telemetry_operation_name_based_on_HTTP_request_contains_an_action_descriptor()
         {
             HttpResponseMessage response = null;
 
@@ -188,6 +169,25 @@ namespace Recipes.Tests
                            .OperationName
                            .Should()
                            .Be("operationName6");
+        }
+
+        [Test]
+        public async Task Telemetry_operation_name_based_on_HTTP_request_url_parsing()
+        {
+            HttpResponseMessage response = null;
+
+            using (Log.With<Telemetry>(t => t.WithPropertiesBasedOn(response)).Enter(() => { }))
+            {
+                response = new HttpResponseMessage(HttpStatusCode.OK)
+                {
+                    RequestMessage = new HttpRequestMessage(HttpMethod.Get, @"http://contoso.com/operationName5")
+                };
+            }
+
+            telemetryEvents.Single()
+                           .OperationName
+                           .Should()
+                           .Be("operationName5");
         }
     }
 }

@@ -77,7 +77,7 @@ namespace Its.Log.Instrumentation
             return request.GetActionDescriptor() != null;
         }
 
-        public static Dictionary<string, string> ToDictionary(this HttpHeaders httpHeaders)
+        public static Dictionary<string, string> ToDictionaryLogString(this HttpHeaders httpHeaders)
         {
             return httpHeaders.ToDictionary(p => p.Key, p => p.Value.ToLogString());
         }
