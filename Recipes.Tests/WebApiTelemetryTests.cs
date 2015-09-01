@@ -6,8 +6,12 @@ using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Reactive.Disposables;
+using System.ServiceModel.Channels;
 using System.Threading.Tasks;
+using System.Web.Http.Controllers;
+using System.Web.Http.Hosting;
 using Its.Log.Instrumentation.Extensions;
+using Moq;
 using NUnit.Framework;
 
 namespace Recipes.Tests
@@ -38,7 +42,7 @@ namespace Recipes.Tests
         {
             HttpResponseMessage response = null;
 
-            using (var activity = Log.With<Telemetry>(t => t.For(response)).Enter(() => { }))
+            using (var activity = Log.With<Telemetry>(t => t.WithPropertiesBasedOn(response)).Enter(() => { }))
             {
                 response = new HttpResponseMessage(HttpStatusCode.OK);
                 activity.MarkAsSuccessful();
@@ -55,7 +59,7 @@ namespace Recipes.Tests
         {
             HttpResponseMessage response = null;
 
-            using (Log.With<Telemetry>(t => t.For(response)).Enter(() => { }))
+            using (Log.With<Telemetry>(t => t.WithPropertiesBasedOn(response)).Enter(() => { }))
             {
                 response = new HttpResponseMessage(HttpStatusCode.OK);
             }
@@ -71,7 +75,7 @@ namespace Recipes.Tests
         {
             HttpResponseMessage response = null;
 
-            using (Log.With<Telemetry>(t => t.For(response)).Enter(() => { }))
+            using (Log.With<Telemetry>(t => t.WithPropertiesBasedOn(response)).Enter(() => { }))
             {
                 response = new HttpResponseMessage(HttpStatusCode.NotFound);
             }
@@ -87,7 +91,7 @@ namespace Recipes.Tests
         {
             HttpResponseMessage response = null;
 
-            using (Log.With<Telemetry>(t => t.For(response)).Enter(() => { }))
+            using (Log.With<Telemetry>(t => t.WithPropertiesBasedOn(response)).Enter(() => { }))
             {
                 response = new HttpResponseMessage(HttpStatusCode.InternalServerError);
             }
@@ -103,7 +107,7 @@ namespace Recipes.Tests
         {
             HttpResponseMessage response = null;
 
-            using (Log.With<Telemetry>(t => t.For(response)).Enter(() => { }))
+            using (Log.With<Telemetry>(t => t.WithPropertiesBasedOn(response)).Enter(() => { }))
             {
                 response = new HttpResponseMessage(HttpStatusCode.OK)
                 {
@@ -115,6 +119,75 @@ namespace Recipes.Tests
                            .RequestUri
                            .Should()
                            .Be(new Uri(@"http://contoso.com/"));
+        }
+
+        [Test]
+        public async Task Telemetry_events_based_on_HTTP_responses_contain_a_caller_IP_address()
+        {
+            HttpResponseMessage response = null;
+
+            using (Log.With<Telemetry>(t => t.WithPropertiesBasedOn(response)).Enter(() => { }))
+            {
+                var request = new HttpRequestMessage(HttpMethod.Get, @"http://contoso.com/");
+                request.Properties[RemoteEndpointMessageProperty.Name] = new RemoteEndpointMessageProperty("123.123.123.123", 80);
+
+                response = new HttpResponseMessage(HttpStatusCode.OK)
+                {
+                    RequestMessage = request
+                };
+            }
+
+            telemetryEvents.Single()
+                           .IsIncomingRequest()
+                           .Should()
+                           .BeTrue();
+            telemetryEvents.Single()
+                           .CallerIpAddress()
+                           .Should()
+                           .Be("123.123.123.123");
+        }
+
+        [Test]
+        public async Task Telemetry_events_based_on_HTTP_responses_do_not_contain_an_action_descriptor()
+        {
+            HttpResponseMessage response = null;
+
+            using (Log.With<Telemetry>(t => t.WithPropertiesBasedOn(response)).Enter(() => { }))
+            {
+                response = new HttpResponseMessage(HttpStatusCode.OK)
+                {
+                    RequestMessage = new HttpRequestMessage(HttpMethod.Get, @"http://contoso.com/operationName5")
+                };
+            }
+
+            telemetryEvents.Single()
+                           .OperationName
+                           .Should()
+                           .Be("operationName5");
+        }
+
+        [Test]
+        public async Task Telemetry_events_based_on_HTTP_responses_contain_an_action_descriptor()
+        {
+            HttpResponseMessage response = null;
+
+            using (Log.With<Telemetry>(t => t.WithPropertiesBasedOn(response)).Enter(() => { }))
+            {
+                var request = new HttpRequestMessage(HttpMethod.Get, @"http://contoso.com/operationName5");
+                var actionDescriptor = new Mock<HttpActionDescriptor>();
+                actionDescriptor.Setup(a => a.ActionName).Returns("operationName6");
+                request.Properties[HttpPropertyKeys.HttpActionDescriptorKey] = actionDescriptor.Object;
+
+                response = new HttpResponseMessage(HttpStatusCode.OK)
+                {
+                    RequestMessage = request
+                };
+            }
+
+            telemetryEvents.Single()
+                           .OperationName
+                           .Should()
+                           .Be("operationName6");
         }
     }
 }
