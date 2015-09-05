@@ -341,7 +341,7 @@ namespace Its.Log.Instrumentation
             Formatter<Type>.Default = (type, writer) =>
             {
                 var typeName = type.Name;
-                if (type.IsGenericType && !type.IsAnonymous())
+                if (typeName.Contains("`") && !type.IsAnonymous())
                 {
                     writer.Write(typeName.Remove(typeName.IndexOf('`')));
                     writer.Write("<");

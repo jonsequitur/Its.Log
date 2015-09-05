@@ -12,7 +12,7 @@
     <description>Provides methods for supplying Its.Log telemetry based from Web API.</description>
     <tags>telemetry monitoring diagnostics Its.Log TiP</tags>
     <dependencies>
-      <dependency id="Its.Log" version="[2.9.8-beta,)" />
+      <dependency id="Its.Log" version="[2.9.9-beta,)" />
       <dependency id="Microsoft.AspNet.WebApi" version="[5.1.2,)" />
     </dependencies>
     <frameworkAssemblies>

@@ -13,7 +13,7 @@ using System.Runtime.InteropServices;
 
 
 [assembly: AssemblyVersion("2.7.0.0")]
-[assembly: AssemblyFileVersion("2.9.8-beta")]
+[assembly: AssemblyFileVersion("2.9.9-beta")]
 
 
 [assembly: AssemblyTrademark("Microsoft and Windows are registered trademarks of Microsoft Corporation.")]
