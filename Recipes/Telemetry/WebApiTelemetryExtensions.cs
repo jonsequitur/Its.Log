@@ -10,8 +10,10 @@
 // PM> Get-Package -Updates
 
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
+using System.Net.Http.Headers;
 using System.ServiceModel.Channels;
 using System.Web;
 using Its.Log.Instrumentation.Extensions;
@@ -22,9 +24,10 @@ namespace Its.Log.Instrumentation
     [System.Diagnostics.DebuggerStepThrough]
     [System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
 #endif
+
     internal static class WebApiTelemetryExtensions
     {
-        public static Telemetry For(
+        public static Telemetry WithPropertiesBasedOn(
             this Telemetry telemetry,
             HttpResponseMessage response)
         {
@@ -33,21 +36,45 @@ namespace Its.Log.Instrumentation
                 telemetry.Succeeded = response.IsSuccessStatusCode;
                 telemetry.HttpStatusCode = response.StatusCode;
 
-                if (response.RequestMessage != null)
+                var request = response.RequestMessage;
+                if (request != null)
                 {
-                    telemetry.RequestUri = response.RequestMessage.RequestUri;
-
-                    var callerIpAddress = response.RequestMessage.CallerIpAddress();
-
-                    if (!string.IsNullOrWhiteSpace(callerIpAddress))
-                    {
-                        telemetry.IsIncomingRequest(true);
-                        telemetry.CallerIpAddress(callerIpAddress);
-                    }
+                    telemetry.RequestUri = request.RequestUri;
+                    telemetry.WithCallerIpAddressBasedOn(request);
+                    telemetry.WithOperationNameBasedOn(request);
                 }
             }
 
             return telemetry;
+        }
+
+        private static void WithCallerIpAddressBasedOn(this Telemetry telemetry, HttpRequestMessage request)
+        {
+            var callerIpAddress = request.CallerIpAddress();
+
+            if (!string.IsNullOrWhiteSpace(callerIpAddress))
+            {
+                telemetry.IsIncomingRequest(true);
+                telemetry.CallerIpAddress(callerIpAddress);
+            }
+        }
+
+        private static void WithOperationNameBasedOn(this Telemetry telemetry, HttpRequestMessage request)
+        {
+            if (request.HasActionDescriptor())
+            {
+                telemetry.OperationName = request.GetActionDescriptor().ActionName;
+            }
+            else
+            {
+                var leftPart = request.RequestUri.GetLeftPart(UriPartial.Authority);
+                telemetry.OperationName = new Uri(leftPart).MakeRelativeUri(request.RequestUri).ToString();
+            }
+        }
+
+        private static bool HasActionDescriptor(this HttpRequestMessage request)
+        {
+            return request.GetActionDescriptor() != null;
         }
 
         /// <summary>
