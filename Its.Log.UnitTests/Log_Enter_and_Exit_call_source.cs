@@ -343,9 +343,7 @@ namespace Its.Log.Instrumentation.UnitTests
         [Test]
         public void from_class_nested_within_a_generic_class_shows_correct_CallingType()
         {
-            Formatter.RegisterForAllMembers(typeof (Generic<string>.Nested));
-         
-              var log = new List<LogEntry>();
+            var log = new List<LogEntry>();
 
             using (Log.Events().Subscribe(log.Add))
             {
@@ -358,9 +356,7 @@ namespace Its.Log.Instrumentation.UnitTests
         [Test]
         public void from_class_nested_within_a_generic_class_shows_correct_CallingMethod()
         {
-            Formatter.RegisterForAllMembers(typeof (Generic<string>.Nested));
-         
-              var log = new List<LogEntry>();
+            var log = new List<LogEntry>();
 
             using (Log.Events().Subscribe(log.Add))
             {
