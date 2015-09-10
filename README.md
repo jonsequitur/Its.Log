@@ -1,5 +1,7 @@
 ## Its.Log
 
+[![Join the chat at https://gitter.im/jonsequitur/Its.Log](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/jonsequitur/Its.Log?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+
 [![Build Status](https://ci.appveyor.com/api/projects/status/github/jonsequitur/its.log?svg=true&branch=master)](https://ci.appveyor.com/project/jonsequitur/its-log)  [![NuGet Status](http://img.shields.io/nuget/v/Its.Log.svg?style=flat)](https://www.nuget.org/packages/Its.Log/)
 
 ### Code instrumentation
