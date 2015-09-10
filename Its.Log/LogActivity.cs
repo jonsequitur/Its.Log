@@ -21,7 +21,6 @@ namespace Its.Log.Instrumentation
         private int isCompletedFlag;
         private bool requireConfirm = false;
         private readonly Action<LogEntry> onComplete;
-        private bool confirmed = false;
         private readonly Queue<LogEntry> buffer;
         private ConfirmationList confirmations;
         private Stopwatch stopwatch = null;
@@ -100,8 +99,6 @@ namespace Its.Log.Instrumentation
         /// </summary>
         public void Confirm(Func<object> value = null)
         {
-            confirmed = true;
-
             value = value ?? (() => true);
 
             if (confirmations == null)
