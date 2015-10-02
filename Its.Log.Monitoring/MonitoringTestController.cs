@@ -69,6 +69,7 @@ namespace Its.Log.Monitoring
                                                         Tags = t.Tags
                                                     })
                                             .Where(l => l.Url != null))
+                                            .OrderBy(t => t.Url.ToString())
             };
         }
 
