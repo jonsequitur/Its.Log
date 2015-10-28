@@ -51,6 +51,11 @@ namespace Its.Log.Instrumentation.Extensions
         /// </summary>
         public Uri RequestUri { get; set; }
 
+        /// <summary>
+        /// Gets or sets the user identifier. The user identifier is intended to uniquely represent a user in the context of an event.
+        /// </summary>
+        public string UserIdentifier { get; set; }
+
         public IDictionary<string, object> Properties
         {
             get
