@@ -107,5 +107,18 @@ namespace Its.Log.Instrumentation.UnitTests
                            .Be("hello!");
         }
 
+        [Test]
+        public async Task The_user_identifier_can_be_specified_programmatically()
+        {
+            using (Log.With<Telemetry>(t => t.UserIdentifier = "epic_user").Enter(() => { }))
+            {
+            }
+
+            telemetryEvents.Single()
+                           .UserIdentifier
+                           .Should()
+                           .Be("epic_user");
+        }
+
     }
 }
