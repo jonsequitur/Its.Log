@@ -91,7 +91,7 @@ namespace Recipes.Tests
         {
             HttpResponseMessage response = null;
 
-            using (Log.With<Telemetry>(t => t.WithPropertiesBasedOn(response)).Enter(() => { }))
+            using (Log.With<Telemetry>(t => t.WithPropertiesBasedOn(response)).Enter(() => new { response }))
             {
                 response = new HttpResponseMessage(HttpStatusCode.InternalServerError);
             }

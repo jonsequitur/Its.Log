@@ -56,6 +56,12 @@ namespace Its.Log.Instrumentation.Extensions
         /// </summary>
         public string UserIdentifier { get; set; }
 
+        /// <summary>
+        /// A dictionary that can be used to associated additional properties with a telemetry event. 
+        /// </summary>
+        /// <value>
+        /// The properties.
+        /// </value>
         public IDictionary<string, object> Properties
         {
             get
@@ -64,6 +70,10 @@ namespace Its.Log.Instrumentation.Extensions
             }
         }
 
+        /// <summary>
+        /// Called when <see cref="Log.Enter" /> generates its final <see cref="LogEntry" />.
+        /// </summary>
+        /// <param name="logEntry">The log entry.</param>
         public void OnExit(LogEntry logEntry)
         {
             Succeeded = logEntry.Confirmations
