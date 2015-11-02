@@ -189,5 +189,27 @@ namespace Recipes.Tests
                            .Should()
                            .Be("operationName5");
         }
+
+        [Test]
+        public async Task Telemetry_events_set_the_user_identifier_based_on_the_request_property()
+        {
+            HttpResponseMessage response = null;
+
+            using (Log.With<Telemetry>(t => t.WithPropertiesBasedOn(response)).Enter(() => { }))
+            {
+                response = new HttpResponseMessage(HttpStatusCode.OK)
+                {
+                    RequestMessage = new HttpRequestMessage(HttpMethod.Get, @"http://contoso.com/")
+                                     {
+                                         Properties = {  new KeyValuePair<string, object>("UserIdentifier", "Bobby")}
+                                     }
+                };
+            }
+
+            telemetryEvents.Single()
+                           .UserIdentifier
+                           .Should()
+                           .Be(new Uri(@"http://contoso.com/"));
+        }
     }
 }
