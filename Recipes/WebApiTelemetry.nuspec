@@ -3,7 +3,7 @@
   <metadata>
     <id>Its.Log.WebApiTelemetry</id>
     <title>Its.Log.WebApiTelemetry Recipe</title>
-    <version>1.0.2-beta</version>
+    <version>1.0.3-beta</version>
     <authors>jonsequitur</authors>
     <owners>Microsoft,jonsequitur</owners>
     <projectUrl>https://github.com/jonsequitur/its.log</projectUrl>
@@ -12,7 +12,7 @@
     <description>Provides methods for supplying Its.Log telemetry based from Web API.</description>
     <tags>telemetry monitoring diagnostics Its.Log TiP</tags>
     <dependencies>
-      <dependency id="Its.Log" version="[2.9.9-beta,)" />
+      <dependency id="Its.Log" version="[2.9.10-beta,)" />
       <dependency id="Microsoft.AspNet.WebApi" version="[5.1.2,)" />
     </dependencies>
     <frameworkAssemblies>
