@@ -140,13 +140,33 @@ namespace Recipes.Tests
             }
 
             telemetryEvents.Single()
-                           .IsIncomingRequest()
-                           .Should()
-                           .BeTrue();
-            telemetryEvents.Single()
                            .CallerIpAddress()
                            .Should()
                            .Be("123.123.123.123");
+        }
+
+        [Test]
+        public async Task Telemetry_events_based_on_HTTP_request_are_marked_as_incoming()
+        {
+            HttpResponseMessage response = null;
+
+            using (Log.With<Telemetry>(t => t.WithPropertiesBasedOn(response)).Enter(() => { }))
+            {
+                var request = new HttpRequestMessage(HttpMethod.Get, @"http://contoso.com/");
+                var actionDescriptor = new Mock<HttpActionDescriptor>();
+                actionDescriptor.Setup(a => a.ActionName).Returns("operationName6");
+                request.Properties[HttpPropertyKeys.HttpActionDescriptorKey] = actionDescriptor.Object;
+
+                response = new HttpResponseMessage(HttpStatusCode.OK)
+                {
+                    RequestMessage = request
+                };
+            }
+
+            telemetryEvents.Single()
+                           .IsIncomingRequest()
+                           .Should()
+                           .BeTrue();
         }
 
         [Test]
