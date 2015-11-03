@@ -15,6 +15,7 @@ using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.ServiceModel.Channels;
+using System.Threading;
 using System.Web;
 using Its.Log.Instrumentation.Extensions;
 
@@ -41,11 +42,31 @@ namespace Its.Log.Instrumentation
                 {
                     telemetry.RequestUri = request.RequestUri;
                     telemetry.WithCallerIpAddressBasedOn(request);
+                    telemetry.WithIsIncomingRequestBasedOn(request);
                     telemetry.WithOperationNameBasedOn(request);
+                    telemetry.WithUserIdentifierBasedOn(request);
                 }
             }
 
             return telemetry;
+        }
+
+        private static void WithIsIncomingRequestBasedOn(this Telemetry telemetry, HttpRequestMessage request)
+        {
+            if (request.GetActionDescriptor() != null)
+            {
+                telemetry.IsIncomingRequest(true);
+            }
+        }
+
+        public static void WithUserIdentifierBasedOn(this Telemetry telemetry, HttpRequestMessage request)
+        {
+            object userIdentifier;
+            telemetry.UserIdentifier = request.Properties.TryGetValue("__Its_Log_UserIdentifier", out userIdentifier)
+                                           ? userIdentifier == null
+                                                 ? null
+                                                 : userIdentifier.ToString()
+                                           : Thread.CurrentPrincipal.Identity.Name;
         }
 
         private static void WithCallerIpAddressBasedOn(this Telemetry telemetry, HttpRequestMessage request)
@@ -54,7 +75,6 @@ namespace Its.Log.Instrumentation
 
             if (!string.IsNullOrWhiteSpace(callerIpAddress))
             {
-                telemetry.IsIncomingRequest(true);
                 telemetry.CallerIpAddress(callerIpAddress);
             }
         }
@@ -136,7 +156,7 @@ namespace Its.Log.Instrumentation
             // for in-memory hosting
             if (request.Properties.TryGetValue(RemoteEndpointMessageProperty.Name, out o))
             {
-                return ((RemoteEndpointMessageProperty) o).Address;
+                return ((RemoteEndpointMessageProperty)o).Address;
             }
 
             return null;
