@@ -242,7 +242,7 @@ namespace Recipes.Tests
             using (Log.With<Telemetry>(t => t.WithPropertiesBasedOn(response)).Enter(() => { }))
             {
                 var customIdentity = new CustomIdentity("Bobby");
-                GenericPrincipal threadCurrentPrincipal = new GenericPrincipal(customIdentity, new string[] { "CustomUser" });
+                GenericPrincipal threadCurrentPrincipal = new GenericPrincipal(customIdentity, new [] { "CustomUser" });
                 Thread.CurrentPrincipal = threadCurrentPrincipal;
                 response = new HttpResponseMessage(HttpStatusCode.OK)
                 {
@@ -264,7 +264,7 @@ namespace Recipes.Tests
             using (Log.With<Telemetry>(t => t.WithPropertiesBasedOn(response)).Enter(() => { }))
             {
                 var customIdentity = new CustomIdentity("BobbyCurrentPrincipal");
-                GenericPrincipal threadCurrentPrincipal = new GenericPrincipal(customIdentity, new string[] { "CustomUser" });
+                GenericPrincipal threadCurrentPrincipal = new GenericPrincipal(customIdentity, new [] { "CustomUser" });
                 Thread.CurrentPrincipal = threadCurrentPrincipal;
                 response = new HttpResponseMessage(HttpStatusCode.OK)
                 {
