@@ -62,14 +62,11 @@ namespace Its.Log.Instrumentation
         public static void WithUserIdentifierBasedOn(this Telemetry telemetry, HttpRequestMessage request)
         {
             object userIdentifier;
-            if (request.Properties.TryGetValue("UserIdentifier", out userIdentifier))
-            {
-                telemetry.UserIdentifier = userIdentifier.ToString();
-            }
-            else
-            {
-                telemetry.UserIdentifier = Thread.CurrentPrincipal.Identity.Name;
-            }
+            telemetry.UserIdentifier = request.Properties.TryGetValue("__Its_Log_UserIdentifier", out userIdentifier)
+                                           ? userIdentifier == null
+                                                 ? null
+                                                 : userIdentifier.ToString()
+                                           : Thread.CurrentPrincipal.Identity.Name;
         }
 
         private static void WithCallerIpAddressBasedOn(this Telemetry telemetry, HttpRequestMessage request)

@@ -223,7 +223,7 @@ namespace Recipes.Tests
                 {
                     RequestMessage = new HttpRequestMessage(HttpMethod.Get, @"http://contoso.com/")
                                      {
-                                         Properties = {  new KeyValuePair<string, object>("UserIdentifier", "Bobby")}
+                                         Properties = { new KeyValuePair<string, object>("__Its_Log_UserIdentifier", "Bobby") }
                                      }
                 };
             }
@@ -270,7 +270,7 @@ namespace Recipes.Tests
                 {
                     RequestMessage = new HttpRequestMessage(HttpMethod.Get, @"http://contoso.com/")
                     {
-                        Properties = { new KeyValuePair<string, object>("UserIdentifier", "BobbyRequestProperty") }
+                        Properties = { new KeyValuePair<string, object>("__Its_Log_UserIdentifier", "BobbyRequestProperty") }
                     }
                 };
             }
@@ -294,6 +294,4 @@ namespace Recipes.Tests
         public string AuthenticationType { get; private set; }
         public bool IsAuthenticated { get; private set; }
     }
-
-
 }
