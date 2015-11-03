@@ -107,7 +107,7 @@ namespace Its.Log.Instrumentation
             object isIncoming;
             if (telemetry.Properties.TryGetValue("IsIncoming", out isIncoming))
             {
-                return (bool) isIncoming;
+                return (bool)isIncoming;
             }
 
             return false;
@@ -129,7 +129,7 @@ namespace Its.Log.Instrumentation
             object ipAddress;
             if (telemetry.Properties.TryGetValue("CallerIpAddress", out ipAddress))
             {
-                return (string) ipAddress;
+                return (string)ipAddress;
             }
 
             return null;
@@ -150,7 +150,7 @@ namespace Its.Log.Instrumentation
             // for ASP.NET hosting
             if (request.Properties.TryGetValue("MS_HttpContext", out o))
             {
-                return ((HttpContextWrapper) o).Request.UserHostAddress;
+                return ((HttpContextWrapper)o).Request.UserHostAddress;
             }
 
             // for in-memory hosting
