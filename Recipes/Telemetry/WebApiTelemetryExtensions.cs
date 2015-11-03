@@ -15,7 +15,9 @@ using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.ServiceModel.Channels;
+using System.Threading;
 using System.Web;
+using System.Web.Http.Controllers;
 using Its.Log.Instrumentation.Extensions;
 
 namespace Its.Log.Instrumentation
@@ -25,7 +27,7 @@ namespace Its.Log.Instrumentation
     [System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
 #endif
 
-    internal static class WebApiTelemetryExtensions
+    public static class WebApiTelemetryExtensions
     {
         public static Telemetry WithPropertiesBasedOn(
             this Telemetry telemetry,
@@ -40,41 +42,59 @@ namespace Its.Log.Instrumentation
                 if (request != null)
                 {
                     telemetry.RequestUri = request.RequestUri;
-                    telemetry.WithCallerIpAddressBasedOn(request);
-                    telemetry.WithOperationNameBasedOn(request);
+                    telemetry.SetCallerIpAddressBasedOn(request);
+                    telemetry.SetIsIncomingRequestBasedOn(request);
+                    telemetry.SetOperationNameBasedOn(request);
+                    telemetry.SetUserIdentifierBasedOn(request);
                 }
             }
 
             return telemetry;
         }
 
-        private static void WithCallerIpAddressBasedOn(this Telemetry telemetry, HttpRequestMessage request)
+        private static void SetCallerIpAddressBasedOn(this Telemetry telemetry, HttpRequestMessage request)
         {
             var callerIpAddress = request.CallerIpAddress();
 
             if (!string.IsNullOrWhiteSpace(callerIpAddress))
             {
-                telemetry.IsIncomingRequest(true);
                 telemetry.CallerIpAddress(callerIpAddress);
             }
         }
 
-        private static void WithOperationNameBasedOn(this Telemetry telemetry, HttpRequestMessage request)
+        private static void SetIsIncomingRequestBasedOn(this Telemetry telemetry, HttpRequestMessage request)
         {
-            if (request.HasActionDescriptor())
+            if (request.GetActionDescriptor() != null)
             {
-                telemetry.OperationName = request.GetActionDescriptor().ActionName;
-            }
-            else
-            {
-                var leftPart = request.RequestUri.GetLeftPart(UriPartial.Authority);
-                telemetry.OperationName = new Uri(leftPart).MakeRelativeUri(request.RequestUri).ToString();
+                telemetry.IsIncomingRequest(true);
             }
         }
 
-        private static bool HasActionDescriptor(this HttpRequestMessage request)
+        private static void SetUserIdentifierBasedOn(this Telemetry telemetry, HttpRequestMessage request)
         {
-            return request.GetActionDescriptor() != null;
+            object userIdentifier;
+            if (telemetry.Properties.TryGetValue("UserIdentifier", out userIdentifier))
+            {
+                telemetry.UserIdentifier = userIdentifier.ToString();
+            }
+            else
+            {
+                telemetry.UserIdentifier = Thread.CurrentPrincipal.Identity.Name;
+            }
+            
+        }
+
+        private static void SetOperationNameBasedOn(this Telemetry telemetry, HttpRequestMessage request)
+        {
+            var actionDescriptor = request.GetActionDescriptor();
+            if (actionDescriptor != null)
+            {
+                telemetry.OperationName = actionDescriptor.ControllerDescriptor.ControllerName + "." + actionDescriptor.ActionName;
+            }
+            else
+            {
+                telemetry.OperationName = "NoActionDescriptorFound";
+            }
         }
 
         /// <summary>
@@ -87,7 +107,7 @@ namespace Its.Log.Instrumentation
             object isIncoming;
             if (telemetry.Properties.TryGetValue("IsIncoming", out isIncoming))
             {
-                return (bool) isIncoming;
+                return (bool)isIncoming;
             }
 
             return false;
@@ -109,7 +129,7 @@ namespace Its.Log.Instrumentation
             object ipAddress;
             if (telemetry.Properties.TryGetValue("CallerIpAddress", out ipAddress))
             {
-                return (string) ipAddress;
+                return (string)ipAddress;
             }
 
             return null;
@@ -123,6 +143,25 @@ namespace Its.Log.Instrumentation
             telemetry.Properties["CallerIpAddress"] = value;
         }
 
+        internal static string UserIdentifer(this HttpRequestMessage request)
+        {
+            object o;
+
+            // for ASP.NET hosting
+            if (request.Properties.TryGetValue("UserIdentifier", out o))
+            {
+                return ((HttpContextWrapper)o).Request.UserHostAddress;
+            }
+
+            // for in-memory hosting
+            if (request.Properties.TryGetValue(RemoteEndpointMessageProperty.Name, out o))
+            {
+                return ((RemoteEndpointMessageProperty)o).Address;
+            }
+
+            return null;
+        }
+
         internal static string CallerIpAddress(this HttpRequestMessage request)
         {
             object o;
@@ -130,13 +169,13 @@ namespace Its.Log.Instrumentation
             // for ASP.NET hosting
             if (request.Properties.TryGetValue("MS_HttpContext", out o))
             {
-                return ((HttpContextWrapper) o).Request.UserHostAddress;
+                return ((HttpContextWrapper)o).Request.UserHostAddress;
             }
 
             // for in-memory hosting
             if (request.Properties.TryGetValue(RemoteEndpointMessageProperty.Name, out o))
             {
-                return ((RemoteEndpointMessageProperty) o).Address;
+                return ((RemoteEndpointMessageProperty)o).Address;
             }
 
             return null;
