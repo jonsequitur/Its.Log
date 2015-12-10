@@ -450,6 +450,78 @@ namespace Its.Log.Instrumentation.UnitTests
         }
 
         [Test]
+        public async Task Confirm_is_threadsafe()
+        {
+            var barrier = new Barrier(10);
+            var log = new List<LogEntry>();
+
+            using (Log.Events().Subscribe(log.Add))
+            using (var activity = Log.Enter(() => { }))
+            {
+                new Thread(() =>
+                {
+                    barrier.SignalAndWait(5000);
+                    activity.Confirm(() => 1);
+                    Console.WriteLine("   activity.Confirm(() => 1)");
+                }).Start();
+                new Thread(() =>
+                {
+                    barrier.SignalAndWait(5000);
+                    activity.Confirm(() => 2);
+                    Console.WriteLine("   activity.Confirm(() => 2)");
+                }).Start();
+                new Thread(() =>
+                {
+                    barrier.SignalAndWait(5000);
+                    activity.Confirm(() => 3);
+                    Console.WriteLine("   activity.Confirm(() => 3)");
+                }).Start();
+                new Thread(() =>
+                {
+                    barrier.SignalAndWait(5000);
+                    activity.Confirm(() => 4);
+                    Console.WriteLine("   activity.Confirm(() => 4)");
+                }).Start();
+                new Thread(() =>
+                {
+                    barrier.SignalAndWait(5000);
+                    activity.Confirm(() => 5);
+                    Console.WriteLine("   activity.Confirm(() => 5)");
+                }).Start();
+                new Thread(() =>
+                {
+                    barrier.SignalAndWait(5000);
+                    activity.Confirm(() => 6);
+                    Console.WriteLine("   activity.Confirm(() => 6)");
+                }).Start();
+                new Thread(() =>
+                {
+                    barrier.SignalAndWait(5000);
+                    activity.Confirm(() => 7);
+                    Console.WriteLine("   activity.Confirm(() => 7)");
+                }).Start();
+                new Thread(() =>
+                {
+                    barrier.SignalAndWait(5000);
+                    activity.Confirm(() => 8);
+                    Console.WriteLine("   activity.Confirm(() => 8)");
+                }).Start();
+                new Thread(() =>
+                {
+                    barrier.SignalAndWait(5000);
+                    activity.Confirm(() => 9);
+                    Console.WriteLine("   activity.Confirm(() => 9)");
+                }).Start();
+
+                barrier.SignalAndWait(5000);
+                activity.Confirm(() => 10);
+                Console.WriteLine("   activity.Confirm(() => 10)");
+            }
+
+            log.Last().Confirmations.Count().Should().Be(10);
+        }
+
+        [Test]
         public void When_Confirm_is_called_with_no_args_and_not_required_then_it_is_indicated_in_the_exit_log_entry()
         {
             var log = new List<LogEntry>();
