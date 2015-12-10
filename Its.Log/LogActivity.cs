@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
@@ -22,7 +23,7 @@ namespace Its.Log.Instrumentation
         private bool requireConfirm = false;
         private readonly Action<LogEntry> onComplete;
         private readonly Queue<LogEntry> buffer;
-        private ConfirmationList confirmations;
+        private readonly Lazy<ConfirmationList> confirmations = new Lazy<ConfirmationList>(() => new ConfirmationList());
         private Stopwatch stopwatch = null;
 
         /// <summary>
@@ -79,11 +80,11 @@ namespace Its.Log.Instrumentation
                 stopwatch.Stop();
             }
 
-            if (confirmations != null)
+            if (confirmations.IsValueCreated)
             {
-                Log.WithParams(() => new { Confirmed = confirmations })
+                Log.WithParams(() => new { Confirmed = confirmations.Value })
                    .ApplyTo(clone);
-                clone.Confirmations = confirmations.Select(c => c.ResolvedValue);
+                clone.Confirmations = confirmations.Value.Select(c => c.ResolvedValue);
             }
 
             if (onComplete != null)
@@ -101,11 +102,6 @@ namespace Its.Log.Instrumentation
         {
             value = value ?? (() => true);
 
-            if (confirmations == null)
-            {
-                confirmations = new ConfirmationList();
-            }
-
             long? elapsedMilliseconds = null;
 
             if (stopwatch != null)
@@ -113,7 +109,7 @@ namespace Its.Log.Instrumentation
                 elapsedMilliseconds = stopwatch.ElapsedMilliseconds;
             }
 
-            confirmations.Add(new Confirmation(value, elapsedMilliseconds));
+            confirmations.Value.Add(new Confirmation(value, elapsedMilliseconds));
 
             if (requireConfirm)
             {
@@ -281,12 +277,20 @@ namespace Its.Log.Instrumentation
 
             public void Add(Confirmation confirmation)
             {
-                confirmations[confirmation.GetHashCode()] = confirmation;
+                lock (confirmations)
+                {
+                    confirmations[confirmation.GetHashCode()] = confirmation;
+                }
             }
 
             public IEnumerator<Confirmation> GetEnumerator()
             {
-                return confirmations.Values.GetEnumerator();
+                List<Confirmation> values;
+                lock (confirmations)
+                {
+                    values = confirmations.Values.ToList();
+                }
+                return values.GetEnumerator();
             }
 
             IEnumerator IEnumerable.GetEnumerator()
