@@ -72,7 +72,6 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="%28Its.Recipes%29\MaybeExtensions.cs" />
     <Compile Include="%28Pocket%29\PocketContainer.AfterResolve.cs" />
     <Compile Include="%28Its.Recipes%29\StringTemplate.cs" />
     <Compile Include="%28Its.Recipes%29\System.Collections.Generic\DictionaryExtensions.cs" />

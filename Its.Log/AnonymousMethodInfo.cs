@@ -2,7 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.Globalization;
+using Its.Recipes;
 using System.Linq;
 using System.Reflection;
 
@@ -14,9 +14,6 @@ namespace Its.Log.Instrumentation
     internal class AnonymousMethodInfo
     {
         private readonly MethodInfo anonymousMethod;
-        private readonly string enclosingMethodName;
-        private readonly Type enclosingType;
-        private readonly string enclosingTypeName;
 
         /// <summary>
         ///   Initializes a new instance of the <see cref = "AnonymousMethodInfo" /> class.
@@ -26,85 +23,59 @@ namespace Its.Log.Instrumentation
         {
             if (anonymousMethod == null)
             {
-                throw new ArgumentNullException("anonymousMethod");
+                throw new ArgumentNullException(nameof(anonymousMethod));
             }
             this.anonymousMethod = anonymousMethod;
 
-            // TODO: (AnonymousMethodInfo) differentiate overload method signatures
-            // TODO: (EnsureMethodAndTypeInfo) this doesn't work with Expressions
+            var declaringType = this.anonymousMethod.DeclaringType;
+
             var methodName = this.anonymousMethod.Name;
             var indexOfGt = methodName.IndexOf(">", StringComparison.OrdinalIgnoreCase);
 
             if (indexOfGt < 0)
             {
-                enclosingType = this.anonymousMethod.DeclaringType;
-                enclosingMethodName = this.anonymousMethod.Name;
+                EnclosingType = declaringType;
+                EnclosingMethodName = this.anonymousMethod.Name;
                 return;
             }
-            
-            // it's an anonymous type
-            methodName = methodName.Substring(0, indexOfGt).TrimStart('<');
-            enclosingType = this.anonymousMethod.DeclaringType;
 
-            enclosingMethodName = methodName;
+            EnclosingMethodName = methodName.Substring(0, indexOfGt).TrimStart('<');
 
-            var typeName = enclosingType.FullName;
-            if (typeName.Contains("+<"))
+            if (declaringType.IsCompilerGenerated() &&
+                (declaringType
+                    ?.DeclaringType
+                    ?.IsGenericTypeDefinition)
+                    .IfNotNull()
+                    .ElseDefault())
             {
-                typeName = typeName.Substring(0, typeName.IndexOf("+<", StringComparison.OrdinalIgnoreCase));
+                EnclosingType = declaringType
+                    ?.DeclaringType
+                    ?.MakeGenericType(declaringType.GenericTypeArguments);
+            }
+            else
+            {
+                EnclosingType = declaringType;
             }
 
-            while (enclosingType.DeclaringType != null && enclosingType.IsAnonymousMethod())
+            while (EnclosingType.DeclaringType != null &&
+                   EnclosingType.IsCompilerGenerated())
             {
-                enclosingType = enclosingType.DeclaringType;
-            }
-
-            enclosingTypeName = typeName;
-        }
-
-        public string MethodName
-        {
-            get
-            {
-                return anonymousMethod.Name;
+                EnclosingType = EnclosingType.DeclaringType;
             }
         }
+
+        public string MethodName => anonymousMethod.Name;
 
         /// <summary>
         ///   Gets the name of the enclosing method.
         /// </summary>
         /// <value>The name of the method in which the anonymous method is declared.</value>
-        public string EnclosingMethodName
-        {
-            get
-            {
-                return enclosingMethodName;
-            }
-        }
+        public string EnclosingMethodName { get; }
 
         /// <summary>
         ///   Gets the type of the enclosing.
         /// </summary>
         /// <value>The name of the class within which the anonymous method is declared.</value>
-        public Type EnclosingType
-        {
-            get
-            {
-                return enclosingType;
-            }
-        }
-
-        public string EnclosingTypeName
-        {
-            get
-            {
-                return enclosingTypeName;
-            }
-        }
-
-        public override string ToString()
-        {
-            return string.Format(CultureInfo.InvariantCulture, "{0}.{1}", EnclosingTypeName, EnclosingMethodName);
-        }
+        public Type EnclosingType { get; }
     }
 }

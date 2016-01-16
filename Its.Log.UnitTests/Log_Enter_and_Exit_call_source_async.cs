@@ -53,7 +53,6 @@ namespace Its.Log.Instrumentation.UnitTests
 
             Assert.That(entries.Single(e => e.EventType == TraceEventType.Start).CallingType,
                         Is.EqualTo(typeof (InheritedWidget)));
-
             Assert.That(entries.Single(e => e.EventType == TraceEventType.Stop).CallingType,
                         Is.EqualTo(typeof (InheritedWidget)));
         }

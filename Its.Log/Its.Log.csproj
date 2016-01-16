@@ -70,6 +70,7 @@
     <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Microsoft.CSharp" />
     <Reference Include="System" />
     <Reference Include="System.ComponentModel.Composition" />
     <Reference Include="System.Core">
@@ -82,6 +83,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="%28Its.Recipes%29\AnonymousDisposable.cs" />
+    <Compile Include="%28Its.Recipes%29\MaybeExtensions.cs" />
     <Compile Include="..\ProductInfo.cs">
       <Link>Properties\ProductInfo.cs</Link>
     </Compile>
@@ -125,7 +127,6 @@
     </Compile>
     <Compile Include="LogEntryExtensions.cs" />
     <Compile Include="LogEntry{T}.cs" />
-    <Compile Include="MaybeExtensions.cs" />
     <Compile Include="MemberAccessor.cs" />
     <Compile Include="ObservableExtensions.cs" />
     <Compile Include="TelemetryExtensions.cs" />

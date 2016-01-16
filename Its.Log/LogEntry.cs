@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using Its.Log.Instrumentation.Extensions;
+using Its.Recipes;
 
 namespace Its.Log.Instrumentation
 {
@@ -195,9 +196,11 @@ namespace Its.Log.Instrumentation
         {
             get
             {
-                return message = (message ??
-                                  Subject as string ??
-                                  (Subject as Func<String>).Maybe(f => f()));
+                return message = message ??
+                                 Subject as string ??
+                                 Subject.IfTypeIs<Func<string>>()
+                                        .Then(f => f())
+                                        .ElseDefault();
             }
 
             set
