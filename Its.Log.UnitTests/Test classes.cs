@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace Its.Log.Instrumentation.UnitTests
 {
@@ -51,6 +52,26 @@ namespace Its.Log.Instrumentation.UnitTests
             Log.Exit(activity);
         }
 
+        public virtual async Task DoStuffAsync()
+        {
+            using (Log.Enter(() => { }))
+            {
+                await Task.Run(() => { Log.Write("Doing some stuff..."); });
+            }
+        }
+
+        public virtual async Task DoStuffAsync(string nestedWidgetParam)
+        {
+            await Task.Run(() =>
+            {
+                var activity = Log.Enter(() => new { nestedWidgetParam });
+
+                Log.Write("Doing some stuff...");
+
+                Log.Exit(activity);
+            });
+        }
+
         public static void DoStuffStatically()
         {
             using (Log.Enter(() => { }))
@@ -65,6 +86,26 @@ namespace Its.Log.Instrumentation.UnitTests
             {
                 Log.Write("Doing some stuff...");
             }
+        }
+
+        public static async Task DoStuffStaticallyAsync()
+        {
+            using (Log.Enter(() => { }))
+            {
+                await Task.Run(() => { Log.Write("Doing some stuff..."); });
+            }
+        }
+
+        public static async Task DoStuffStaticallyAsync(string nestedWidgetParam)
+        {
+            await Task.Run(() =>
+            {
+                var activity = Log.Enter(() => new { nestedWidgetParam });
+
+                Log.Write("Doing some stuff...");
+
+                Log.Exit(activity);
+            });
         }
 
         public void DoStuff(string inheritedWidgetParam, ref string outParam)
@@ -99,6 +140,26 @@ namespace Its.Log.Instrumentation.UnitTests
                 Log.Write("Doing some stuff...");
             }
         }
+
+        public override async Task DoStuffAsync()
+        {
+            using (Log.Enter(() => { }))
+            {
+                await Task.Run(() => { Log.Write("Doing some stuff..."); });
+            }
+        }
+
+        public override async Task DoStuffAsync(string nestedWidgetParam)
+        {
+            await Task.Run(() =>
+            {
+                var activity = Log.Enter(() => new { nestedWidgetParam });
+
+                Log.Write("Doing some stuff...");
+
+                Log.Exit(activity);
+            });
+        }
     }
 
     public class InheritedWidgetNoOverride : Widget
@@ -107,10 +168,18 @@ namespace Its.Log.Instrumentation.UnitTests
 
     public static class WidgetExtensions
     {
-        private static Action actionField = () =>
+        private static readonly Action lambdaField = () =>
         {
             using (Log.Enter(() => { }))
             {
+            }
+        };
+
+        private static readonly Func<Task> asyncLambdaField = async () =>
+        {
+            using (Log.Enter(() => { }))
+            {
+                await Task.Run(() => Console.WriteLine("hello"));
             }
         };
 
@@ -125,9 +194,26 @@ namespace Its.Log.Instrumentation.UnitTests
             action();
         }
 
+        public static async Task ExtensionWithLoggingInLocallyScopedAsyncLambdaAsync(this Widget widget)
+        {
+            Func<Task> action = async () =>
+            {
+                using (Log.Enter(() => { }))
+                {
+                    await Task.Run(() => Console.WriteLine("hello"));
+                }
+            };
+            await action();
+        }
+
         public static void ExtensionWithLoggingInStaticallyScopedLambda(this Widget widget)
         {
-            actionField();
+            lambdaField();
+        }
+
+        public static async Task ExtensionWithLoggingInStaticallyScopedAsyncLambdaAsync(this Widget widget)
+        {
+            await asyncLambdaField();
         }
     }
 
@@ -166,12 +252,12 @@ namespace Its.Log.Instrumentation.UnitTests
 
     public class Node
     {
-// ReSharper disable InconsistentNaming
+        // ReSharper disable InconsistentNaming
         private string _id;
-// ReSharper restore InconsistentNaming
-// ReSharper disable ConvertToAutoProperty
+        // ReSharper restore InconsistentNaming
+        // ReSharper disable ConvertToAutoProperty
         public string Id
-// ReSharper restore ConvertToAutoProperty
+            // ReSharper restore ConvertToAutoProperty
         {
             get
             {

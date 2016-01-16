@@ -10,7 +10,6 @@ using System.Threading.Tasks;
 
 namespace Its.Log.Instrumentation
 {
-    [DebuggerStepThrough]
     internal static class TypeExtensions
     {
         public static bool IsAnonymous(this Type type)
@@ -26,12 +25,9 @@ namespace Its.Log.Instrumentation
                    (type.Attributes & TypeAttributes.NotPublic) == TypeAttributes.NotPublic;
         }
 
-        public static bool IsAnonymousMethod(this Type type)
+        public static bool IsCompilerGenerated(this Type type)
         {
-            return Attribute.IsDefined(type, typeof (CompilerGeneratedAttribute), false) &&
-                   type.Name.Contains("DisplayClass") &&
-                   (type.Name.StartsWith("<>") || type.Name.StartsWith("VB$")) &&
-                   (type.Attributes & TypeAttributes.NotPublic) == TypeAttributes.NotPublic;
+            return Attribute.IsDefined(type, typeof (CompilerGeneratedAttribute), false);
         }
 
         public static bool IsAsync(this Type type)

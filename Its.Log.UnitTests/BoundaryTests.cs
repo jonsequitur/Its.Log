@@ -2,14 +2,15 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
+using FluentAssertions;
 using Its.Log.Instrumentation.Extensions;
 using Moq;
 using NUnit.Framework;
-using Assert = NUnit.Framework.Assert;
-using StringAssert = NUnit.Framework.StringAssert;
 
 namespace Its.Log.Instrumentation.UnitTests
 {
@@ -59,15 +60,14 @@ namespace Its.Log.Instrumentation.UnitTests
         public void Boundary_logging_can_be_disabled_per_class_when_calling_with_no_params()
         {
             Extension<Boundaries>.DisableFor<BoundaryTests>();
-            var observer = new Mock<IObserver<LogEntry>>();
-            observer.Setup(o => o.OnNext(It.IsAny<LogEntry>()));
+            var list = new List<LogEntry>();
 
-            using (Log.Events().Subscribe(observer.Object))
+            using (Log.Events().Subscribe(list.Add))
             using (Log.Enter(() => { }))
             {
             }
 
-            observer.Verify(o => o.OnNext(It.IsAny<LogEntry>()), Times.Never());
+            list.Should().BeEmpty();
         }
 
         [Test]
@@ -171,6 +171,26 @@ namespace Its.Log.Instrumentation.UnitTests
                 }
             }
 
+            public static async Task DoStuffStaticallyAsync()
+            {
+                using (Log.Enter(() => { }))
+                {
+                    await Task.Run(() => { Log.Write("Doing some stuff..."); });
+                }
+            }
+
+            public static async Task DoStuffStaticallyAsync(string nestedWidgetParam)
+            {
+                await Task.Run(() =>
+                {
+                    var activity = Log.Enter(() => new { nestedWidgetParam });
+
+                    Log.Write("Doing some stuff...");
+
+                    Log.Exit(activity);
+                });
+            }
+
             public void DoStuff()
             {
                 using (Log.Enter(() => { }))
@@ -186,6 +206,26 @@ namespace Its.Log.Instrumentation.UnitTests
                 Log.Write("Doing some stuff...");
 
                 Log.Exit(activity);
+            }
+
+            public async Task DoStuffAsync()
+            {
+                using (Log.Enter(() => { }))
+                {
+                    await Task.Run(() => { Log.Write("Doing some stuff..."); });
+                }
+            }
+
+            public async Task DoStuffAsync(string nestedWidgetParam)
+            {
+                await Task.Run(() =>
+                {
+                    var activity = Log.Enter(() => new { nestedWidgetParam });
+
+                    Log.Write("Doing some stuff...");
+
+                    Log.Exit(activity);
+                });
             }
 
             public static string StaticProperty { get; set; }

@@ -5,16 +5,14 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
-using System.Reflection;
-using FluentAssertions;
+using System.Threading.Tasks;
 using Its.Log.Instrumentation.Extensions;
 using NUnit.Framework;
-using Assert = NUnit.Framework.Assert;
 
 namespace Its.Log.Instrumentation.UnitTests
 {
     [TestFixture]
-    public class Log_Enter_and_Exit_call_source
+    public class Log_Enter_and_Exit_call_source_async
     {
         [SetUp]
         public void TestInitialize()
@@ -25,32 +23,32 @@ namespace Its.Log.Instrumentation.UnitTests
         }
 
         [Test]
-        public void from_instance_method_in_derived_class_show_correct_CallingMethod()
+        public async Task from_instance_method_in_derived_class_show_correct_CallingMethod()
         {
             var entries = new List<LogEntry>();
 
             using (Log.Events().Subscribe(entries.Add))
             {
                 var widget = new InheritedWidget();
-                widget.DoStuff();
+                await widget.DoStuffAsync();
             }
 
             Assert.That(entries.Single(e => e.EventType == TraceEventType.Start).CallingMethod,
-                        Is.EqualTo("DoStuff"));
+                        Is.EqualTo("DoStuffAsync"));
 
             Assert.That(entries.Single(e => e.EventType == TraceEventType.Stop).CallingMethod,
-                        Is.EqualTo("DoStuff"));
+                        Is.EqualTo("DoStuffAsync"));
         }
 
         [Test]
-        public void from_instance_method_in_derived_class_show_correct_CallingType()
+        public async Task from_instance_method_in_derived_class_show_correct_CallingType()
         {
             var entries = new List<LogEntry>();
 
             using (Log.Events().Subscribe(entries.Add))
             {
                 var widget = new InheritedWidget();
-                widget.DoStuff();
+                await widget.DoStuffAsync();
             }
 
             Assert.That(entries.Single(e => e.EventType == TraceEventType.Start).CallingType,
@@ -60,31 +58,32 @@ namespace Its.Log.Instrumentation.UnitTests
         }
 
         [Test]
-        public void from_instance_method_in_nested_class_show_correct_CallingMethod()
+        public async Task from_instance_method_in_nested_class_show_correct_CallingMethod()
         {
             var log = new List<LogEntry>();
 
             using (Log.Events().Subscribe(log.Add))
             {
                 var widget = new BoundaryTests.NestedWidget();
-                widget.DoStuff();
+                await widget.DoStuffAsync();
             }
 
             Assert.That(log.Single(e => e.EventType == TraceEventType.Start).CallingMethod,
-                        Is.EqualTo("DoStuff"));
+                        Is.EqualTo("DoStuffAsync"));
+
             Assert.That(log.Single(e => e.EventType == TraceEventType.Stop).CallingMethod,
-                        Is.EqualTo("DoStuff"));
+                        Is.EqualTo("DoStuffAsync"));
         }
 
         [Test]
-        public void from_instance_method_in_nested_class_show_correct_CallingType()
+        public async Task from_instance_method_in_nested_class_show_correct_CallingType()
         {
             var log = new List<LogEntry>();
 
             using (Log.Events().Subscribe(log.Add))
             {
                 var widget = new BoundaryTests.NestedWidget();
-                widget.DoStuff();
+                await widget.DoStuffAsync();
             }
 
             Assert.That(log.Single(e => e.EventType == TraceEventType.Start).CallingType,
@@ -94,31 +93,31 @@ namespace Its.Log.Instrumentation.UnitTests
         }
 
         [Test]
-        public void from_instance_method_show_correct_CallingMethod()
+        public async Task from_instance_method_show_correct_CallingMethod()
         {
             var log = new List<LogEntry>();
 
             using (Log.Events().Subscribe(log.Add))
             {
                 var widget = new Widget();
-                widget.DoStuff("hello");
+                await widget.DoStuffAsync("hello");
             }
 
             Assert.That(log.Single(e => e.EventType == TraceEventType.Start).CallingMethod,
-                        Is.EqualTo("DoStuff"));
+                        Is.EqualTo("DoStuffAsync"));
             Assert.That(log.Single(e => e.EventType == TraceEventType.Stop).CallingMethod,
-                        Is.EqualTo("DoStuff"));
+                        Is.EqualTo("DoStuffAsync"));
         }
 
         [Test]
-        public void from_instance_method_show_correct_CallingType()
+        public async Task from_instance_method_show_correct_CallingType()
         {
             var log = new List<LogEntry>();
 
             using (Log.Events().Subscribe(log.Add))
             {
                 var widget = new Widget();
-                widget.DoStuff("hello");
+                await widget.DoStuffAsync("hello");
             }
 
             Assert.That(log.Single(e => e.EventType == TraceEventType.Start).CallingType,
@@ -128,29 +127,29 @@ namespace Its.Log.Instrumentation.UnitTests
         }
 
         [Test]
-        public void from_static_method_in_nested_class_show_correct_CallingMethod()
+        public async Task from_static_method_in_nested_class_show_correct_CallingMethod()
         {
             var log = new List<LogEntry>();
 
             using (Log.Events().Subscribe(log.Add))
             {
-                BoundaryTests.NestedWidget.DoStuffStatically();
+                await BoundaryTests.NestedWidget.DoStuffStaticallyAsync();
             }
 
             Assert.That(log.Single(e => e.EventType == TraceEventType.Start).CallingMethod,
-                        Is.EqualTo("DoStuffStatically"));
+                        Is.EqualTo("DoStuffStaticallyAsync"));
             Assert.That(log.Single(e => e.EventType == TraceEventType.Stop).CallingMethod,
-                        Is.EqualTo("DoStuffStatically"));
+                        Is.EqualTo("DoStuffStaticallyAsync"));
         }
 
         [Test]
-        public void from_static_method_in_nested_class_show_correct_CallingType()
+        public async Task from_static_method_in_nested_class_show_correct_CallingType()
         {
             var log = new List<LogEntry>();
 
             using (Log.Events().Subscribe(log.Add))
             {
-                BoundaryTests.NestedWidget.DoStuffStatically();
+                await BoundaryTests.NestedWidget.DoStuffStaticallyAsync();
             }
 
             Assert.That(log.Single(e => e.EventType == TraceEventType.Start).CallingType,
@@ -160,31 +159,31 @@ namespace Its.Log.Instrumentation.UnitTests
         }
 
         [Test]
-        public void from_static_method_show_correct_CallingMethod()
+        public async Task from_static_method_show_correct_CallingMethod()
         {
             string param = Guid.NewGuid().ToString();
             var log = new List<LogEntry>();
 
             using (Log.Events().Subscribe(log.Add))
             {
-                Widget.DoStuffStatically(param);
+                await Widget.DoStuffStaticallyAsync(param);
             }
 
             Assert.That(log.Single(e => e.EventType == TraceEventType.Start).CallingMethod,
-                        Is.EqualTo("DoStuffStatically"));
+                        Is.EqualTo("DoStuffStaticallyAsync"));
             Assert.That(log.Single(e => e.EventType == TraceEventType.Stop).CallingMethod,
-                        Is.EqualTo("DoStuffStatically"));
+                        Is.EqualTo("DoStuffStaticallyAsync"));
         }
 
         [Test]
-        public void from_static_method_show_correct_CallingType()
+        public async Task from_static_method_show_correct_CallingType()
         {
             string param = Guid.NewGuid().ToString();
             var log = new List<LogEntry>();
 
             using (Log.Events().Subscribe(log.Add))
             {
-                Widget.DoStuffStatically(param);
+                await Widget.DoStuffStaticallyAsync(param);
             }
 
             Assert.That(log.Single(e => e.EventType == TraceEventType.Start).CallingType,
@@ -194,31 +193,31 @@ namespace Its.Log.Instrumentation.UnitTests
         }
 
         [Test]
-        public void from_static_method_in_derived_class_show_correct_CallingMethod()
+        public async Task from_static_method_in_derived_class_show_correct_CallingMethod()
         {
             string param = Guid.NewGuid().ToString();
             var log = new List<LogEntry>();
 
             using (Log.Events().Subscribe(log.Add))
             {
-                InheritedWidget.DoStuffStatically(param);
+                await InheritedWidget.DoStuffStaticallyAsync(param);
             }
 
             Assert.That(log.Single(e => e.EventType == TraceEventType.Start).CallingMethod,
-                        Is.EqualTo("DoStuffStatically"));
+                        Is.EqualTo("DoStuffStaticallyAsync"));
             Assert.That(log.Single(e => e.EventType == TraceEventType.Stop).CallingMethod,
-                        Is.EqualTo("DoStuffStatically"));
+                        Is.EqualTo("DoStuffStaticallyAsync"));
         }
 
         [Test]
-        public void from_static_method_in_derived_class_show_correct_CallingType()
+        public async Task from_static_method_in_derived_class_show_correct_CallingType()
         {
             string param = Guid.NewGuid().ToString();
             var log = new List<LogEntry>();
 
             using (Log.Events().Subscribe(log.Add))
             {
-                InheritedWidget.DoStuffStatically(param);
+                await InheritedWidget.DoStuffStaticallyAsync(param);
             }
 
             Assert.That(log.Single(e => e.EventType == TraceEventType.Start).CallingType,
@@ -228,73 +227,75 @@ namespace Its.Log.Instrumentation.UnitTests
         }
 
         [Test]
-        public void from_local_anonymous_delegate_in_non_static_class_show_correct_CallingMethod()
+        public async Task from_local_anonymous_delegate_in_non_static_class_show_correct_CallingMethod()
         {
             var log = new List<LogEntry>();
-            var action = new Action(() =>
+            var action = new Func<Task>(async () =>
             {
                 using (Log.Enter(() => { }))
                 {
+                    await Task.Run(() => Console.WriteLine("hello"));
                 }
             });
 
             using (Log.Events().Subscribe(log.Add))
             {
-                action();
+                await action();
             }
 
             Assert.That(log.Single(e => e.EventType == TraceEventType.Start).CallingMethod,
-                        Is.EqualTo(MethodBase.GetCurrentMethod().Name));
+                        Is.EqualTo("from_local_anonymous_delegate_in_non_static_class_show_correct_CallingMethod"));
             Assert.That(log.Single(e => e.EventType == TraceEventType.Stop).CallingMethod,
-                        Is.EqualTo(MethodBase.GetCurrentMethod().Name));
+                        Is.EqualTo("from_local_anonymous_delegate_in_non_static_class_show_correct_CallingMethod"));
         }
 
         [Test]
-        public void from_local_anonymous_delegate_in_non_static_class_show_correct_CallingType()
+        public async Task from_local_anonymous_delegate_in_non_static_class_show_correct_CallingType()
         {
             var log = new List<LogEntry>();
-            var action = new Action(() =>
+            var action = new Func<Task>(async () =>
             {
                 using (Log.Enter(() => { }))
                 {
+                    await Task.Run(() => Console.WriteLine("hello"));
                 }
             });
 
             using (Log.Events().Subscribe(log.Add))
             {
-                action();
+                await action();
             }
 
             Assert.That(log.Single(e => e.EventType == TraceEventType.Start).CallingType,
-                        Is.EqualTo(typeof (Log_Enter_and_Exit_call_source)));
+                        Is.EqualTo(typeof (Log_Enter_and_Exit_call_source_async)));
             Assert.That(log.Single(e => e.EventType == TraceEventType.Stop).CallingType,
-                        Is.EqualTo(typeof (Log_Enter_and_Exit_call_source)));
+                        Is.EqualTo(typeof (Log_Enter_and_Exit_call_source_async)));
         }
 
         [Test]
-        public void from_local_anonymous_delegate_in_static_class_show_correct_CallingMethod()
+        public async Task from_local_anonymous_delegate_in_static_class_show_correct_CallingMethod()
         {
             var log = new List<LogEntry>();
 
             using (Log.Events().Subscribe(log.Add))
             {
-                new Widget().ExtensionWithLoggingInLocallyScopedLambda();
+                await new Widget().ExtensionWithLoggingInLocallyScopedAsyncLambdaAsync();
             }
 
             Assert.That(log.Single(e => e.EventType == TraceEventType.Start).CallingMethod,
-                        Is.EqualTo("ExtensionWithLoggingInLocallyScopedLambda"));
+                        Is.EqualTo("ExtensionWithLoggingInLocallyScopedAsyncLambdaAsync"));
             Assert.That(log.Single(e => e.EventType == TraceEventType.Stop).CallingMethod,
-                        Is.EqualTo("ExtensionWithLoggingInLocallyScopedLambda"));
+                        Is.EqualTo("ExtensionWithLoggingInLocallyScopedAsyncLambdaAsync"));
         }
 
         [Test]
-        public void from_local_anonymous_delegate_in_static_class_show_correct_CallingType()
+        public async Task from_local_anonymous_delegate_in_static_class_show_correct_CallingType()
         {
             var log = new List<LogEntry>();
 
             using (Log.Events().Subscribe(log.Add))
             {
-                new Widget().ExtensionWithLoggingInLocallyScopedLambda();
+                await new Widget().ExtensionWithLoggingInLocallyScopedAsyncLambdaAsync();
             }
 
             Assert.That(log.Single(e => e.EventType == TraceEventType.Start).CallingType,
@@ -302,15 +303,15 @@ namespace Its.Log.Instrumentation.UnitTests
             Assert.That(log.Single(e => e.EventType == TraceEventType.Stop).CallingType,
                         Is.EqualTo(typeof (WidgetExtensions)));
         }
-        
+
         [Test]
-        public void from_static_anonymous_delegate_in_static_class_show_ctor_as_CallingMethod()
+        public async Task from_static_anonymous_delegate_in_static_class_show_ctor_as_CallingMethod()
         {
             var log = new List<LogEntry>();
 
             using (Log.Events().Subscribe(log.Add))
             {
-                new Widget().ExtensionWithLoggingInStaticallyScopedLambda();
+                await new Widget().ExtensionWithLoggingInStaticallyScopedAsyncLambdaAsync();
             }
 
             Assert.That(log.Single(e => e.EventType == TraceEventType.Start).CallingMethod,
@@ -320,64 +321,19 @@ namespace Its.Log.Instrumentation.UnitTests
         }
 
         [Test]
-        public void from_static_anonymous_delegate_in_static_class_show_correct_CallingType()
+        public async Task from_static_anonymous_delegate_in_static_class_show_correct_CallingType()
         {
             var log = new List<LogEntry>();
 
             using (Log.Events().Subscribe(log.Add))
             {
-                new Widget().ExtensionWithLoggingInLocallyScopedLambda();
+                await new Widget().ExtensionWithLoggingInLocallyScopedAsyncLambdaAsync();
             }
 
             Assert.That(log.Single(e => e.EventType == TraceEventType.Start).CallingType,
                         Is.EqualTo(typeof (WidgetExtensions)));
             Assert.That(log.Single(e => e.EventType == TraceEventType.Stop).CallingType,
                         Is.EqualTo(typeof (WidgetExtensions)));
-        }
-
-        [Test]
-        public void from_class_nested_within_a_generic_class_shows_correct_CallingType()
-        {
-            var log = new List<LogEntry>();
-
-            using (Log.Events().Subscribe(log.Add))
-            {
-                Console.WriteLine(new Generic<int>.Nested().Value);
-            }
-
-            log.Should().OnlyContain(e => e.CallingType == typeof (Generic<int>.Nested));
-        }
-
-        [Test]
-        public void from_class_nested_within_a_generic_class_shows_correct_CallingMethod()
-        {
-            var log = new List<LogEntry>();
-
-            using (Log.Events().Subscribe(log.Add))
-            {
-                Console.WriteLine(new Generic<int>.Nested().Value);
-            }
-
-            log.Should().OnlyContain(e => e.CallingMethod == "get_Value");
-        }
-
-        public class Generic<T>
-        {
-            public class Nested
-            {
-                private int value;
-
-                public int Value
-                {
-                    get
-                    {
-                        using (Log.Enter(() => {}))
-                        {
-                            return value;
-                        }
-                    }
-                }
-            }
         }
     }
 }

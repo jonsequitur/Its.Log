@@ -8,6 +8,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 using System.Web;
+using Its.Recipes;
 
 namespace Its.Log.Instrumentation
 {
@@ -19,7 +20,11 @@ namespace Its.Log.Instrumentation
         private static readonly string processStartTime = new DateTimeOffset(Process.GetCurrentProcess().StartTime).ToString("o");
         private static readonly int processId = Process.GetCurrentProcess().Id;
 
-        private static readonly string location = Assembly.GetExecutingAssembly().CodeBase.Maybe(c => c.Remove(c.LastIndexOf("/", StringComparison.InvariantCultureIgnoreCase)));
+        private static readonly string location = Assembly.GetExecutingAssembly()
+                                                          .CodeBase
+                                                          .IfNotNull()
+                                                          .Then(c => c.Remove(c.LastIndexOf("/", StringComparison.InvariantCultureIgnoreCase)))
+                                                          .ElseDefault();
 
         /// <summary>
         ///   Returns diagnostic information related to the deployed application.
