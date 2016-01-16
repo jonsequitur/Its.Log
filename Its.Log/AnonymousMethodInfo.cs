@@ -43,13 +43,11 @@ namespace Its.Log.Instrumentation
 
             if (declaringType.IsCompilerGenerated() &&
                 (declaringType
-                    ?.DeclaringType
-                    ?.IsGenericTypeDefinition)
-                    .IfNotNull()
-                    .ElseDefault())
+                          ?.DeclaringType
+                          ?.IsGenericTypeDefinition ?? false))
             {
                 EnclosingType = declaringType
-                    ?.DeclaringType
+                    .DeclaringType
                     ?.MakeGenericType(declaringType.GenericTypeArguments);
             }
             else
@@ -57,7 +55,7 @@ namespace Its.Log.Instrumentation
                 EnclosingType = declaringType;
             }
 
-            while (EnclosingType.DeclaringType != null &&
+            while (EnclosingType?.DeclaringType != null &&
                    EnclosingType.IsCompilerGenerated())
             {
                 EnclosingType = EnclosingType.DeclaringType;
