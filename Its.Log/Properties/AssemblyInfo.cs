@@ -2,7 +2,6 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
@@ -13,8 +12,8 @@ using System.Runtime.InteropServices;
 
 
 [assembly: AssemblyVersion("2.7.0.0")]
-[assembly: AssemblyFileVersion("2.9.11")]
-
+[assembly: AssemblyFileVersion("2.9.12")]
+[assembly: AssemblyInformationalVersion("2.9.12")]
 
 [assembly: AssemblyTrademark("Microsoft and Windows are registered trademarks of Microsoft Corporation.")]
 [assembly: AssemblyDelaySign(false)]
