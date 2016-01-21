@@ -81,12 +81,18 @@ namespace Pocket
                 }
                 catch (TypeInitializationException ex)
                 {
-                    throw new ArgumentException(string.Format("PocketContainer can't construct a {0} unless you register it first. ☹", typeof (T)), ex);
+                    throw OnFailedResolve(typeof(T), ex);
                 }
 
                 return c => defaultFactory(c);
             })(this);
         }
+
+        /// <summary>
+        /// Returns an exception to be thrown when resolve fails.
+        /// </summary>
+        public Func<Type, Exception, Exception> OnFailedResolve = (type, exception) =>
+            new ArgumentException(string.Format("PocketContainer can't construct a {0} unless you register it first. ☹", type), exception);
 
         /// <summary>
         /// Resolves an instance of the specified type.
@@ -179,8 +185,8 @@ namespace Pocket
             var delegateType = typeof (Func<,>).MakeGenericType(typeof (PocketContainer), resultType);
             var body = Expression.Convert(call, resultType);
             var expression = Expression.Lambda(delegateType,
-                                               body,
-                                               new[] { containerParam });
+                                               body, 
+                                               containerParam);
             return expression.Compile();
         }
 
@@ -193,6 +199,11 @@ namespace Pocket
         {
             public static Func<PocketContainer, T> UsingLongestConstructor<T>()
             {
+                if (typeof(Delegate).IsAssignableFrom(typeof(T)))
+                {
+                    throw new TypeInitializationException(typeof(T).FullName, null);
+                }
+
                 var ctors = typeof (T).GetConstructors();
 
                 var longestCtorParamCount = ctors.Max(c => c.GetParameters().Count());
