@@ -3,7 +3,6 @@
 
 using System;
 using System.Collections;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
@@ -240,9 +239,9 @@ namespace Its.Log.Instrumentation
                 this.elapsedMilliseconds = elapsedMilliseconds;
             }
 
-            public Func<object> Accessor { get; private set; }
+            private Func<object> Accessor { get; set; }
 
-            public object ResolvedValue
+            internal object ResolvedValue
             {
                 get
                 {
