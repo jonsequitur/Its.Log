@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 using FluentAssertions;
 using Its.Log.Instrumentation.Extensions;
 using Its.Recipes;
@@ -178,6 +179,7 @@ namespace Its.Log.Instrumentation.UnitTests
             // FIX (EventType_can_be_serialized_as_a_string) write test
             Assert.Fail("Test not written yet.");
         }
+
 
         private static void WriteSomeLogs(string log)
         {
