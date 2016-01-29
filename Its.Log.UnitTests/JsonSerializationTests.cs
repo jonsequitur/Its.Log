@@ -201,7 +201,7 @@ namespace Its.Log.Instrumentation.UnitTests
                     response.yes
                 });
             }
-            Console.WriteLine(  log);
+            Console.WriteLine(log);
             log.Should().NotContain("this should not be in the log output");
         }
 
