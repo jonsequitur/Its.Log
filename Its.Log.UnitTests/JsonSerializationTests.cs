@@ -7,6 +7,8 @@ using System.Diagnostics;
 using System.IO;
 using FluentAssertions;
 using System.Linq;
+using System.Threading.Tasks;
+using FluentAssertions;
 using Its.Log.Instrumentation.Extensions;
 using Its.Recipes;
 using Newtonsoft.Json;
@@ -201,7 +203,7 @@ namespace Its.Log.Instrumentation.UnitTests
                     response.yes
                 });
             }
-            Console.WriteLine(  log);
+            Console.WriteLine(log);
             log.Should().NotContain("this should not be in the log output");
         }
 

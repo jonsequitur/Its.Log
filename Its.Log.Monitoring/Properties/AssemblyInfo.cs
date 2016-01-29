@@ -5,7 +5,6 @@ using System.Reflection;
 using System.Runtime.InteropServices;
 
 [assembly: AssemblyVersion("1.0.0.0")]
-[assembly: AssemblyFileVersion("1.8.7-beta")]
 [assembly: AssemblyInformationalVersion("1.8.7-beta")]
 
 // General Information about an assembly is controlled through the following 
