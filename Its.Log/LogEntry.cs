@@ -353,13 +353,13 @@ namespace Its.Log.Instrumentation
         /// If a log entry is part of a log activity, gets the objects passed to Confirm.
         /// </summary>
         [FormatterIgnores]
-        public IEnumerable<object> Confirmations
+        internal IEnumerable<object> Confirmations
         {
             get
             {
                 return confirmations ?? (confirmations = Enumerable.Empty<object>());
             }
-            internal set
+            set
             {
                 confirmations = value;
             }
