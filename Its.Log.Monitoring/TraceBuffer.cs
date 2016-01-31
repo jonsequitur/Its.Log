@@ -20,27 +20,15 @@ namespace Its.Log.Monitoring
 
         public bool HasContent { get; private set; }
 
-        public override string ToString()
-        {
-            return buffer.ToString();
-        }
+        public override string ToString() => buffer.ToString();
 
-        public static TraceBuffer Current
-        {
-            get
-            {
-                return CallContext.LogicalGetData(TraceBufferKey) as TraceBuffer;
-            }
-        }
+        public static TraceBuffer Current =>
+            CallContext.LogicalGetData(TraceBufferKey) as TraceBuffer;
 
-        internal static void Initialize()
-        {
+        internal static void Initialize() =>
             CallContext.LogicalSetData(TraceBufferKey, new TraceBuffer());
-        }
 
-        internal static void Clear()
-        {
+        internal static void Clear() =>
             CallContext.LogicalSetData(TraceBufferKey, null);
-        }
     }
 }

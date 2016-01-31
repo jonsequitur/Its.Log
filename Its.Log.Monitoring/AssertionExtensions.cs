@@ -62,10 +62,8 @@ namespace Its.Log.Monitoring
 
         public static async Task<HttpResponseMessage> ShouldSucceedAsync(
             this Task<HttpResponseMessage> response,
-            HttpStatusCode? expected = null)
-        {
-            return (await response).ShouldSucceed(expected);
-        }
+            HttpStatusCode? expected = null) =>
+                (await response).ShouldSucceed(expected);
 
         public static HttpResponseMessage ShouldFailWith(
             this HttpResponseMessage response,
@@ -81,10 +79,8 @@ namespace Its.Log.Monitoring
 
         public static async Task<HttpResponseMessage> ShouldFailWithAsync(
             this Task<HttpResponseMessage> response,
-            HttpStatusCode code)
-        {
-            return (await response).ShouldFailWith(code);
-        }
+            HttpStatusCode code) =>
+                (await response).ShouldFailWith(code);
 
         private static void ThrowVerboseAssertion(HttpResponseMessage response)
         {

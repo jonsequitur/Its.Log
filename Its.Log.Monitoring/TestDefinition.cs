@@ -11,13 +11,7 @@ namespace Its.Log.Monitoring
     {
         public abstract string TestName { get; }
 
-        public string RouteName
-        {
-            get
-            {
-                return "Its-Log-Monitoring-Test-" + TestName;
-            }
-        }
+        public string RouteName => "Its-Log-Monitoring-Test-" + TestName;
 
         public string RouteTemplate { get; set; }
 

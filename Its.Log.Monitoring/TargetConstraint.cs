@@ -19,10 +19,8 @@ namespace Its.Log.Monitoring
             }
         }
 
-        protected override bool Match(TestTarget target, HttpRequestMessage _)
-        {
-            return Match(target);
-        }
+        protected override bool Match(TestTarget target, HttpRequestMessage _) =>
+            Match(target);
 
         internal bool Match(TestTarget target)
         {
@@ -31,7 +29,7 @@ namespace Its.Log.Monitoring
                 return true;
             }
 
-            var key = string.Format("{0}({1}:{2}):{3}", "TargetConstraint:", target.Environment, target.Application, TestDefinition.TestType);
+            var key = $"{"TargetConstraint:"}({target.Environment}:{target.Application}):{TestDefinition.TestType}";
 
             Func<bool> resolve = () =>
             {

@@ -18,10 +18,8 @@ namespace Its.Log.Monitoring
         /// Occurs before the action method is invoked.
         /// </summary>
         /// <param name="actionContext">The action context.</param>
-        public override void OnActionExecuting(HttpActionContext actionContext)
-        {
+        public override void OnActionExecuting(HttpActionContext actionContext) =>
             TraceBuffer.Initialize();
-        }
 
         public override async Task OnActionExecutedAsync(HttpActionExecutedContext actionExecutedContext, CancellationToken cancellationToken)
         {
@@ -57,16 +55,19 @@ namespace Its.Log.Monitoring
             }
         }
 
+        /// <summary>
+        /// Gets a value that indicates whether multiple filters are allowed.
+        /// </summary>
+        /// <returns>
+        /// true if multiple filters are allowed; otherwise, false.
+        /// </returns>
         public override bool AllowMultiple => false;
 
         internal class TraceListener : System.Diagnostics.TraceListener
         {
             public static readonly TraceListener Instance = new TraceListener();
 
-            public override void Write(string message)
-            {
-                WriteLine(message);
-            }
+            public override void Write(string message) => WriteLine(message);
 
             public override void WriteLine(string message)
             {
