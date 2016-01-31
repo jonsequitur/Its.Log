@@ -7,7 +7,7 @@ namespace Its.Log.Instrumentation
 {
     internal struct NullLogActivity : ILogActivity
     {
-        public static readonly NullLogActivity Instance;
+        public static readonly NullLogActivity Instance = new NullLogActivity();
 
         public void Complete(Action magicBarbell)
         {

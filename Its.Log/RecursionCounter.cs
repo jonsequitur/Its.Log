@@ -12,13 +12,7 @@ namespace Its.Log.Instrumentation
         [ThreadStatic]
         private static int depth = 0;
 
-        public int Depth
-        {
-            get
-            {
-                return depth;
-            }
-        }
+        public int Depth => depth;
 
         public IDisposable Enter()
         {
@@ -26,9 +20,6 @@ namespace Its.Log.Instrumentation
             return this;
         }
 
-        public void Dispose()
-        {
-            depth -= 1;
-        }
+        public void Dispose() => depth -= 1;
     }
 }

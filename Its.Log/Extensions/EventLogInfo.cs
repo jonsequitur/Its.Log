@@ -25,8 +25,14 @@ namespace Its.Log.Instrumentation.Extensions
             EntryType = EventLogEntryType.Information;
         }
 
+        /// <summary>
+        /// Gets or sets the type of the event log entry.
+        /// </summary>
         public EventLogEntryType EntryType { get; set; }
 
+        /// <summary>
+        /// Gets or sets the event identifier.
+        /// </summary>
         public int EventId { get; set; }
     }
 }

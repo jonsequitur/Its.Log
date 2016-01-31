@@ -20,50 +20,23 @@ namespace Its.Log.Instrumentation
         {
         }
 
-        public void WriteStartObject(TextWriter writer)
-        {
-            writer.Write(OpeningDelimiter);
-        }
+        public void WriteStartObject(TextWriter writer) => writer.Write(OpeningDelimiter);
 
-        public void WriteEndObject(TextWriter writer)
-        {
-            writer.Write(ClosingDelimiter);
-        }
+        public void WriteEndObject(TextWriter writer) => writer.Write(ClosingDelimiter);
 
-        public void WriteStartSequence(TextWriter writer)
-        {
-            writer.Write(OpeningDelimiter);
-        }
+        public void WriteStartSequence(TextWriter writer) => writer.Write(OpeningDelimiter);
 
-        public void WriteEndSequence(TextWriter writer)
-        {
-            writer.Write(ClosingDelimiter);
-        }
+        public void WriteEndSequence(TextWriter writer) => writer.Write(ClosingDelimiter);
 
-        public void WriteNameValueDelimiter(TextWriter writer)
-        {
-            writer.Write(" = ");
-        }
+        public void WriteNameValueDelimiter(TextWriter writer) => writer.Write(" = ");
 
-        public void WritePropertyDelimiter(TextWriter writer)
-        {
-            writer.Write(PropertySeparator);
-        }
+        public void WritePropertyDelimiter(TextWriter writer) => writer.Write(PropertySeparator);
 
-        public void WriteSequenceDelimiter(TextWriter writer)
-        {
-            writer.Write(ItemSeparator);
-        }
+        public void WriteSequenceDelimiter(TextWriter writer) => writer.Write(ItemSeparator);
 
-        public void WriteLogEntryHeader(LogEntry entry, TextWriter writer)
-        {
-            writer.Write(entry.EventType);
-        }
+        public void WriteLogEntryHeader(LogEntry entry, TextWriter writer) => writer.Write(entry.EventType);
 
-        public void WriteEndHeader(TextWriter writer)
-        {
-            writer.Write(": ");
-        }
+        public void WriteEndHeader(TextWriter writer) => writer.Write(": ");
 
         public void WriteStartSequenceItem(TextWriter writer)
         {

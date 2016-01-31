@@ -50,21 +50,9 @@ namespace Its.Log.Instrumentation.Extensions
         /// Gets the parameter values.
         /// </summary>
         /// <remarks><see cref="Values" /> returns the current parameter vales at the time the method is called. These values may have been changed since the <see cref="Params{TAnonymous}" /> instance or containing <see cref="LogEntry" /> was created.</remarks>
-        public object Values
-        {
-            get
-            {
-                return paramsAccessor();
-            }
-        }
+        public object Values => paramsAccessor();
 
-        internal override Delegate ParamsAccessor
-        {
-            get
-            {
-                return paramsAccessor;
-            }
-        }
+        internal override Delegate ParamsAccessor => paramsAccessor;
 
         /// <summary>
         /// Returns a <see cref="System.String"/> that represents this instance.
@@ -72,14 +60,8 @@ namespace Its.Log.Instrumentation.Extensions
         /// <returns>
         /// A <see cref="System.String"/> that represents this instance.
         /// </returns>
-        public override string ToString()
-        {
-            return this.ToLogString();
-        }
+        public override string ToString() => this.ToLogString();
 
-        internal void SetAccessor(Func<TAnonymous> accessor)
-        {
-            paramsAccessor = accessor;
-        }
+        internal void SetAccessor(Func<TAnonymous> accessor) => paramsAccessor = accessor;
     }
 }

@@ -45,24 +45,15 @@ namespace Its.Log.Instrumentation
             Indent();
         }
 
-        public void WriteNameValueDelimiter(TextWriter writer)
-        {
-            writer.Write(": ");
-        }
+        public void WriteNameValueDelimiter(TextWriter writer) => writer.Write(": ");
 
         public void WritePropertyDelimiter(TextWriter writer)
         {
         }
 
-        public void WriteSequenceDelimiter(TextWriter writer)
-        {
-            WriteLine(writer);
-        }
+        public void WriteSequenceDelimiter(TextWriter writer) => WriteLine(writer);
 
-        private void WriteLine(TextWriter writer)
-        {
-            writer.WriteLine();
-        }
+        private void WriteLine(TextWriter writer) => writer.WriteLine();
 
         public void WriteStartObject(TextWriter writer)
         {
@@ -80,19 +71,10 @@ namespace Its.Log.Instrumentation
             Indent();
         }
 
-        private void Indent()
-        {
-            indentLevel++;
-        }
+        private void Indent() => indentLevel++;
 
-        private void Unindent()
-        {
-            indentLevel--;
-        }
+        private void Unindent() => indentLevel--;
 
-        private void WriteIndent(TextWriter writer)
-        {
-            writer.Write(new string('\t', indentLevel));
-        }
+        private void WriteIndent(TextWriter writer) => writer.Write(new string('\t', indentLevel));
     }
 }

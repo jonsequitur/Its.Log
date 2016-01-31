@@ -70,10 +70,7 @@ namespace Its.Log.Instrumentation
         /// <summary>
         ///   Clears all formatters in the <see cref = "FormatterSet" />.
         /// </summary>
-        public void Clear()
-        {
-            Formatter.ResetToDefault();
-        }
+        public void Clear() => Formatter.ResetToDefault();
 
         /// <summary>
         /// Dynamically generates a formatter function that will output the specified properties of objects of type <typeparamref name="T"/> as a string.
@@ -115,10 +112,7 @@ namespace Its.Log.Instrumentation
         /// </summary>
         /// <param name = "obj">The object to be formatted.</param>
         /// <returns>A string representation of the object.</returns>
-        public string Format<T>(T obj)
-        {
-            return obj.ToLogString();
-        }
+        public string Format<T>(T obj) => obj.ToLogString();
 
         /// <summary>
         ///   Registers a formatter function for the specified <see cref = "Type" /> <typeparamref name = "T" />.
@@ -138,10 +132,8 @@ namespace Its.Log.Instrumentation
         /// <typeparam name="T">The <see cref="Type"/> targeted by the formatter function.</typeparam>
         /// <param name="members">An array of MemberExpressions specifying the members to include in formatting.</param>
         /// <returns></returns>
-        public FormatterSet RegisterPropertiesFormatter<T>(params Expression<Func<T, object>>[] members)
-        {
-            return RegisterFormatter(CreateFormatterFor(members));
-        }
+        public FormatterSet RegisterPropertiesFormatter<T>(params Expression<Func<T, object>>[] members) =>
+            RegisterFormatter(CreateFormatterFor(members));
 
         /// <summary>
         ///   Registers an auto-generated formatter function for the specified <see cref = "Type" /> <typeparamref name = "T" />.

@@ -17,13 +17,12 @@ namespace Its.Log.Instrumentation
     /// <typeparam name="T">The type for which formatting is provided.</typeparam>
     public static class Formatter<T>
     {
-        private static Action<T, TextWriter> @default = WriteDefault;
         private static readonly bool isAnonymous = typeof (T).IsAnonymous();
         private static Action<T, TextWriter> Custom;
         private static readonly bool isException = typeof (Exception).IsAssignableFrom(typeof (T));
         private static readonly bool writeHeader = !isAnonymous && typeof (T).BaseType != typeof (Params);
         private static readonly bool isLogEntry = typeof (LogEntry).IsAssignableFrom(typeof (T));
-        private static int? listExpansionLimit = null;
+        private static int? listExpansionLimit;
 
         /// <summary>
         /// Initializes the <see cref="Formatter&lt;T&gt;"/> class.
@@ -33,36 +32,25 @@ namespace Its.Log.Instrumentation
             Formatter.Clearing += (o, e) => Custom = null;
         }
 
-        public static Action<T, TextWriter> Default
-        {
-            get
-            {
-                return @default;
-            }
-            set
-            {
-                @default = value;
-            }
-        }
+        /// <summary>
+        /// Gets or sets the default formatter for type <typeparamref name="T" />.
+        /// </summary>
+        public static Action<T, TextWriter> Default { get; set; } = WriteDefault;
 
         /// <summary>
         /// Generates a formatter action that will write out all properties and fields from instances of type <typeparamref name="T" />.
         /// </summary>
         /// <param name="includeInternals">if set to <c>true</c> include internal and private members.</param>
-        public static Action<T, TextWriter> GenerateForAllMembers(bool includeInternals = false)
-        {
-            return CreateCustom(typeof (T).GetAllMembers(includeInternals).ToArray());
-        }
+        public static Action<T, TextWriter> GenerateForAllMembers(bool includeInternals = false) =>
+            CreateCustom(typeof (T).GetAllMembers(includeInternals).ToArray());
 
         /// <summary>
         /// Generates a formatter action that will write out all properties and fields from instances of type <typeparamref name="T"/>.
         /// </summary>
         /// <param name="members">Expressions specifying the members to include in formatting.</param>
         /// <returns></returns>
-        public static Action<T, TextWriter> GenerateForMembers(params Expression<Func<T, object>>[] members)
-        {
-            return CreateCustom(typeof (T).GetMembers(members).ToArray());
-        }
+        public static Action<T, TextWriter> GenerateForMembers(params Expression<Func<T, object>>[] members) =>
+            CreateCustom(typeof (T).GetMembers(members).ToArray());
 
         /// <summary>
         /// Registers a formatter to be used when formatting instances of type <typeparamref name="T" />.
@@ -71,12 +59,13 @@ namespace Its.Log.Instrumentation
         {
             if (formatter == null)
             {
-                throw new ArgumentNullException("formatter");
+                throw new ArgumentNullException(nameof(formatter));
             }
 
             if (typeof (T) == typeof (Type))
             {
                 // special treatment is needed since typeof(Type) == System.RuntimeType, which is not public
+                // ReSharper disable once PossibleMistakenCallToGetType.2
                 Formatter.Register(typeof (Type).GetType(), (o, writer) => formatter((T) o, writer));
             }
 
@@ -86,18 +75,14 @@ namespace Its.Log.Instrumentation
         /// <summary>
         /// Registers a formatter to be used when formatting instances of type <typeparamref name="T" />.
         /// </summary>
-        public static void Register(Func<T, string> formatter)
-        {
+        public static void Register(Func<T, string> formatter) =>
             Register((obj, writer) => writer.Write(formatter(obj)));
-        }
 
         /// <summary>
         /// Registers a formatter to be used when formatting instances of type <typeparamref name="T" />.
         /// </summary>
-        public static void RegisterForAllMembers(bool includeInternals = false)
-        {
+        public static void RegisterForAllMembers(bool includeInternals = false) =>
             Register(GenerateForAllMembers(includeInternals));
-        }
 
         /// <summary>
         /// Registers a formatter to be used when formatting instances of type <typeparamref name="T" />.
@@ -164,11 +149,11 @@ namespace Its.Log.Instrumentation
                             }
                         }
                     }
-                    (Custom ?? @default)(obj, writer);
+                    (Custom ?? Default)(obj, writer);
                 }
                 else
                 {
-                    @default(obj, writer);
+                    Default(obj, writer);
                 }
             }
         }
@@ -240,8 +225,7 @@ namespace Its.Log.Instrumentation
                             continue;
                         }
 
-                        object value = accessor.GetValue(target);
-
+                        var value = accessor.GetValue(target);
 
                         if (accessor.SkipOnNull && value == null)
                         {
@@ -289,13 +273,8 @@ namespace Its.Log.Instrumentation
             }
         }
 
-        internal static bool IsCustom
-        {
-            get
-            {
-                return Custom != null || @default != WriteDefault;
-            }
-        }
+        internal static bool IsCustom =>
+            Custom != null || Default != WriteDefault;
 
         private static void WriteDefault(T obj, TextWriter writer)
         {

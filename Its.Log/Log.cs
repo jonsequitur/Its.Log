@@ -13,7 +13,8 @@ namespace Its.Log.Instrumentation
     /// </summary>
     public static class Log
     {
-        private static readonly FormatterSet formatters = new FormatterSet();
+#pragma warning disable 618
+#pragma warning restore 618
 
         /// <summary>
         ///     Occurs when a log entry is posted.
@@ -36,11 +37,14 @@ namespace Its.Log.Instrumentation
                 return;
             }
 
-            var subscribers = EntryPosted.GetInvocationList();
+            var subscribers = EntryPosted?.GetInvocationList();
 
-            foreach (var d in subscribers)
+            if (subscribers != null)
             {
-                EntryPosted -= (d as EventHandler<InstrumentationEventArgs>);
+                foreach (var d in subscribers)
+                {
+                    EntryPosted -= (d as EventHandler<InstrumentationEventArgs>);
+                }
             }
         }
 
@@ -48,10 +52,7 @@ namespace Its.Log.Instrumentation
         ///     Gets the global formatter set, which is used by <see cref="ToLogString{T}" />.
         /// </summary>
         [Obsolete("Please use the Formatter class instead.")]
-        public static FormatterSet Formatters
-        {
-            get { return formatters; }
-        }
+        public static FormatterSet Formatters { get; } = new FormatterSet();
 
         private static Func<Exception, bool> canThrowWhen = ex => ex.IsFatal();
 
@@ -95,17 +96,17 @@ namespace Its.Log.Instrumentation
         }
 
         /// <summary>
-        ///     Indicates that execution is entering a region.
+        /// Indicates that execution is entering a region.
         /// </summary>
-        /// <param name="magicBarbell">An empty anonymous method which will not be called, i.e.: ( ) => { }</param>
+        /// <param name="magicBarbell">An empty anonymous method which will not be called, i.e.: ( ) =&gt; { }</param>
+        /// <param name="requireConfirm">if set to <c>true</c>, log entries are buffered in memory and will not be emitted to subscripbers unless <see cref="ILogActivity.Confirm" /> is called.</param>
         /// <returns>
-        ///     An <see cref="ILogActivity" />.
+        /// An <see cref="ILogActivity" />.
         /// </returns>
         /// <remarks>
-        ///     The anonymous method is used to resolve the enclosing method and type without the use of a more expensive
-        ///     <see
-        ///         cref="StackFrame" />
-        ///     .
+        /// The anonymous method is used to resolve the enclosing method and type without the use of a more expensive
+        /// <see cref="StackFrame" />
+        /// .
         /// </remarks>
         public static ILogActivity Enter(Action magicBarbell, bool requireConfirm = false)
         {
@@ -126,29 +127,17 @@ namespace Its.Log.Instrumentation
         ///     Indicates that execution is exiting a region.
         /// </summary>
         /// <param name="activity">The log activity to be ended.</param>
-        public static void Exit(ILogActivity activity)
-        {
-            if (activity != null)
-            {
-                activity.Dispose();
-            }
-        }
+        public static void Exit(ILogActivity activity) => activity?.Dispose();
 
         /// <summary>
         /// Returns an observable sequence of all log entries posted to Its.Log.
         /// </summary>
-        public static IObservable<LogEntry> Events()
-        {
-            return new LogEventsObservable();
-        }
+        public static IObservable<LogEntry> Events() => new LogEventsObservable();
 
         /// <summary>
         /// Returns an observable sequence of all log entries posted to Its.Log whose handlers throw an exception.
         /// </summary>
-        public static IObservable<LogEntry> InternalErrorEvents()
-        {
-            return new LogInternalErrorsObservable();
-        }
+        public static IObservable<LogEntry> InternalErrorEvents() => new LogInternalErrorsObservable();
 
         private class LogEventsObservable : IObservable<LogEntry>
         {
@@ -194,11 +183,11 @@ namespace Its.Log.Instrumentation
         ///     Formats an object to a string based on the framework configuration for its <see cref="Type" />.
         /// </summary>
         /// <param name="obj">The object to be formatted.</param>
-        public static string ToLogString<T>(this T obj)
-        {
-            return Formatter.Format(obj);
-        }
+        public static string ToLogString<T>(this T obj) => Formatter.Format(obj);
 
+        /// <summary>
+        /// Gets an observable sequence of telemetry events.
+        /// </summary>
         public static IObservable<Telemetry> TelemetryEvents()
         {
             return new TelemetryObservable();
@@ -221,38 +210,28 @@ namespace Its.Log.Instrumentation
         /// </summary>
         /// <typeparam name="TExtension">The type of the extension.</typeparam>
         public static Extension With<TExtension>(Action<TExtension> extend)
-            where TExtension : new()
-        {
-            return new Extension().With(extend);
-        }
+            where TExtension : new() => 
+            new Extension().With(extend);
 
         /// <summary>
         ///     Adds parameters to the log entry.
         /// </summary>
         /// <param name="paramsAccessor">The parameters accessor, generally a lambda returning an anonymous method specifying the parameters to be logged.</param>
         /// <returns></returns>
-        public static Extension WithParams<T>(Func<T> paramsAccessor) where T : class
-        {
-            return With<Params<T>>(ext => ext.SetAccessor(paramsAccessor));
-        }
+        public static Extension WithParams<T>(Func<T> paramsAccessor) where T : class => 
+            With<Params<T>>(ext => ext.SetAccessor(paramsAccessor));
 
         /// <summary>
         ///     Writes the specified message to the log.
         /// </summary>
         /// <param name="message">The message to be written.</param>
-        public static void Write(string message)
-        {
-            Write(new LogEntry(message));
-        }
+        public static void Write(string message) => Write(new LogEntry(message));
 
         /// <summary>
         ///     Writes the specified object to the log.
         /// </summary>
         /// <param name="subject">The object to be written.</param>
-        public static void Write<T>(T subject)
-        {
-            Write(new LogEntry<T>(subject) as LogEntry);
-        }
+        public static void Write<T>(T subject) => Write(new LogEntry<T>(subject) as LogEntry);
 
         /// <summary>
         ///     Writes the specified object to the log.
