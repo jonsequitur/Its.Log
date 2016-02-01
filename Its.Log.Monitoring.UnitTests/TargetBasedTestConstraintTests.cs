@@ -65,6 +65,8 @@ namespace Its.Log.Monitoring.UnitTests
 
             JArray tests = response.JsonContent().Tests;
 
+            Console.WriteLine(tests);
+
             tests.Should().Contain(t => t.Value<string>("Url").Contains("target_based_constraint_test"));
         }
 
@@ -108,7 +110,7 @@ namespace Its.Log.Monitoring.UnitTests
         {
             if (httpClient == null)
             {
-                throw new ArgumentNullException("httpClient");
+                throw new ArgumentNullException(nameof(httpClient));
             }
             this.httpClient = httpClient;
         }
