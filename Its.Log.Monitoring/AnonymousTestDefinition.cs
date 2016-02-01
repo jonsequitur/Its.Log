@@ -15,23 +15,17 @@ namespace Its.Log.Monitoring
         {
             if (testName == null)
             {
-                throw new ArgumentNullException("testName");
+                throw new ArgumentNullException(nameof(testName));
             }
             if (run == null)
             {
-                throw new ArgumentNullException("run");
+                throw new ArgumentNullException(nameof(run));
             }
             this.testName = testName;
             this.run = run;
         }
 
-        public override string TestName
-        {
-            get
-            {
-                return testName;
-            }
-        }
+        public override string TestName => testName;
 
         internal override dynamic Run(HttpActionContext actionContext, Func<Type, object> resolver = null)
         {

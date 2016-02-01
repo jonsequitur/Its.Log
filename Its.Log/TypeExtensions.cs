@@ -2,7 +2,6 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
@@ -16,7 +15,7 @@ namespace Its.Log.Instrumentation
         {
             if (type == null)
             {
-                throw new ArgumentNullException("type");
+                throw new ArgumentNullException(nameof(type));
             }
 
             return Attribute.IsDefined(type, typeof (CompilerGeneratedAttribute), false) &&
@@ -25,14 +24,9 @@ namespace Its.Log.Instrumentation
                    (type.Attributes & TypeAttributes.NotPublic) == TypeAttributes.NotPublic;
         }
 
-        public static bool IsCompilerGenerated(this Type type)
-        {
-            return Attribute.IsDefined(type, typeof (CompilerGeneratedAttribute), false);
-        }
+        public static bool IsCompilerGenerated(this Type type) => Attribute.IsDefined(type, typeof (CompilerGeneratedAttribute), false);
 
-        public static bool IsAsync(this Type type)
-        {
-            return typeof (Task).IsAssignableFrom(type);
-        }
+        public static bool IsAsync(this Type type) =>
+            typeof (Task).IsAssignableFrom(type);
     }
 }

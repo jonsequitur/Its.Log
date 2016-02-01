@@ -31,13 +31,16 @@ namespace Its.Log.Instrumentation
         {
             if (export == null)
             {
-                throw new ArgumentNullException("export");
+                throw new ArgumentNullException(nameof(export));
             }
 
             @delegate = export.CreateDelegate(typeof (Delegate));
-            name = GetName(@delegate.Method);
-            declaringType = @delegate.Method.DeclaringType;
-            returnType = @delegate.Method.ReturnType;
+            if (@delegate != null)
+            {
+                name = GetName(@delegate.Method);
+                declaringType = @delegate.Method.DeclaringType;
+                returnType = @delegate.Method.ReturnType;
+            }
 
             ValidateAndInitialize();
         }
@@ -56,19 +59,19 @@ namespace Its.Log.Instrumentation
         {
             if (returnType == null)
             {
-                throw new ArgumentNullException("returnType");
+                throw new ArgumentNullException(nameof(returnType));
             }
             if (name == null)
             {
-                throw new ArgumentNullException("name");
+                throw new ArgumentNullException(nameof(name));
             }
             if (declaringType == null)
             {
-                throw new ArgumentNullException("declaringType");
+                throw new ArgumentNullException(nameof(declaringType));
             }
             if (@delegate == null)
             {
-                throw new ArgumentNullException("delegate");
+                throw new ArgumentNullException(nameof(@delegate));
             }
 
             isAsync = returnType.IsAsync();
@@ -78,36 +81,18 @@ namespace Its.Log.Instrumentation
         ///   Gets the type on which the sensor method is declared.
         /// </summary>
         /// <value> The type of the declaring. </value>
-        public Type DeclaringType
-        {
-            get
-            {
-                return declaringType;
-            }
-        }
+        public Type DeclaringType => declaringType;
 
         /// <summary>
         ///   Gets the name of the sensor method.
         /// </summary>
-        public string Name
-        {
-            get
-            {
-                return name;
-            }
-        }
+        public string Name => name;
 
         /// <summary>
         ///   Gets the return type of the sensor method.
         /// </summary>
         /// <value> The type of the return. </value>
-        public Type ReturnType
-        {
-            get
-            {
-                return returnType;
-            }
-        }
+        public Type ReturnType => returnType;
 
         /// <summary>
         /// Gets a value indicating whether the sensor's return value is async.
@@ -115,13 +100,7 @@ namespace Its.Log.Instrumentation
         /// <value>
         ///   <c>true</c> if the sensor is async; otherwise, <c>false</c>.
         /// </value>
-        public bool IsAsync
-        {
-            get
-            {
-                return isAsync;
-            }
-        }
+        public bool IsAsync => isAsync;
 
         /// <summary>
         ///   Reads the sensor and returns its value.
@@ -151,46 +130,46 @@ namespace Its.Log.Instrumentation
         /// <summary>
         /// Discovers sensors found in all loaded assemblies.
         /// </summary>
-        public static ConcurrentDictionary<string, DiagnosticSensor> Discover()
-        {
-            return AppDomain.CurrentDomain
-                .GetAssemblies()
-                .Where(a => !a.IsDynamic && !a.GlobalAssemblyCache)
-                .SelectMany(a =>
-                {
-                    try
-                    {
-                        return new CompositionContainer(new AggregateCatalog(new AssemblyCatalog(a)))
-                            .GetExports<object>("DiagnosticSensor")
-                            .Select(lazy => lazy.Value)
-                            .OfType<ExportedDelegate>()
-                            .Select(sensorMethod => new DiagnosticSensor(sensorMethod));
-                    }
-                    catch (Exception ex)
-                    {
-                        if (ex is TypeLoadException || ex is ReflectionTypeLoadException || ex is FileNotFoundException ||
-                            ex is FileLoadException)
-                        {
-                            return new[]
-                            {
-                                new DiagnosticSensor(typeof (Exception),
-                                    "AssemblyLoadError-" + a.FullName,
-                                    typeof (DiagnosticSensor),
-                                    new Func<Exception>(() => ex))
-                            };
-                        }
-                        throw;
-                    }
-                })
-                .OrderBy(sensor => sensor.Name)
-                .ThenBy(sensor => sensor.DeclaringType.Assembly.FullName)
-                .Aggregate(new ConcurrentDictionary<string, DiagnosticSensor>(), (sensors, sensor) =>
-                {
-                    // FIX: (Discover) we should be graceful about collisions or deterministic about ordering
-                    sensors[sensor.Name] = sensor;
-                    return sensors;
-                });
-        }
+        public static ConcurrentDictionary<string, DiagnosticSensor> Discover() =>
+            AppDomain.CurrentDomain
+                     .GetAssemblies()
+                     .Where(a => !a.IsDynamic && !a.GlobalAssemblyCache)
+                     .SelectMany(a =>
+                     {
+                         try
+                         {
+                             return new CompositionContainer(new AggregateCatalog(new AssemblyCatalog(a)))
+                                 .GetExports<object>("DiagnosticSensor")
+                                 .Select(lazy => lazy.Value)
+                                 .OfType<ExportedDelegate>()
+                                 .Select(sensorMethod => new DiagnosticSensor(sensorMethod));
+                         }
+                         catch (Exception ex)
+                         {
+                             if (ex is TypeLoadException ||
+                                 ex is ReflectionTypeLoadException ||
+                                 ex is FileNotFoundException ||
+                                 ex is FileLoadException)
+                             {
+                                 return new[]
+                                 {
+                                     new DiagnosticSensor(typeof (Exception),
+                                                          "AssemblyLoadError-" + a.FullName,
+                                                          typeof (DiagnosticSensor),
+                                                          new Func<Exception>(() => ex))
+                                 };
+                             }
+                             throw;
+                         }
+                     })
+                     .OrderBy(sensor => sensor.Name)
+                     .ThenBy(sensor => sensor.DeclaringType.Assembly.FullName)
+                     .Aggregate(new ConcurrentDictionary<string, DiagnosticSensor>(), (sensors, sensor) =>
+                     {
+                         // FIX: (Discover) we should be graceful about collisions or deterministic about ordering
+                         sensors[sensor.Name] = sensor;
+                         return sensors;
+                     });
 
         /// <summary>
         /// Gets the name of a sensor.
@@ -213,10 +192,7 @@ namespace Its.Log.Instrumentation
         /// <summary>
         ///   Returns all of the diagnostic sensors found in the application.
         /// </summary>
-        public static IEnumerable<DiagnosticSensor> KnownSensors()
-        {
-            return allSensors.Value.Values.ToArray();
-        }
+        public static IEnumerable<DiagnosticSensor> KnownSensors() => allSensors.Value.Values.ToArray();
 
         /// <summary>
         ///   Registers the specified sensor.

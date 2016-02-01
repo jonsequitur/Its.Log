@@ -33,12 +33,8 @@ namespace Its.Log.Monitoring
                                 .Then(config => config.Configuration.TestTargets().TryGet(environment, application))
                                 .ElseDefault();
 
-            if (target == null)
-            {
-                return false;
-            }
-
-            return Match(target, request);
+            return target != null &&
+                   Match(target, request);
         }
     }
 }

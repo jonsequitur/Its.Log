@@ -15,7 +15,7 @@ namespace Its.Log.Instrumentation
         {
             if (expression == null)
             {
-                throw new ArgumentNullException("expression");
+                throw new ArgumentNullException(nameof(expression));
             }
 
             var memberExpression = expression.Body as MemberExpression;
@@ -36,15 +36,13 @@ namespace Its.Log.Instrumentation
                 }
             }
 
-            throw new ArgumentException(string.Format("Expression {0} does not specify a member.", expression));
+            throw new ArgumentException($"Expression {expression} does not specify a member.");
         }
 
-        public static MemberAccessor<T>[] GetMemberAccessors<T>(this MemberInfo[] forMembers)
-        {
-            return forMembers
+        public static MemberAccessor<T>[] GetMemberAccessors<T>(this MemberInfo[] forMembers) =>
+            forMembers
                 .Select(m => new MemberAccessor<T>(m))
                 .ToArray();
-        }
 
         public static IEnumerable<MemberInfo> GetAllMembers(this Type type, bool includeInternals = false)
         {

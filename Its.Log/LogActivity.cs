@@ -26,9 +26,11 @@ namespace Its.Log.Instrumentation
         private Stopwatch stopwatch = null;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="LogActivity"/> class.
+        /// Initializes a new instance of the <see cref="LogActivity" /> class.
         /// </summary>
         /// <param name="entry">The entry.</param>
+        /// <param name="requireConfirm">if set to <c>true</c>, log entries are buffered in memory and will not be emitted to subscripbers unless <see cref="Confirm" /> is called.</param>
+        /// <param name="onComplete">The on complete.</param>
         public LogActivity(
             LogEntry entry,
             bool requireConfirm = false,
@@ -74,10 +76,7 @@ namespace Its.Log.Instrumentation
             var clone = entry.Clone(false);
             clone.EventType = TraceEventType.Stop;
 
-            if (stopwatch != null)
-            {
-                stopwatch.Stop();
-            }
+            stopwatch?.Stop();
 
             if (confirmations.IsValueCreated)
             {
@@ -86,10 +85,7 @@ namespace Its.Log.Instrumentation
                 clone.Confirmations = confirmations.Value.Select(c => c.ResolvedValue);
             }
 
-            if (onComplete != null)
-            {
-                onComplete(clone);
-            }
+            onComplete?.Invoke(clone);
 
             Write(clone);
         }
@@ -123,10 +119,7 @@ namespace Its.Log.Instrumentation
         /// <summary>
         /// Performs application-defined tasks associated with freeing, releasing, or resetting unmanaged resources.
         /// </summary>
-        public void Dispose()
-        {
-            Complete(null);
-        }
+        public void Dispose() => Complete(null);
 
         /// <summary>
         /// Gets a value indicating whether this activity is completed.
@@ -134,13 +127,7 @@ namespace Its.Log.Instrumentation
         /// <value>
         /// 	<c>true</c> if this instance is completed; otherwise, <c>false</c>.
         /// </value>
-        public bool IsCompleted
-        {
-            get
-            {
-                return isCompletedFlag == 1;
-            }
-        }
+        public bool IsCompleted => isCompletedFlag == 1;
 
         /// <summary>
         /// Writes a log message associated with the current activity.
@@ -168,10 +155,7 @@ namespace Its.Log.Instrumentation
         /// <summary>
         /// Logs variables associated with the current activity.
         /// </summary>
-        public void Trace<T>(Func<T> paramsAccessor) where T : class
-        {
-            TraceInner(paramsAccessor, false);
-        }
+        public void Trace<T>(Func<T> paramsAccessor) where T : class => TraceInner(paramsAccessor, false);
 
         /// <summary>
         /// Logs variables associated with the current activity and registers them to be logged again each time additional events are logged in the activity, so that their updated values will be recorded.
@@ -239,30 +223,16 @@ namespace Its.Log.Instrumentation
                 this.elapsedMilliseconds = elapsedMilliseconds;
             }
 
-            private Func<object> Accessor { get; set; }
+            private Func<object> Accessor { get; }
 
-            internal object ResolvedValue
-            {
-                get
-                {
-                    return value ?? (value = Accessor.InvokeSafely());
-                }
-            }
+            internal object ResolvedValue => value ?? (value = Accessor.InvokeSafely());
 
-            public override string ToString()
-            {
-                if (elapsedMilliseconds == null)
-                {
-                    return ResolvedValue.ToLogString();
-                }
+            public override string ToString() =>
+                (elapsedMilliseconds == null)
+                    ? ResolvedValue.ToLogString()
+                    : $"{ResolvedValue.ToLogString()} (@{elapsedMilliseconds}ms)";
 
-                return string.Format("{0} (@{1}ms)", ResolvedValue.ToLogString(), elapsedMilliseconds);
-            }
-
-            public override int GetHashCode()
-            {
-                return Accessor.Method.GetHashCode();
-            }
+            public override int GetHashCode() => Accessor.Method.GetHashCode();
         }
 
         private class ConfirmationList : IEnumerable<Confirmation>
@@ -292,10 +262,7 @@ namespace Its.Log.Instrumentation
                 return values.GetEnumerator();
             }
 
-            IEnumerator IEnumerable.GetEnumerator()
-            {
-                return GetEnumerator();
-            }
+            IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
         }
     }
 }

@@ -42,11 +42,11 @@ namespace Its.Log.Monitoring
         {
             if (configuration == null)
             {
-                throw new ArgumentNullException("configuration");
+                throw new ArgumentNullException(nameof(configuration));
             }
             if (authorizeRequest == null)
             {
-                throw new ArgumentNullException("authorizeRequest");
+                throw new ArgumentNullException(nameof(authorizeRequest));
             }
 
             AuthorizeSensorsAttribute.AuthorizeRequest = authorizeRequest;
@@ -86,7 +86,7 @@ namespace Its.Log.Monitoring
         {
             if (configuration == null)
             {
-                throw new ArgumentNullException("configuration");
+                throw new ArgumentNullException(nameof(configuration));
             }
 
             if (!Trace.Listeners.OfType<TracingFilter.TraceListener>().Any())
@@ -123,10 +123,7 @@ namespace Its.Log.Monitoring
             // set up test execution routes
             var targetRegistry = new TestTargetRegistry(configuration);
             configuration.TestTargetsAre(targetRegistry);
-            if (configureTargets != null)
-            {
-                configureTargets(targetRegistry);
-            }
+            configureTargets?.Invoke(targetRegistry);
 
             testTypes = testTypes ?? Discover.ConcreteTypes()
                                              .DerivedFrom(typeof (IMonitoringTest));
@@ -167,48 +164,40 @@ namespace Its.Log.Monitoring
             return configuration;
         }
 
-        internal static void RootTestUriIs(this HttpConfiguration configuration,
-                                           string uriRoot)
-        {
-            configuration.Properties["Its.Log.Monitoring.RootTestUri"] = uriRoot;
-        }
+        internal static void RootTestUriIs(
+            this HttpConfiguration configuration,
+            string uriRoot) =>
+                configuration.Properties["Its.Log.Monitoring.RootTestUri"] = uriRoot;
 
-        internal static string RootTestUri(this HttpConfiguration configuration)
-        {
-            return (string) configuration.Properties["Its.Log.Monitoring.RootTestUri"];
-        }
+        internal static string RootTestUri(
+            this HttpConfiguration configuration) =>
+                (string) configuration.Properties["Its.Log.Monitoring.RootTestUri"];
 
-        internal static void TestUiUriIs(this HttpConfiguration configuration,
-                                         string testUiUri)
-        {
-            configuration.Properties["Its.Log.Monitoring.TestUiUri"] = testUiUri;
-        }
+        internal static void TestUiUriIs(
+            this HttpConfiguration configuration,
+            string testUiUri) =>
+                configuration.Properties["Its.Log.Monitoring.TestUiUri"] = testUiUri;
 
-        internal static void TestDefinitionsAre(this HttpConfiguration configuration,
-                                                IDictionary<string, TestDefinition> testDefinitions)
-        {
-            configuration.Properties["Its.Log.Monitoring.TestDefinitions"] = testDefinitions;
-        }
+        internal static void TestDefinitionsAre(
+            this HttpConfiguration configuration,
+            IDictionary<string, TestDefinition> testDefinitions) =>
+                configuration.Properties["Its.Log.Monitoring.TestDefinitions"] = testDefinitions;
 
-        internal static TestDefinition TestDefinition(this HttpConfiguration configuration, string testName)
-        {
-            return configuration.TestDefinitions()[testName];
-        }
+        internal static TestDefinition TestDefinition(
+            this HttpConfiguration configuration,
+            string testName) =>
+                configuration.TestDefinitions()[testName];
 
-        internal static IDictionary<string, TestDefinition> TestDefinitions(this HttpConfiguration configuration)
-        {
-            return ((IDictionary<string, TestDefinition>) configuration.Properties["Its.Log.Monitoring.TestDefinitions"]);
-        }
+        internal static IDictionary<string, TestDefinition> TestDefinitions(
+            this HttpConfiguration configuration) =>
+                ((IDictionary<string, TestDefinition>) configuration.Properties["Its.Log.Monitoring.TestDefinitions"]);
 
-        internal static void TestTargetsAre(this HttpConfiguration configuration,
-                                            TestTargetRegistry targets)
-        {
-            configuration.Properties["Its.Log.Monitoring.TestTargets"] = targets;
-        }
+        internal static void TestTargetsAre(
+            this HttpConfiguration configuration,
+            TestTargetRegistry targets) =>
+                configuration.Properties["Its.Log.Monitoring.TestTargets"] = targets;
 
-        internal static TestTargetRegistry TestTargets(this HttpConfiguration configuration)
-        {
-            return (TestTargetRegistry) configuration.Properties["Its.Log.Monitoring.TestTargets"];
-        }
+        internal static TestTargetRegistry TestTargets(this HttpConfiguration configuration) =>
+            (TestTargetRegistry) configuration.Properties["Its.Log.Monitoring.TestTargets"];
     }
 }

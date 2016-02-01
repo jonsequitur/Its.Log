@@ -49,46 +49,29 @@ namespace Its.Log.Instrumentation.Extensions
         /// <value>
         ///   <c>true</c> if extension type <typeparamref name = "T" /> is enabled; otherwise, <c>false</c>.
         /// </value>
-        public static bool IsEnabled
-        {
-            get
-            {
-                return isEnabled;
-            }
-        }
+        public static bool IsEnabled => isEnabled;
 
         /// <summary>
         ///   Disables the specified Extension type <typeparamref name = "T" /> for all instrumented classes.
         /// </summary>
-        public static void Disable()
-        {
-            isEnabled = false;
-        }
+        public static void Disable() => isEnabled = false;
 
         /// <summary>
         ///   Disables the specified Extension type <typeparamref name = "T" /> for instrumented class <typeparamref
         ///    name = "TForClass" />.
         /// </summary>
-        public static void DisableFor<TForClass>() where TForClass : class
-        {
+        public static void DisableFor<TForClass>() where TForClass : class => 
             DisableFor(typeof (TForClass));
-        }
 
         /// <summary>
         ///   Enables the specified Extension type <typeparamref name="T" /> for all instrumented classes.
         /// </summary>
-        public static void Enable()
-        {
-            isEnabled = true;
-        }
+        public static void Enable() => isEnabled = true;
 
         /// <summary>
         ///   Enables the specified Extension type <typeparamref name = "T" /> for instrumented class <typeparamref name = "TForClass" />.
         /// </summary>
-        public static void EnableFor<TForClass>() where TForClass : class
-        {
-            EnableFor(typeof (TForClass));
-        }
+        public static void EnableFor<TForClass>() where TForClass : class => EnableFor(typeof (TForClass));
 
         /// <summary>
         ///   Determines whether extension <typeparamref name = "T" /> is enable the specified for instrumenation events sent from instances of type <paramref name = "forClass" />.
@@ -107,18 +90,12 @@ namespace Its.Log.Instrumentation.Extensions
         ///   Determines whether extension <typeparamref name = "T" /> is enable the specified for instrumenation events sent from instances of type <typeparamref name = "TForClass" />.
         /// </summary>
         /// <typeparam name = "TForClass">The instrumented class.</typeparam>
-        public static bool IsEnabledFor<TForClass>()
-        {
-            return IsEnabledFor(typeof (TForClass));
-        }
+        public static bool IsEnabledFor<TForClass>() => IsEnabledFor(typeof (TForClass));
 
         /// <summary>
         ///   Disables the specified Extension type <typeparamref name = "T" /> for instrumented class <paramref name = "forClass" />.
         /// </summary>
-        public static void DisableFor(Type forClass)
-        {
-            disabledExtensions.TryAdd(forClass, true);
-        }
+        public static void DisableFor(Type forClass) => disabledExtensions.TryAdd(forClass, true);
 
         /// <summary>
         ///   Enables the specified Extension type <typeparamref name = "T" /> for instrumented class <paramref name = "forClass" />.

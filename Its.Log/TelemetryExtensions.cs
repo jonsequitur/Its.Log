@@ -9,12 +9,10 @@ namespace Its.Log.Instrumentation
 {
     public static class TelemetryExtensions
     {
-        public static void MarkAsSuccessful(this ILogActivity activity)
-        {
+        public static void MarkAsSuccessful(this ILogActivity activity) =>
             activity.Confirm(() => new Telemetry
             {
                 Succeeded = true
             });
-        }
     }
 }

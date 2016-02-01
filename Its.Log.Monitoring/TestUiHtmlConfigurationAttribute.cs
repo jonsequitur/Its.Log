@@ -11,16 +11,14 @@ namespace Its.Log.Monitoring
     {
         public void Initialize(
             HttpControllerSettings controllerSettings,
-            HttpControllerDescriptor controllerDescriptor)
-        {
-            controllerSettings.Formatters.Add(
-                new TestUiScriptFormatter(
-                    controllerDescriptor.Configuration
-                                        .Properties
-                                        .IfContains("Its.Log.Monitoring.TestUiUri")
-                                        .And()
-                                        .IfTypeIs<string>()
-                                        .Else(() => "http://itsmonitoringux.azurewebsites.net/its.log.monitoring.js")));
-        }
+            HttpControllerDescriptor controllerDescriptor) =>
+                controllerSettings.Formatters.Add(
+                    new TestUiScriptFormatter(
+                        controllerDescriptor.Configuration
+                                            .Properties
+                                            .IfContains("Its.Log.Monitoring.TestUiUri")
+                                            .And()
+                                            .IfTypeIs<string>()
+                                            .Else(() => "http://itsmonitoringux.azurewebsites.net/its.log.monitoring.js")));
     }
 }

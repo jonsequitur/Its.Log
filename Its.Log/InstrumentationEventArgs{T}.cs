@@ -23,6 +23,6 @@ namespace Its.Log.Instrumentation
         /// Gets the payload.
         /// </summary>
         /// <value>The payload.</value>
-        public LogEntry LogEntry { get; private set; }
+        public LogEntry LogEntry { get; }
     }
 }

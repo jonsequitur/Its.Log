@@ -35,14 +35,7 @@ namespace Its.Log.Instrumentation.Extensions
         /// <summary>
         /// Enables all known extension types.
         /// </summary>
-        public static void EnableAll()
-        {
-            var handler = EnableAllSignaled;
-            if (handler != null)
-            {
-                handler(null, EventArgs.Empty);
-            }
-        }
+        public static void EnableAll() => EnableAllSignaled?.Invoke(null, EventArgs.Empty);
 
         /// <summary>
         ///   Indicates to the log that execution is entering a region.
@@ -118,10 +111,7 @@ namespace Its.Log.Instrumentation.Extensions
                         var extension = new TExtension();
 
                         var applyOnEnter = extension as IApplyOnEnter;
-                        if (applyOnEnter != null)
-                        {
-                            applyOnEnter.OnEnter(entry);
-                        }
+                        applyOnEnter?.OnEnter(entry);
 
                         extend(extension);
                         
@@ -136,10 +126,7 @@ namespace Its.Log.Instrumentation.Extensions
                         var extension = new TExtension();
 
                         var applyOnExit = extension as IApplyOnExit;
-                        if (applyOnExit != null)
-                        {
-                            applyOnExit.OnExit(entry);
-                        }
+                        applyOnExit?.OnExit(entry);
 
                         extend(extension);
 
@@ -155,10 +142,8 @@ namespace Its.Log.Instrumentation.Extensions
         /// Adds an extension of type <typeparamref name="TExtension" /> to the <see cref="LogEntry"/> if extension type <typeparamref name="TExtension" /> is enabled.
         /// </summary>
         public Extension With<TExtension>()
-            where TExtension : new()
-        {
-            return With<TExtension>(delegate { });
-        }
+            where TExtension : new() =>
+                With<TExtension>(delegate { });
 
         /// <summary>
         /// Writes the specified entry to the log.
@@ -180,21 +165,14 @@ namespace Its.Log.Instrumentation.Extensions
         /// Writes the specified object to the log.
         /// </summary>
         /// <param name="obj">The object to be written.</param>
-        public void Write(object obj)
-        {
-            Write(new LogEntry(obj));
-        }
+        public void Write(object obj) => Write(new LogEntry(obj));
 
         /// <summary>
         /// Writes the specified object to the log.
         /// </summary>
         /// <param name="subject">The object to be written.</param>
         /// <param name="comment">A comment to provide context to the log entry.</param>
-        public void Write(object subject, string comment)
-        {
-            var entry = new LogEntry(subject) { Message = comment };
-            Write(entry);
-        }
+        public void Write(object subject, string comment) => Write(new LogEntry(subject) { Message = comment });
 
         private static void ExtendLogEntry(
             LogEntry logEntry,

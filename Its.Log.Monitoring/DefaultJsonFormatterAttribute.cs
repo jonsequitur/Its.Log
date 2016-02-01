@@ -4,7 +4,6 @@
 using System;
 using System.Net.Http.Formatting;
 using System.Web.Http.Controllers;
-using Its.Recipes;
 
 namespace Its.Log.Monitoring
 {

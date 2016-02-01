@@ -22,29 +22,17 @@ namespace Its.Log.Instrumentation.Extensions
         /// <summary>
         /// Gets the call count for the current <see cref="Counter" />.
         /// </summary>
-        public long Count
-        {
-            get
-            {
-                return count;
-            }
-        }
+        public long Count => count;
 
         /// <summary>
         ///   Increments the counter by one.
         /// </summary>
-        public void Increment()
-        {
-            Interlocked.Increment(ref count);
-        }
+        public void Increment() => Interlocked.Increment(ref count);
 
         /// <summary>
         /// Clears all.
         /// </summary>
-        public static void ResetAll()
-        {
-            counters.Clear();
-        }
+        public static void ResetAll() => counters.Clear();
 
         /// <summary>
         /// Gets the <see cref="Counter" /> for the specified method.
@@ -64,7 +52,7 @@ namespace Its.Log.Instrumentation.Extensions
         {
             if (method == null)
             {
-                throw new ArgumentNullException("method");
+                throw new ArgumentNullException(nameof(method));
             }
             var action = method.Body as MethodCallExpression;
             var actionName = action.Method.Name;

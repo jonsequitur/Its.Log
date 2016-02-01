@@ -62,13 +62,7 @@ namespace Its.Log.Instrumentation.Extensions
         /// <value>
         /// The properties.
         /// </value>
-        public IDictionary<string, object> Properties
-        {
-            get
-            {
-                return properties ?? (properties = new Dictionary<string, object>());
-            }
-        }
+        public IDictionary<string, object> Properties => properties ?? (properties = new Dictionary<string, object>());
 
         /// <summary>
         /// Called when <see cref="Log.Enter" /> generates its final <see cref="LogEntry" />.
