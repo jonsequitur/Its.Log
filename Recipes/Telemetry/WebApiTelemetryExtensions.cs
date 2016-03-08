@@ -59,7 +59,7 @@ namespace Its.Log.Instrumentation
             }
         }
 
-        public static void WithUserIdentifierBasedOn(this Telemetry telemetry, HttpRequestMessage request)
+        private static void WithUserIdentifierBasedOn(this Telemetry telemetry, HttpRequestMessage request)
         {
             object userIdentifier;
             telemetry.UserIdentifier = request.Properties.TryGetValue("__Its_Log_UserIdentifier", out userIdentifier)
