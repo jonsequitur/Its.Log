@@ -95,10 +95,7 @@ namespace Its.Log.Instrumentation.UnitTests
         public IAsyncResult BeginSomething(AsyncCallback callback, object state)
         {
             var activity = state as ILogActivity;
-            if (activity != null)
-            {
-                activity.Trace(() => "hello");
-            }
+            activity?.Trace(() => "hello");
 
             return new AsyncResult
                        {
@@ -111,14 +108,8 @@ namespace Its.Log.Instrumentation.UnitTests
             var state = result.AsyncState as Tuple<AsyncCallback, ILogActivity>;
             if (state != null)
             {
-                if (state.Item2 != null)
-                {
-                    state.Item2.Trace(() => "hello");
-                }
-                if (state.Item1 != null)
-                {
-                    state.Item1.Invoke(result);
-                }
+                state.Item2?.Trace(() => "hello");
+                state.Item1?.Invoke(result);
             }
         }
 

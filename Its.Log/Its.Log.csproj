@@ -93,6 +93,7 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="AnonymousMethodInfo{T}.cs" />
+    <Compile Include="AsyncDispatchQueue{T}.cs" />
     <Compile Include="DefaultDiagnosticSensors.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -126,10 +127,12 @@
     <Compile Include="Log.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="LogEntryDispatchQueue.cs" />
     <Compile Include="LogEntryExtensions.cs" />
     <Compile Include="LogEntry{T}.cs" />
     <Compile Include="MemberAccessor.cs" />
     <Compile Include="ObservableExtensions.cs" />
+    <Compile Include="TelemetryDispatchQueue.cs" />
     <Compile Include="TelemetryExtensions.cs" />
     <Compile Include="Text\ILogTextFormatter.cs" />
     <Compile Include="Text\MultiLineTextFormatter.cs" />

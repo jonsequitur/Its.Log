@@ -4,6 +4,7 @@
 using System;
 using System.Linq;
 using System.Reactive.Linq;
+using Its.Log.Instrumentation.Extensions;
 
 namespace Its.Log.Instrumentation.UnitTests
 {
@@ -31,6 +32,12 @@ namespace Its.Log.Instrumentation.UnitTests
         public static IDisposable SubscribeToLogInternalErrors(this IObserver<LogEntry> observer)
         {
             var subscription = InternalErrors().Subscribe(observer);
+            return subscription;
+        }
+
+        public static IDisposable SubscribeToTelemetryEvents(this IObserver<Telemetry> observer)
+        {
+            var subscription = Log.TelemetryEvents().Subscribe(observer);
             return subscription;
         }
 
