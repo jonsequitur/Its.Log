@@ -116,7 +116,6 @@
     <Compile Include="..\ProductInfo.cs">
       <Link>Properties\ProductInfo.cs</Link>
     </Compile>
-    <Compile Include="AsyncDispatchQueue.cs" />
     <Compile Include="AsyncTests.cs" />
     <Compile Include="BadExtension.cs" />
     <Compile Include="BoundaryTests.cs" />

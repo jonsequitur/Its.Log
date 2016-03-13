@@ -3,12 +3,13 @@
 
 using System;
 using System.Collections.Concurrent;
+using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
 
 namespace Its.Log.Instrumentation
 {
-    public abstract class AsyncDispatchQueue<T> : IDisposable
+    public class AsyncDispatchQueue<T> : IDisposable
     {
         private readonly Func<T, Task> send;
         private readonly IDisposable subscription;
@@ -46,14 +47,21 @@ namespace Its.Log.Instrumentation
                 catch (InvalidOperationException)
                 {
                     // collection is completed
-                    break;
+                    if (blockingCollection.IsCompleted)
+                    {
+                        break;
+                    }
+                }
+                catch (Exception exception)
+                {
+                    Debug.WriteLine(exception);
                 }
             }
         }
 
         private async Task Drain()
         {
-            while (!blockingCollection.IsEmpty())
+            while (!blockingCollection.IsCompleted)
             {
                 await Task.Delay(50);
             }
