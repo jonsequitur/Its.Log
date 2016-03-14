@@ -3,7 +3,6 @@
 
 using System;
 using System.Collections.Concurrent;
-using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -16,7 +15,7 @@ namespace Its.Log.Instrumentation
         private readonly BlockingCollection<T> blockingCollection;
         private readonly Thread dispatcherThread;
 
-        protected AsyncDispatchQueue(Func<T, Task> send, IObservable<T> events)
+        protected AsyncDispatchQueue(IObservable<T> events, Func<T, Task> send)
         {
             if (send == null)
             {
@@ -37,24 +36,16 @@ namespace Its.Log.Instrumentation
 
         private void Send()
         {
-            while (true)
+            while (!blockingCollection.IsCompleted)
             {
                 try
                 {
                     var value = blockingCollection.Take();
                     send(value).Wait();
                 }
-                catch (InvalidOperationException)
-                {
-                    // collection is completed
-                    if (blockingCollection.IsCompleted)
-                    {
-                        break;
-                    }
-                }
                 catch (Exception exception)
                 {
-                    Debug.WriteLine(exception);
+                    exception.RaiseErrorEvent();
                 }
             }
         }

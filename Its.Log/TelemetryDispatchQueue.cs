@@ -9,7 +9,7 @@ namespace Its.Log.Instrumentation
         public TelemetryDispatchQueue(
             Func<Telemetry, Task> send,
             IObservable<Telemetry> telemetryEvents = null) :
-                base(send, telemetryEvents ?? Log.TelemetryEvents())
+                base(telemetryEvents ?? Log.TelemetryEvents(), send)
         {
         }
     }

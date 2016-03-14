@@ -11,7 +11,7 @@ namespace Its.Log.Instrumentation
         public LogEntryDispatchQueue(
             Func<LogEntry, Task> send,
             IObservable<LogEntry> logEvents = null) :
-                base(send, logEvents ?? Log.Events())
+                base(logEvents ?? Log.Events(), send)
         {
         }
     }
