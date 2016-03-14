@@ -446,6 +446,59 @@ namespace Its.Log.Monitoring.UnitTests
         {
             return null;
         }
+
+        public void no_more_than_10_percent_of_calls_have_failed()
+        {
+            Telemetry[] telemetry =
+            {
+                new Telemetry
+                {
+                    ElapsedMilliseconds = Any.Int(),
+                    OperationName = Any.CamelCaseName(),
+                    Succeeded = false,
+                    UserIdentifier = Any.Email(),
+                    Properties = {{"StatusCode", "500"}}
+                },
+                new Telemetry
+                {
+                    ElapsedMilliseconds = Any.Int(),
+                    OperationName = Any.CamelCaseName(),
+                    Succeeded = true,
+                    UserIdentifier = Any.Email(),
+                    Properties = {{"StatusCode", "200"}}
+                }
+            };
+
+            var telemetryTestResult = new TelemetryTestResult(telemetry);
+
+            telemetryTestResult.Should().HavePercentageNoGreaterThan(10, t => t.Succeeded);
+            telemetryTestResult.Should().HaveLessThanPercentage(0.1, t => t.Properties["StatusCode"] == 200);
+        }
+
+        public TelemetryTestResult telemetry_without_failures()
+        {
+            Telemetry[] telemetry =
+            {
+                new Telemetry
+                {
+                    ElapsedMilliseconds = Any.Int(),
+                    OperationName = Any.CamelCaseName(),
+                    Succeeded = false,
+                    UserIdentifier = Any.Email(),
+                    Properties = {{"StatusCode", "500"}}
+                },
+                new Telemetry
+                {
+                    ElapsedMilliseconds = Any.Int(),
+                    OperationName = Any.CamelCaseName(),
+                    Succeeded = true,
+                    UserIdentifier = Any.Email(),
+                    Properties = {{"StatusCode", "200"}}
+                }
+            };
+            var telemetryWithFailures = new TelemetryTestResult(telemetry);
+            return telemetryWithFailures;
+        }
     }
 
     public class BigAppleTests : IHaveTags

@@ -101,6 +101,7 @@
     <Compile Include="SensorRoutingTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="TargetBasedTestConstraintTests.cs" />
+    <Compile Include="TelemetryTests.cs" />
     <Compile Include="TestApi.cs" />
     <Compile Include="TestSensor.cs" />
   </ItemGroup>

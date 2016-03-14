@@ -91,6 +91,7 @@
     <Compile Include="CacheExtensions.cs" />
     <Compile Include="EnvironmentConstraint.cs" />
     <Compile Include="DefaultJsonFormatterAttribute.cs" />
+    <Compile Include="TelemetryTestResult.cs" />
     <Compile Include="TestUiHtmlConfigurationAttribute.cs" />
     <Compile Include="TestUiScriptFormatter.cs" />
     <Compile Include="HttpConfigurationExtensions.cs" />
