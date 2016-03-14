@@ -1,7 +1,4 @@
-// Copyright (c) Microsoft. All rights reserved. 
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
-
-// ----------------------------------------------------------------------------------------------------
+﻿// ----------------------------------------------------------------------------------------------------
 // THIS .CS FILE WAS GENERATED USING T4. DO NOT EDIT IT DIRECTLY--EDIT THE ASSOCIATED .TT FILE INSTEAD.
 // ----------------------------------------------------------------------------------------------------
 

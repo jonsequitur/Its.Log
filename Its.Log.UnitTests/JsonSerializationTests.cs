@@ -5,16 +5,18 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using FluentAssertions;
 using System.Linq;
+using System.Threading.Tasks;
 using FluentAssertions;
 using Its.Log.Instrumentation.Extensions;
 using Its.Recipes;
-using NUnit.Framework;
 using Newtonsoft.Json;
+using NUnit.Framework;
 
 namespace Its.Log.Instrumentation.UnitTests
 {
-    [TestFixture, Ignore]
+    [TestFixture]
     public class JsonSerializationTests
     {
         [TearDown]
@@ -150,6 +152,7 @@ namespace Its.Log.Instrumentation.UnitTests
             json.Should().Contain("\"ActivityId\":\"" + activityId + "\"");
         }
 
+        [Ignore]
         [Test]
         public void ActivityId_is_a_JSON_property_when_added_using_WithExtension_Tracing_is_called()
         {
@@ -165,6 +168,7 @@ namespace Its.Log.Instrumentation.UnitTests
             json.Should().Contain("\"ActivityId\":\"" + activityId + "\"");
         }
 
+        [Ignore]
         [Test]
         public void CallingType_is_serialized_as_the_full_type_name()
         {
@@ -172,11 +176,41 @@ namespace Its.Log.Instrumentation.UnitTests
             Assert.Fail("Test not written yet.");
         }
 
+        [Ignore]
         [Test]
         public void EventType_can_be_serialized_as_a_string()
         {
             // FIX (EventType_can_be_serialized_as_a_string) write test
             Assert.Fail("Test not written yet.");
+        }
+
+        [Test]
+        public void Serializer_does_not_emit_private_state_of_Confirmation_objects()
+        {
+            var log = "";
+
+            using (Log.Events().Subscribe(e => log += JsonConvert.SerializeObject(e)))
+            using (var a = Log.Enter(() => { }))
+            {
+                var response = new SomeObject
+                {
+                    yes = "this should be in the log output",
+                    no = "this should not be in the log output"
+                };
+
+                a.Confirm(() => new
+                {
+                    response.yes
+                });
+            }
+            Console.WriteLine(log);
+            log.Should().NotContain("this should not be in the log output");
+        }
+
+        public class SomeObject
+        {
+            public string yes;
+            public string no;
         }
 
         private static void WriteSomeLogs(string log)

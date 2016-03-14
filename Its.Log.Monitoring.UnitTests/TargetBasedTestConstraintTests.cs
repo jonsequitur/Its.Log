@@ -4,34 +4,39 @@
 using System;
 using System.Collections;
 using System.Net.Http;
+using System.Reactive.Disposables;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Web;
 using System.Web.Http;
 using FluentAssertions;
-using NUnit.Framework;
 using Newtonsoft.Json.Linq;
+using NUnit.Framework;
+using log = Its.Log.Instrumentation.Log;
 
 namespace Its.Log.Monitoring.UnitTests
 {
     [TestFixture]
     public class TargetBasedTestConstraintTests
     {
+        private CompositeDisposable disposables;
+
         [SetUp]
         public void SetUp()
         {
             TestsConstrainedToTarget.AppliesTo = _ => false;
+            disposables = new CompositeDisposable(log.Events().Subscribe(Console.WriteLine));
         }
 
         private static TestApi CreateApiClient()
         {
             return new TestApi(targets =>
-                                   targets.Add("staging", "widgetapi",
-                                               new Uri("http://staging.widgets.com"),
-                                               dependencies =>
-                                                   dependencies.Register(() =>
-                                                                             new HttpClient(new HttpServer(new HttpConfiguration()
-                                                                                                               .MapSensorRoutes(_ => true))))),
+                               targets.Add("staging", "widgetapi",
+                                           new Uri("http://staging.widgets.com"),
+                                           dependencies =>
+                                           dependencies.Register(() =>
+                                                                 new HttpClient(new HttpServer(new HttpConfiguration()
+                                                                                                   .MapSensorRoutes(_ => true))))),
                                typeof (TestsConstrainedToTarget));
         }
 
@@ -42,30 +47,46 @@ namespace Its.Log.Monitoring.UnitTests
             {
                 HttpRuntime.Cache.Remove((string) entry.Key);
             }
+
+            disposables.Dispose();
         }
 
         [Test]
         public async Task A_test_can_be_hidden_based_on_the_target_application_build_date_sensor()
         {
-            TestsConstrainedToTarget.AppliesTo = BuildDateAfter(DateTime.Now);
+            using (var activity = log.Enter(() => { }))
+            {
+                TestsConstrainedToTarget.AppliesTo = BuildDateAfter(DateTime.Now);
 
-            var response = await CreateApiClient().GetAsync("http://tests.com/tests");
+                var response = await CreateApiClient().GetAsync("http://tests.com/tests");
 
-            JArray tests = response.JsonContent().Tests;
+                activity.Confirm(() => new { response });
 
-            tests.Should().NotContain(t => t.Value<string>("Url").Contains("target_based_constraint_test"));
+                JArray tests = response.JsonContent().Tests;
+
+                activity.Confirm(() => new { tests });
+
+                tests.Should().NotContain(t => t.Value<string>("Url").Contains("target_based_constraint_test"));
+            }
         }
 
         [Test]
         public async Task A_test_can_be_shown_based_on_the_target_application_build_date_sensor()
         {
-            TestsConstrainedToTarget.AppliesTo = BuildDateAfter(DateTime.Now.Subtract(TimeSpan.FromDays(1000)));
+            using (var activity = log.Enter(() => { }))
+            {
+                TestsConstrainedToTarget.AppliesTo = BuildDateAfter(DateTime.Now.Subtract(TimeSpan.FromDays(1000)));
 
-            var response = await CreateApiClient().GetAsync("http://tests.com/tests");
+                var response = await CreateApiClient().GetAsync("http://tests.com/tests");
 
-            JArray tests = response.JsonContent().Tests;
+                activity.Confirm(() => new { response });
 
-            tests.Should().Contain(t => t.Value<string>("Url").Contains("target_based_constraint_test"));
+                JArray tests = response.JsonContent().Tests;
+
+                activity.Confirm(() => new { tests });
+
+                tests.Should().Contain(t => t.Value<string>("Url").Contains("target_based_constraint_test"));
+            }
         }
 
         [Test]
@@ -85,17 +106,18 @@ namespace Its.Log.Monitoring.UnitTests
             await apiClient.GetAsync("http://tests.com/tests");
             await apiClient.GetAsync("http://tests.com/tests");
 
-            constraintCalls.Should().BeLessOrEqualTo(1);
+            constraintCalls.Should().Be(1);
         }
 
-        private static Func<HttpClient, bool> BuildDateAfter(DateTime dateTime)
+        private static Func<HttpClient, bool> BuildDateAfter(DateTime buildDateAfter)
         {
             return httpClient =>
             {
                 var sensorResult = httpClient.GetAsync("/sensors").Result.JsonContent();
-                Console.WriteLine(sensorResult);
+                Console.WriteLine(new { sensorResult });
                 var buildDate = sensorResult.Version["Build date"];
-                return buildDate > dateTime;
+                Console.WriteLine(new { buildDate, buildDateAfter });
+                return buildDate > buildDateAfter;
             };
         }
     }
@@ -108,7 +130,7 @@ namespace Its.Log.Monitoring.UnitTests
         {
             if (httpClient == null)
             {
-                throw new ArgumentNullException("httpClient");
+                throw new ArgumentNullException(nameof(httpClient));
             }
             this.httpClient = httpClient;
         }

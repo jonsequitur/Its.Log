@@ -4,6 +4,8 @@
 using System;
 using System.Net;
 using System.Net.Http;
+using System.Threading;
+using System.Threading.Tasks;
 using System.Web.Http.Controllers;
 using System.Web.Http.Filters;
 using Its.Log.Instrumentation;
@@ -12,12 +14,14 @@ namespace Its.Log.Monitoring
 {
     public class TracingFilter : ActionFilterAttribute
     {
-        public override void OnActionExecuting(HttpActionContext actionContext)
-        {
+        /// <summary>
+        /// Occurs before the action method is invoked.
+        /// </summary>
+        /// <param name="actionContext">The action context.</param>
+        public override void OnActionExecuting(HttpActionContext actionContext) =>
             TraceBuffer.Initialize();
-        }
 
-        public override void OnActionExecuted(HttpActionExecutedContext actionExecutedContext)
+        public override async Task OnActionExecutedAsync(HttpActionExecutedContext actionExecutedContext, CancellationToken cancellationToken)
         {
             var buffer = TraceBuffer.Current;
 
@@ -35,7 +39,7 @@ namespace Its.Log.Monitoring
 
                 if (actionExecutedContext.Exception == null)
                 {
-                    originalContent = actionExecutedContext.Response.Content.ReadAsStringAsync().Result;
+                    originalContent = await actionExecutedContext.Response.Content.ReadAsStringAsync();
                     statusCode = actionExecutedContext.Response.StatusCode;
                 }
                 else
@@ -46,36 +50,30 @@ namespace Its.Log.Monitoring
 
                 actionExecutedContext.Response = new HttpResponseMessage(statusCode)
                 {
-                    Content = new StringContent(string.Format("{0}\n\n{1}", buffer, originalContent).Trim())
+                    Content = new StringContent($"{buffer}\n\n{originalContent}".Trim())
                 };
             }
         }
 
-        public override bool AllowMultiple
-        {
-            get
-            {
-                return false;
-            }
-        }
+        /// <summary>
+        /// Gets a value that indicates whether multiple filters are allowed.
+        /// </summary>
+        /// <returns>
+        /// true if multiple filters are allowed; otherwise, false.
+        /// </returns>
+        public override bool AllowMultiple => false;
 
         internal class TraceListener : System.Diagnostics.TraceListener
         {
             public static readonly TraceListener Instance = new TraceListener();
 
-            public override void Write(string message)
-            {
-                WriteLine(message);
-            }
+            public override void Write(string message) => WriteLine(message);
 
             public override void WriteLine(string message)
             {
                 var buffer = TraceBuffer.Current;
 
-                if (buffer != null)
-                {
-                    buffer.Write(message);
-                }
+                buffer?.Write(message);
             }
         }
     }

@@ -62,17 +62,14 @@ namespace Its.Log.Instrumentation
         /// </summary>
         /// <param name="exception">Exception instance</param>
         /// <returns>True if exception is considered fatal, or false otherwise</returns>
-        internal static bool IsFatal(this Exception exception)
-        {
-            return exception.IsItselfFatal() || exception.InnerExceptions().Any(IsItselfFatal);
-        }
+        internal static bool IsFatal(this Exception exception) =>
+            exception.IsItselfFatal() ||
+            exception.InnerExceptions().Any(IsItselfFatal);
 
-        private static bool IsItselfFatal(this Exception exception)
-        {
-            return (exception is ThreadAbortException ||
-                    exception is AccessViolationException ||
-                    (exception is OutOfMemoryException) && !(exception is InsufficientMemoryException));
-        }
+        private static bool IsItselfFatal(this Exception exception) =>
+            (exception is ThreadAbortException ||
+             exception is AccessViolationException ||
+             (exception is OutOfMemoryException) && !(exception is InsufficientMemoryException));
 
         /// <summary>
         /// Marks the exception as having been handled.
@@ -92,11 +89,9 @@ namespace Its.Log.Instrumentation
         /// <returns>
         ///   <c>true</c> if the exception has been handled; otherwise, <c>false</c>.
         /// </returns>
-        public static bool HasBeenHandled(this Exception exception)
-        {
-            return exception.Data.Contains("Handled") &&
-                   Equals(exception.Data["Handled"], true);
-        }
+        public static bool HasBeenHandled(this Exception exception) =>
+            exception.Data.Contains("Handled") &&
+            Equals(exception.Data["Handled"], true);
 
         /// <summary>
         /// Add additional data to the exception as string for logging purpose. Anonymous type works the best.
@@ -110,8 +105,8 @@ namespace Its.Log.Instrumentation
         {
             // if the same key is already in the Data dictionary, append a number starting with 2
             // to the end of the key to create a new key/value pair
-            int index = 2;
-            string key = ExceptionDataKey;
+            var index = 2;
+            var key = ExceptionDataKey;
             while (exception.Data.Contains(key))
             {
                 key = ExceptionDataKey + index++;

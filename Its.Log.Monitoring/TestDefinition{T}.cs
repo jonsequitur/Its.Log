@@ -18,7 +18,7 @@ namespace Its.Log.Monitoring
         {
             if (methodInfo == null)
             {
-                throw new ArgumentNullException("methodInfo");
+                throw new ArgumentNullException(nameof(methodInfo));
             }
 
             this.methodInfo = methodInfo;
@@ -58,13 +58,7 @@ namespace Its.Log.Monitoring
             }
         }
 
-        public override string TestName
-        {
-            get
-            {
-                return methodInfo.Name;
-            }
-        }
+        public override string TestName => methodInfo.Name;
 
         internal override dynamic Run(HttpActionContext context, Func<Type, object> resolver = null)
         {
@@ -79,10 +73,7 @@ namespace Its.Log.Monitoring
 
         public override string ToString()
         {
-            return string.Format("{0} ({1}.{2})",
-                                 base.ToString(),
-                                 methodInfo.DeclaringType,
-                                 methodInfo.Name);
+            return $"{base.ToString()} ({methodInfo.DeclaringType}.{methodInfo.Name})";
         }
     }
 }

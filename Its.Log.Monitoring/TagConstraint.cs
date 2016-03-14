@@ -58,7 +58,7 @@ namespace Its.Log.Monitoring
                                         .ToArray();
 
             return !excludeTags.Intersect(testTags, StringComparer.OrdinalIgnoreCase).Any()  &&
-                   includeTags.Intersect(testTags, StringComparer.OrdinalIgnoreCase).Count() == includeTags.Count();
+                   includeTags.Intersect(testTags, StringComparer.OrdinalIgnoreCase).Count() == includeTags.Length;
         }
     }
 }

@@ -9,7 +9,6 @@ using System.Net.Http;
 using System.Net.Http.Formatting;
 using System.Threading;
 using System.Threading.Tasks;
-using Its.Recipes;
 
 namespace Its.Log.Monitoring
 {
@@ -19,8 +18,10 @@ namespace Its.Log.Monitoring
 
         public TestUiScriptFormatter(string scriptUrl)
         {
+            var version = FileVersionInfo.GetVersionInfo(typeof (TestUiScriptFormatter).Assembly.Location).FileVersion;
+
             bootstrapHtml =
-                @"<!doctype html>
+                $@"<!doctype html>
 <html lang=""en"">
     <head>
 	    <meta charset=""UTF-8"">
@@ -28,11 +29,7 @@ namespace Its.Log.Monitoring
     </head>
     <body>
     </body>
-</html>".Fill(new
-                {
-                    scriptUrl,
-                    version = FileVersionInfo.GetVersionInfo(typeof (TestUiScriptFormatter).Assembly.Location).FileVersion
-                });
+</html>";
 
             MediaTypeMappings.Add(
                 new RequestHeaderMapping("Accept",
@@ -42,29 +39,21 @@ namespace Its.Log.Monitoring
                                          "text/html"));
         }
 
-        public override bool CanReadType(Type type)
-        {
-            return false;
-        }
+        public override bool CanReadType(Type type) => false;
 
-        public override bool CanWriteType(Type type)
-        {
-            return true;
-        }
+        public override bool CanWriteType(Type type) => true;
 
-        public override Task WriteToStreamAsync(Type type,
-                                                object value,
-                                                Stream writeStream,
-                                                HttpContent content,
-                                                TransportContext transportContext,
-                                                CancellationToken cancellationToken)
+        public override async Task WriteToStreamAsync(
+            Type type,
+            object value,
+            Stream writeStream,
+            HttpContent content,
+            TransportContext transportContext,
+            CancellationToken cancellationToken)
         {
-            return Task.Run(() =>
-            {
-                var writer = new StreamWriter(writeStream);
-                writer.Write(bootstrapHtml);
-                writer.Flush();
-            });
+            var writer = new StreamWriter(writeStream);
+            await writer.WriteAsync(bootstrapHtml);
+            await writer.FlushAsync();
         }
     }
 }

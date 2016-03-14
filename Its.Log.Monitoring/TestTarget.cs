@@ -25,9 +25,6 @@ namespace Its.Log.Monitoring
 
         internal Func<Type, object> ResolveDependency { get; set; }
 
-        public override string ToString()
-        {
-            return this.ToLogString();
-        }
+        public override string ToString() => this.ToLogString();
     }
 }

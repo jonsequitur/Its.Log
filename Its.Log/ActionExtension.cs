@@ -12,15 +12,11 @@ namespace Its.Log.Instrumentation
         private static readonly ConcurrentDictionary<MethodInfo, AnonymousMethodInfo> anonymousMethodInfos =
             new ConcurrentDictionary<MethodInfo, AnonymousMethodInfo>();
 
-        public static AnonymousMethodInfo GetAnonymousMethodInfo<T>(this Func<T> anonymousMethod)
-        {
-            return anonymousMethodInfos.GetOrAdd(anonymousMethod.Method, m => new AnonymousMethodInfo<T>(anonymousMethod));
-        }
+        public static AnonymousMethodInfo GetAnonymousMethodInfo<T>(this Func<T> anonymousMethod) => 
+            anonymousMethodInfos.GetOrAdd(anonymousMethod.Method, m => new AnonymousMethodInfo<T>(anonymousMethod));
 
-        public static AnonymousMethodInfo GetAnonymousMethodInfo(this Delegate anonymousMethod)
-        {
-            return anonymousMethodInfos.GetOrAdd(anonymousMethod.Method, m => new AnonymousMethodInfo(anonymousMethod.Method));
-        }
+        public static AnonymousMethodInfo GetAnonymousMethodInfo(this Delegate anonymousMethod) => 
+            anonymousMethodInfos.GetOrAdd(anonymousMethod.Method, m => new AnonymousMethodInfo(anonymousMethod.Method));
 
         internal static void InvokeSafely<T>(this Action<T> action, T target)
         {

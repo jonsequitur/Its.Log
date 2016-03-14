@@ -48,9 +48,9 @@ namespace Its.Log.Instrumentation
             if (subjectAccessor != null)
             {
                 Subject = subjectAccessor();
-                if (typeof (TSubject) == typeof (string))
+                if (Subject is string)
                 {
-                    Message = subjectAccessor() as string;
+                    Message = Subject as string;
                 }
             }
 
@@ -72,9 +72,8 @@ namespace Its.Log.Instrumentation
         /// Clones this instance.
         /// </summary>
         /// <returns>A <see cref="LogEntry" /> which is a clone of this instance.</returns>
-        internal override LogEntry Clone(bool deep)
-        {
-            var clone = new LogEntry<TSubject>(subjectAccessor)
+        internal override LogEntry Clone(bool deep) =>
+            new LogEntry<TSubject>(subjectAccessor)
             {
                 info = info,
                 Message = Message,
@@ -82,7 +81,5 @@ namespace Its.Log.Instrumentation
                                  ? extensions
                                  : new Dictionary<Type, object>(extensions)
             };
-            return clone;
-        }
     }
 }

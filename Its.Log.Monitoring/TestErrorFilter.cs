@@ -30,12 +30,6 @@ namespace Its.Log.Monitoring
             }
         }
 
-        public override bool AllowMultiple
-        {
-            get
-            {
-                return false;
-            }
-        }
+        public override bool AllowMultiple => false;
     }
 }

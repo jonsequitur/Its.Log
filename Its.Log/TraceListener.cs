@@ -7,7 +7,7 @@ using System.Diagnostics;
 namespace Its.Log.Instrumentation
 {
     /// <summary>
-    /// Monitor trace and debug output and writes it to <see cref="Log.Write"/>.
+    /// Monitor trace and debug output and writes it to <see cref="Log.Write(LogEntry)"/>.
     /// </summary>
     [DebuggerStepThrough]
     public class TraceListener : System.Diagnostics.TraceListener
@@ -15,7 +15,7 @@ namespace Its.Log.Instrumentation
         internal static readonly RecursionCounter RecursionCounter = new RecursionCounter();
 
         /// <summary>
-        /// Writes trace input to <see cref="Log.Write" />.
+        /// Writes trace input to <see cref="Log.Write(LogEntry)" />.
         /// </summary>
         /// <remarks>This is the method into which all TraceListener Write methods call.</remarks>
         private static void LogWrite(object o, string category = null)

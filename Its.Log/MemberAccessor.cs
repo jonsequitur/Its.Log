@@ -29,8 +29,11 @@ namespace Its.Log.Instrumentation
         }
 
         public bool Ignore { get; set; }
-        public string MemberName { get; private set; }
+
+        public string MemberName { get; }
+
         public bool SkipOnNull;
+
         public Func<T, object> GetValue { get; set; }
     }
 }

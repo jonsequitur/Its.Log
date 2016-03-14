@@ -103,11 +103,7 @@ namespace Its.Log.Instrumentation
         /// </summary>
         public static void ResetToDefault()
         {
-            EventHandler handler = Clearing;
-            if (handler != null)
-            {
-                handler(null, EventArgs.Empty);
-            }
+            Clearing?.Invoke(null, EventArgs.Empty);
 
             AutoGenerateForType = t => false;
             ListExpansionLimit = 10;
@@ -135,7 +131,7 @@ namespace Its.Log.Instrumentation
             {
                 if (value == null)
                 {
-                    throw new ArgumentNullException("value");
+                    throw new ArgumentNullException(nameof(value));
                 }
                 autoGenerateForType = value;
             }
@@ -174,7 +170,7 @@ namespace Its.Log.Instrumentation
                 if (typeof (T) != actualType)
                 {
                     // in some cases the generic parameter is Object but the object is of a more specific type, in which case get or add a cached accessor to the more specific Formatter<T>.Format method
-                    Action<object, TextWriter> genericFormatter =
+                    var genericFormatter =
                         genericFormatters.GetOrAdd(actualType,
                                                    GetGenericFormatterMethod);
                     genericFormatter(obj, writer);
@@ -203,12 +199,12 @@ namespace Its.Log.Instrumentation
 
         // TODO: (Formatter) make Join methods public and expose an override for iteration limit
 
-        internal static void Join(IEnumerable list,
-                                  TextWriter writer,
-                                  int? listExpansionLimit = null)
-        {
-            Join(list.Cast<object>(), writer, listExpansionLimit);
-        }
+        internal static void Join(
+            IEnumerable list,
+            TextWriter writer,
+            int? listExpansionLimit = null) =>
+                Join(list.Cast<object>(), writer, listExpansionLimit);
+        
 
         internal static void Join<T>(IEnumerable<T> list,
                                      TextWriter writer,
@@ -267,7 +263,7 @@ namespace Its.Log.Instrumentation
         /// </summary>
         public static void Register(Type type, Action<object, TextWriter> formatter)
         {
-            MethodInfo genericRegisterMethod = typeof (Formatter<>)
+            var genericRegisterMethod = typeof (Formatter<>)
                 .MakeGenericType(type)
                 .GetMethod("Register", new[] { typeof (Action<,>).MakeGenericType(type, typeof (TextWriter)) });
 
@@ -279,7 +275,7 @@ namespace Its.Log.Instrumentation
         /// </summary>
         public static void RegisterForAllMembers(Type type, bool includeInternals = false)
         {
-            MethodInfo genericRegisterMethod = typeof (Formatter<>)
+            var genericRegisterMethod = typeof (Formatter<>)
                 .MakeGenericType(type)
                 .GetMethod("RegisterForAllMembers");
 
@@ -324,7 +320,7 @@ namespace Its.Log.Instrumentation
                 TextFormatter.WriteStartObject(writer);
                 KeyValuePair<string, object>[] pairs = expando.ToArray();
                 int length = pairs.Length;
-                for (int i = 0; i < length; i++)
+                for (var i = 0; i < length; i++)
                 {
                     KeyValuePair<string, object> pair = pairs[i];
                     writer.Write(pair.Key);
@@ -347,7 +343,7 @@ namespace Its.Log.Instrumentation
                     writer.Write("<");
                     var genericArguments = type.GetGenericArguments();
 
-                    for (int i = 0; i < genericArguments.Length; i++)
+                    for (var i = 0; i < genericArguments.Length; i++)
                     {
                         Formatter<Type>.Default(genericArguments[i], writer);
                         if (i < genericArguments.Length - 1)
@@ -364,6 +360,7 @@ namespace Its.Log.Instrumentation
             };
 
             // an additional formatter is needed since typeof(Type) == System.RuntimeType, which is not public
+            // ReSharper disable once PossibleMistakenCallToGetType.2
             Register(typeof (Type).GetType(),
                      (obj, writer) => Formatter<Type>.Default((Type) obj, writer));
 
@@ -395,12 +392,11 @@ namespace Its.Log.Instrumentation
                 {
                     throw;
                 }
-                Log.Write(() => exception, string.Format("An exception occurred while trying to register a formatter for type '{0}'.", typeName));
+                Log.Write(() => exception, $"An exception occurred while trying to register a formatter for type '{typeName}'.");
             }
         }
 
-        internal static void RegisterDefaultLogEntryFormatters()
-        {
+        internal static void RegisterDefaultLogEntryFormatters() =>
             Formatter<LogEntry>.RegisterForMembers(
                 e => e.CallingType,
                 e => e.CallingMethod,
@@ -410,8 +406,6 @@ namespace Its.Log.Instrumentation
                 e => e.Message,
                 e => e.Subject,
                 e => e.TimeStamp,
-                e => e.Params
-                );
-        }
+                e => e.Params);
     }
 }

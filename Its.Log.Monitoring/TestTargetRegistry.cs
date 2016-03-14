@@ -20,27 +20,28 @@ namespace Its.Log.Monitoring
         {
             if (configuration == null)
             {
-                throw new ArgumentNullException("configuration");
+                throw new ArgumentNullException(nameof(configuration));
             }
             this.configuration = configuration;
         }
 
-        public TestTargetRegistry Add(string environment,
-                                      string application,
-                                      Uri baseAddress,
-                                      Action<TestDependencyRegistry> testDependencies = null)
+        public TestTargetRegistry Add(
+            string environment,
+            string application,
+            Uri baseAddress,
+            Action<TestDependencyRegistry> testDependencies = null)
         {
             if (environment == null)
             {
-                throw new ArgumentNullException("environment");
+                throw new ArgumentNullException(nameof(environment));
             }
             if (application == null)
             {
-                throw new ArgumentNullException("application");
+                throw new ArgumentNullException(nameof(application));
             }
             if (baseAddress == null)
             {
-                throw new ArgumentNullException("baseAddress");
+                throw new ArgumentNullException(nameof(baseAddress));
             }
             if (!baseAddress.IsAbsoluteUri)
             {
@@ -58,10 +59,7 @@ namespace Its.Log.Monitoring
                 .Register(c => new HttpClient())
                 .Register(c => testTarget);
 
-            if (testDependencies != null)
-            {
-                testDependencies(new TestDependencyRegistry((t, func) => container.Register(t, c => func())));
-            }
+            testDependencies?.Invoke(new TestDependencyRegistry((t, func) => container.Register(t, c => func())));
 
             container.AfterResolve<HttpClient>((c, client) =>
             {
@@ -89,10 +87,10 @@ namespace Its.Log.Monitoring
 
             if (!targets.Any(t => t.Value.Environment.Equals(environment, StringComparison.OrdinalIgnoreCase)))
             {
-                throw new ArgumentException(string.Format("Environment '{0}' has not been defined.", environment));
+                throw new ArgumentException($"Environment '{environment}' has not been defined.");
             }
 
-            throw new ArgumentException(string.Format("Environment '{0}' has no application named '{1}' defined.", environment, application));
+            throw new ArgumentException($"Environment '{environment}' has no application named '{application}' defined.");
         }
 
         internal TestTarget TryGet(string environment, string application)
@@ -105,14 +103,9 @@ namespace Its.Log.Monitoring
             return null;
         }
 
-        public IEnumerator<TestTarget> GetEnumerator()
-        {
-            return targets.Select(c => c.Value).GetEnumerator();
-        }
+        public IEnumerator<TestTarget> GetEnumerator() =>
+            targets.Select(c => c.Value).GetEnumerator();
 
-        IEnumerator IEnumerable.GetEnumerator()
-        {
-            return GetEnumerator();
-        }
+        IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
     }
 }

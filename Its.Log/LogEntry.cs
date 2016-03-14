@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using Its.Log.Instrumentation.Extensions;
+using Its.Recipes;
 
 namespace Its.Log.Instrumentation
 {
@@ -119,7 +120,7 @@ namespace Its.Log.Instrumentation
         }
 
         /// <summary>
-        /// Gets or sets the method from which <see cref="Log.Write" /> was called.
+        /// Gets or sets the method from which a log was written.
         /// </summary>
         public string CallingMethod
         {
@@ -152,12 +153,14 @@ namespace Its.Log.Instrumentation
             }
             set
             {
-                if (anonymousMethodInfo != value)
+                if (anonymousMethodInfo == value)
                 {
-                    anonymousMethodInfo = value;
-                    CallingType = anonymousMethodInfo.EnclosingType;
-                    CallingMethod = value.EnclosingMethodName;
+                    return;
                 }
+
+                anonymousMethodInfo = value;
+                CallingType = anonymousMethodInfo.EnclosingType;
+                CallingMethod = value.EnclosingMethodName;
             }
         }
 
@@ -195,9 +198,11 @@ namespace Its.Log.Instrumentation
         {
             get
             {
-                return message = (message ??
-                                  Subject as string ??
-                                  (Subject as Func<String>).Maybe(f => f()));
+                return message = message ??
+                                 Subject as string ??
+                                 Subject.IfTypeIs<Func<string>>()
+                                        .Then(f => f())
+                                        .ElseDefault();
             }
 
             set
@@ -221,25 +226,30 @@ namespace Its.Log.Instrumentation
                 subject = value;
 
                 var exception = subject as Exception;
-                if (exception != null)
-                {
-                    EnsureExceptionId();
 
-                    if (eventType == null)
-                    {
-                        if (exception.HasBeenHandled())
-                        {
-                            eventType = TraceEventType.Warning;
-                        }
-                        else if (exception.IsFatal())
-                        {
-                            eventType = TraceEventType.Critical;
-                        }
-                        else
-                        {
-                            EventType = TraceEventType.Error;
-                        }
-                    }
+                if (exception == null)
+                {
+                    return;
+                }
+
+                EnsureExceptionId();
+
+                if (eventType != null)
+                {
+                    return;
+                }
+
+                if (exception.HasBeenHandled())
+                {
+                    eventType = TraceEventType.Warning;
+                }
+                else if (exception.IsFatal())
+                {
+                    eventType = TraceEventType.Critical;
+                }
+                else
+                {
+                    EventType = TraceEventType.Error;
                 }
             }
         }
@@ -265,14 +275,10 @@ namespace Its.Log.Instrumentation
         /// </summary>
         /// <typeparam name="T">The <see cref="Type" /> of the subject</typeparam>
         /// <returns>The <see cref="Subject" />, strongly typed</returns>
-        public virtual T GetSubject<T>()
-        {
-            if (Subject is T)
-            {
-                return (T)Subject;
-            }
-            return default(T);
-        }
+        public virtual T GetSubject<T>() =>
+            Subject is T
+                ? (T) Subject
+                : default(T);
 
         /// <summary>
         /// Returns a <see cref="T:System.String"/> that represents the current <see cref="T:System.Object"/>.
@@ -280,10 +286,7 @@ namespace Its.Log.Instrumentation
         /// <returns>
         /// A <see cref="T:System.String"/> that represents the current <see cref="T:System.Object"/>.
         /// </returns>
-        public override string ToString()
-        {
-            return Formatter<LogEntry>.Format(this);
-        }
+        public override string ToString() => Formatter<LogEntry>.Format(this);
 
         /// <summary> 
         /// Adds info to the <see cref="LogEntry"/>.
@@ -350,13 +353,13 @@ namespace Its.Log.Instrumentation
         /// If a log entry is part of a log activity, gets the objects passed to Confirm.
         /// </summary>
         [FormatterIgnores]
-        public IEnumerable<object> Confirmations
+        internal IEnumerable<object> Confirmations
         {
             get
             {
                 return confirmations ?? (confirmations = Enumerable.Empty<object>());
             }
-            internal set
+            set
             {
                 confirmations = value;
             }
@@ -394,10 +397,7 @@ namespace Its.Log.Instrumentation
                 if (EventType == TraceEventType.Stop || EventType == TraceEventType.Verbose)
                 {
                     var stopwatch = GetExtension<Stopwatch>();
-                    if (stopwatch != null)
-                    {
-                        return stopwatch.ElapsedMilliseconds;
-                    }
+                    return stopwatch?.ElapsedMilliseconds;
                 }
 
                 return null;
@@ -478,9 +478,8 @@ namespace Its.Log.Instrumentation
         /// Clones this instance.
         /// </summary>
         /// <returns>A <see cref="LogEntry" /> which is a clone of this instance.</returns>
-        internal virtual LogEntry Clone(bool deep)
-        {
-            var clone = new LogEntry(Subject)
+        internal virtual LogEntry Clone(bool deep) =>
+            new LogEntry(Subject)
             {
                 info = info,
                 Message = Message,
@@ -489,8 +488,6 @@ namespace Its.Log.Instrumentation
                                  ? extensions
                                  : new Dictionary<Type, object>(extensions)
             };
-            return clone;
-        }
 
         /// <summary>
         /// Ensures that the exception id is initialized.
