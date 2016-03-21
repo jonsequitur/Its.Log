@@ -2,10 +2,15 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using System.Collections.Generic;
 using System.Net;
 using System.Net.Http;
+using System.Text;
 using System.Web.Http.Filters;
 using Its.Log.Instrumentation;
+using Its.Log.Instrumentation.Extensions;
+using Its.Recipes;
+using Newtonsoft.Json;
 
 namespace Its.Log.Monitoring
 {
@@ -18,18 +23,39 @@ namespace Its.Log.Monitoring
             this.testUriRouteRoot = testUriRouteRoot;
         }
 
+        public override bool AllowMultiple => false;
+
         public override void OnException(HttpActionExecutedContext actionExecutedContext)
         {
-            if (actionExecutedContext.ActionContext.ControllerContext.RouteData.Route.RouteTemplate.StartsWith(testUriRouteRoot + "/", StringComparison.OrdinalIgnoreCase))
+            if (!actionExecutedContext.ActionContext.ControllerContext.RouteData.Route.RouteTemplate
+                                      .StartsWith(testUriRouteRoot + "/", StringComparison.OrdinalIgnoreCase))
             {
-                var response = new HttpResponseMessage(HttpStatusCode.InternalServerError)
-                {
-                    Content = new StringContent(actionExecutedContext.Exception.ToLogString())
-                };
-                actionExecutedContext.Response = response;
+                return;
             }
-        }
 
-        public override bool AllowMultiple => false;
+            actionExecutedContext.Response = actionExecutedContext
+                .Exception
+                .IfTypeIs<AggregationAssertionException<IEnumerable<Telemetry>>>()
+                .Then(e => new HttpResponseMessage(HttpStatusCode.InternalServerError)
+                           {
+                               Content = new StringContent(JsonConvert.SerializeObject(new
+                                                                                       {
+                                                                                           Message = e.Message,
+                                                                                           RelatedEvents = e.State,
+                                                                                           Exception = e.ToLogString()
+                                                                                       }),
+                                                           Encoding.UTF8,
+                                                           "application/json")
+                           }).Else(() => new HttpResponseMessage(HttpStatusCode.InternalServerError)
+                                         {
+                                             Content = new StringContent(JsonConvert.SerializeObject(new
+                                                                                                     {
+                                                                                                         Message = actionExecutedContext.Exception.Message,
+                                                                                                         Exception = actionExecutedContext.Exception.ToLogString()
+                                                                                                     }),
+                                                                         Encoding.UTF8,
+                                                                         "application/json")
+                                         });
+        }
     }
 }
