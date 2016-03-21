@@ -10,11 +10,9 @@
 // PM> Get-Package -Updates
 
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Net.Http;
-using System.Net.Http.Headers;
 using System.ServiceModel.Channels;
+using System.Threading;
 using System.Web;
 using Its.Log.Instrumentation.Extensions;
 
@@ -41,11 +39,31 @@ namespace Its.Log.Instrumentation
                 {
                     telemetry.RequestUri = request.RequestUri;
                     telemetry.WithCallerIpAddressBasedOn(request);
+                    telemetry.WithIsIncomingRequestBasedOn(request);
                     telemetry.WithOperationNameBasedOn(request);
+                    telemetry.WithUserIdentifierBasedOn(request);
                 }
             }
 
             return telemetry;
+        }
+
+        private static void WithIsIncomingRequestBasedOn(this Telemetry telemetry, HttpRequestMessage request)
+        {
+            if (request.GetActionDescriptor() != null)
+            {
+                telemetry.IsIncomingRequest(true);
+            }
+        }
+
+        private static void WithUserIdentifierBasedOn(this Telemetry telemetry, HttpRequestMessage request)
+        {
+            object userIdentifier;
+            telemetry.UserIdentifier = request.Properties.TryGetValue("__Its_Log_UserIdentifier", out userIdentifier)
+                                           ? userIdentifier == null
+                                                 ? null
+                                                 : userIdentifier.ToString()
+                                           : Thread.CurrentPrincipal.Identity.Name;
         }
 
         private static void WithCallerIpAddressBasedOn(this Telemetry telemetry, HttpRequestMessage request)
@@ -54,7 +72,6 @@ namespace Its.Log.Instrumentation
 
             if (!string.IsNullOrWhiteSpace(callerIpAddress))
             {
-                telemetry.IsIncomingRequest(true);
                 telemetry.CallerIpAddress(callerIpAddress);
             }
         }
@@ -78,7 +95,7 @@ namespace Its.Log.Instrumentation
         }
 
         /// <summary>
-        /// Determines whether the telemetry is for an incoming request.
+        ///     Determines whether the telemetry is for an incoming request.
         /// </summary>
         /// <param name="telemetry">The telemetry.</param>
         /// <returns></returns>
@@ -94,7 +111,7 @@ namespace Its.Log.Instrumentation
         }
 
         /// <summary>
-        /// Sets a property indicating that the telemetry is for an incoming request.
+        ///     Sets a property indicating that the telemetry is for an incoming request.
         /// </summary>
         public static void IsIncomingRequest(this Telemetry telemetry, bool value)
         {
@@ -102,7 +119,7 @@ namespace Its.Log.Instrumentation
         }
 
         /// <summary>
-        /// Gets a property indicating the caller's IP address.
+        ///     Gets a property indicating the caller's IP address.
         /// </summary>
         public static string CallerIpAddress(this Telemetry telemetry)
         {
@@ -116,7 +133,7 @@ namespace Its.Log.Instrumentation
         }
 
         /// <summary>
-        /// Sets the caller's the ip address in <see cref="Telemetry.Properties" />.
+        ///     Sets the caller's the ip address in <see cref="Telemetry.Properties" />.
         /// </summary>
         public static void CallerIpAddress(this Telemetry telemetry, string value)
         {
