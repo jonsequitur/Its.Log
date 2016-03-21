@@ -6,7 +6,9 @@ using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Reactive.Disposables;
+using System.Security.Principal;
 using System.ServiceModel.Channels;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Web.Http.Controllers;
 using System.Web.Http.Hosting;
@@ -138,13 +140,33 @@ namespace Recipes.Tests
             }
 
             telemetryEvents.Single()
-                           .IsIncomingRequest()
-                           .Should()
-                           .BeTrue();
-            telemetryEvents.Single()
                            .CallerIpAddress()
                            .Should()
                            .Be("123.123.123.123");
+        }
+
+        [Test]
+        public async Task Telemetry_events_based_on_HTTP_request_are_marked_as_incoming()
+        {
+            HttpResponseMessage response = null;
+
+            using (Log.With<Telemetry>(t => t.WithPropertiesBasedOn(response)).Enter(() => { }))
+            {
+                var request = new HttpRequestMessage(HttpMethod.Get, @"http://contoso.com/");
+                var actionDescriptor = new Mock<HttpActionDescriptor>();
+                actionDescriptor.Setup(a => a.ActionName).Returns("operationName6");
+                request.Properties[HttpPropertyKeys.HttpActionDescriptorKey] = actionDescriptor.Object;
+
+                response = new HttpResponseMessage(HttpStatusCode.OK)
+                {
+                    RequestMessage = request
+                };
+            }
+
+            telemetryEvents.Single()
+                           .IsIncomingRequest()
+                           .Should()
+                           .BeTrue();
         }
 
         [Test]
@@ -189,5 +211,87 @@ namespace Recipes.Tests
                            .Should()
                            .Be("operationName5");
         }
+
+        [Test]
+        public async Task Telemetry_events_set_the_user_identifier_based_on_the_request_property()
+        {
+            HttpResponseMessage response = null;
+
+            using (Log.With<Telemetry>(t => t.WithPropertiesBasedOn(response)).Enter(() => { }))
+            {
+                response = new HttpResponseMessage(HttpStatusCode.OK)
+                {
+                    RequestMessage = new HttpRequestMessage(HttpMethod.Get, @"http://contoso.com/")
+                                     {
+                                         Properties = { new KeyValuePair<string, object>("__Its_Log_UserIdentifier", "Bobby") }
+                                     }
+                };
+            }
+
+            telemetryEvents.Single()
+                           .UserIdentifier
+                           .Should()
+                           .Be("Bobby");
+        }
+
+        [Test]
+        public async Task Telemetry_events_set_the_user_identifier_based_on_the_CurrentPrincipal_when_the_property_is_not_set()
+        {
+            HttpResponseMessage response = null;
+
+            using (Log.With<Telemetry>(t => t.WithPropertiesBasedOn(response)).Enter(() => { }))
+            {
+                var customIdentity = new CustomIdentity("Bobby");
+                GenericPrincipal threadCurrentPrincipal = new GenericPrincipal(customIdentity, new [] { "CustomUser" });
+                Thread.CurrentPrincipal = threadCurrentPrincipal;
+                response = new HttpResponseMessage(HttpStatusCode.OK)
+                {
+                    RequestMessage = new HttpRequestMessage(HttpMethod.Get, @"http://contoso.com/")
+                };
+            }
+
+            telemetryEvents.Single()
+                           .UserIdentifier
+                           .Should()
+                           .Be("Bobby");
+        }
+
+        [Test]
+        public async Task Telemetry_events_set_the_user_identifier_based_on_request_properties_over_CurrentPrincipal()
+        {
+            HttpResponseMessage response = null;
+
+            using (Log.With<Telemetry>(t => t.WithPropertiesBasedOn(response)).Enter(() => { }))
+            {
+                var customIdentity = new CustomIdentity("BobbyCurrentPrincipal");
+                GenericPrincipal threadCurrentPrincipal = new GenericPrincipal(customIdentity, new [] { "CustomUser" });
+                Thread.CurrentPrincipal = threadCurrentPrincipal;
+                response = new HttpResponseMessage(HttpStatusCode.OK)
+                {
+                    RequestMessage = new HttpRequestMessage(HttpMethod.Get, @"http://contoso.com/")
+                    {
+                        Properties = { new KeyValuePair<string, object>("__Its_Log_UserIdentifier", "BobbyRequestProperty") }
+                    }
+                };
+            }
+
+            telemetryEvents.Single()
+                           .UserIdentifier
+                           .Should()
+                           .Be("BobbyRequestProperty");
+        }
+    }
+
+    public class CustomIdentity : IIdentity
+    {
+        public CustomIdentity(string name)
+        {
+            Name = name;
+            IsAuthenticated = true;
+        }
+
+        public string Name { get; private set; }
+        public string AuthenticationType { get; private set; }
+        public bool IsAuthenticated { get; private set; }
     }
 }
