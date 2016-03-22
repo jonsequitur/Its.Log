@@ -12,8 +12,8 @@ using System.Runtime.InteropServices;
 
 
 [assembly: AssemblyVersion("2.7.0.0")]
-[assembly: AssemblyFileVersion("2.9.13")]
-[assembly: AssemblyInformationalVersion("2.9.13")]
+[assembly: AssemblyFileVersion("2.9.14")]
+[assembly: AssemblyInformationalVersion("2.9.14")]
 
 [assembly: AssemblyTrademark("Microsoft and Windows are registered trademarks of Microsoft Corporation.")]
 [assembly: AssemblyDelaySign(false)]
