@@ -8,6 +8,7 @@ using System.Net.Http;
 using System.Threading.Tasks;
 using System.Web.Http;
 using FluentAssertions;
+using Its.Log.Instrumentation.Extensions;
 using Its.Recipes;
 using NUnit.Framework;
 using Newtonsoft.Json.Linq;
@@ -445,6 +446,56 @@ namespace Its.Log.Monitoring.UnitTests
         private dynamic also_not_a_test()
         {
             return null;
+        }
+
+        public void no_more_than_10_percent_of_calls_have_failed()
+        {
+            Telemetry[] telemetry =
+            {
+                new Telemetry
+                {
+                    ElapsedMilliseconds = Any.Int(),
+                    OperationName = Any.CamelCaseName(),
+                    Succeeded = false,
+                    UserIdentifier = Any.Email(),
+                    Properties = {{"StatusCode", "500"}}
+                },
+                new Telemetry
+                {
+                    ElapsedMilliseconds = Any.Int(),
+                    OperationName = Any.CamelCaseName(),
+                    Succeeded = true,
+                    UserIdentifier = Any.Email(),
+                    Properties = {{"StatusCode", "200"}}
+                }
+            };
+
+            telemetry.PercentageOf(t => !t.Succeeded).Should().BeLessThanOrEqualTo(10.Percent());
+        }
+
+        public void telemetry_without_failures()
+        {
+            Telemetry[] telemetry =
+            {
+                new Telemetry
+                {
+                    ElapsedMilliseconds = Any.Int(),
+                    OperationName = Any.CamelCaseName(),
+                    Succeeded = true,
+                    UserIdentifier = Any.Email(),
+                    Properties = {{"StatusCode", "200"}}
+                },
+                new Telemetry
+                {
+                    ElapsedMilliseconds = Any.Int(),
+                    OperationName = Any.CamelCaseName(),
+                    Succeeded = true,
+                    UserIdentifier = Any.Email(),
+                    Properties = {{"StatusCode", "200"}}
+                }
+            };
+
+            telemetry.PercentageOf(t => t.Succeeded).Should().BeEqualTo(100.Percent());
         }
     }
 

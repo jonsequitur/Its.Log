@@ -87,10 +87,15 @@
     <Compile Include="AssertionFailedException.cs" />
     <Compile Include="AuthorizeSensorsAttribute.cs" />
     <Compile Include="Enumerable.cs" />
+    <Compile Include="Percentage.cs" />
+    <Compile Include="Aggregation.cs" />
+    <Compile Include="AggregationAssertionException.cs" />
+    <Compile Include="AggregationAssertions.cs" />
     <Compile Include="TagConstraint.cs" />
     <Compile Include="CacheExtensions.cs" />
     <Compile Include="EnvironmentConstraint.cs" />
     <Compile Include="DefaultJsonFormatterAttribute.cs" />
+    <Compile Include="Telemetry.cs" />
     <Compile Include="TestUiHtmlConfigurationAttribute.cs" />
     <Compile Include="TestUiScriptFormatter.cs" />
     <Compile Include="HttpConfigurationExtensions.cs" />

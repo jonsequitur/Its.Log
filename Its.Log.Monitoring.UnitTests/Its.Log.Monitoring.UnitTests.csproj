@@ -106,6 +106,7 @@
     <Compile Include="%28Its.Recipes%29\MaybeExtensions.cs" />
     <Compile Include="%28Its.Recipes%29\TestInputGenerator.cs" />
     <Compile Include="AssertionExtensionsTests.cs" />
+    <Compile Include="AssertionTests.cs" />
     <Compile Include="FakeHttpClient.cs" />
     <Compile Include="JsonContent.cs" />
     <Compile Include="JsonSerializationExtensions.cs" />
@@ -120,6 +121,7 @@
     <Compile Include="SensorRoutingTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="TargetBasedTestConstraintTests.cs" />
+    <Compile Include="TelemetryMonitorTests.cs" />
     <Compile Include="TestApi.cs" />
     <Compile Include="TestSensor.cs" />
   </ItemGroup>
