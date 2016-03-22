@@ -2,6 +2,8 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
@@ -81,6 +83,38 @@ namespace Its.Log.Monitoring
             this Task<HttpResponseMessage> response,
             HttpStatusCode code) =>
                 (await response).ShouldFailWith(code);
+
+        public static Aggregation<IEnumerable<T>, long> CountOf<T>(this IEnumerable<T> sequence, Func<T, bool> selector)
+        {
+            var filteredResults = sequence.Where(selector).ToArray();
+
+            return new Aggregation<IEnumerable<T>, long>(filteredResults, filteredResults.Length);
+        }
+
+        public static Aggregation<IEnumerable<T>, Percentage> PercentageOf<T>(this IEnumerable<T> sequence, Func<T, bool> selector)
+        {
+            var count = 0;
+
+            var filteredResults = sequence.Where(_ =>
+            {
+                count++;
+                return selector(_);
+            }).ToArray();
+
+            var percentage = count == 0 ? 0 : (double)filteredResults.Length / count;
+
+            return new Aggregation<IEnumerable<T>, Percentage>(filteredResults, new Percentage((int)(percentage * 100)));
+        }
+
+        public static AggregationAssertions<TState, TResult> Should<TState, TResult>(this Aggregation<TState, TResult> aggregation) where TResult : IComparable<TResult>
+        {
+            return new AggregationAssertions<TState, TResult>(aggregation);
+        }
+
+        public static Percentage Percent(this int i)
+        {
+            return new Percentage(i);
+        }
 
         private static void ThrowVerboseAssertion(HttpResponseMessage response)
         {
