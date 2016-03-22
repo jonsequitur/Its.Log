@@ -46,7 +46,7 @@ namespace Its.Log.Instrumentation.UnitTests
         }
 
         [Test]
-        public void Telemetry_events_indicate_success_if_confirmed()
+        public void Telemetry_events_indicate_success_if_marked_as_successful()
         {
             using (var activity = Log.With<Telemetry>().Enter(() => { }))
             {
