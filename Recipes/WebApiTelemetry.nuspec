@@ -3,7 +3,7 @@
   <metadata>
     <id>Its.Log.WebApiTelemetry</id>
     <title>Its.Log.WebApiTelemetry Recipe</title>
-    <version>1.0.5-beta</version>
+    <version>1.0.6-beta</version>
     <authors>jonsequitur</authors>
     <owners>Microsoft,jonsequitur</owners>
     <projectUrl>https://github.com/jonsequitur/its.log</projectUrl>
