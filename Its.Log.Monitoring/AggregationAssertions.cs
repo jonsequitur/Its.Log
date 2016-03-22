@@ -12,6 +12,10 @@ namespace Its.Log.Monitoring
             {
                 throw new ArgumentNullException(nameof(aggregation));
             }
+            if (aggregation.Result == null)
+            {
+                throw new ArgumentNullException(nameof(aggregation.Result));
+            }
             Subject = aggregation;
         }
 
