@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
 using System.Web.Http.Controllers;
@@ -22,7 +23,7 @@ namespace Its.Log.Monitoring
             }
 
             this.methodInfo = methodInfo;
-
+            var methodParametersExpression = methodInfo.GetParameters().Select(p => Expression.Constant(p.DefaultValue));
             var test = Expression.Parameter(typeof (T), "test");
 
             if (methodInfo.ReturnType != typeof (void))
@@ -30,15 +31,19 @@ namespace Its.Log.Monitoring
                 if (methodInfo.ReturnType.IsClass)
                 {
                     executeTestMethod = Expression.Lambda<Func<T, dynamic>>(
-                        Expression.Call(test, methodInfo),
-                        test)
+                                                                            Expression.Call(test,
+                                                                                            methodInfo,
+                                                                                            methodParametersExpression),
+                                                                            test)
                                                   .Compile();
                 }
                 else
                 {
                     dynamic testMethod = Expression.Lambda(typeof (Func<,>)
                                                                .MakeGenericType(typeof (T), methodInfo.ReturnType),
-                                                           Expression.Call(test, methodInfo),
+                                                           Expression.Call(test,
+                                                                           methodInfo,
+                                                                           methodParametersExpression),
                                                            test)
                                                    .Compile();
                     executeTestMethod = testClassInstance => testMethod(testClassInstance);
@@ -46,15 +51,16 @@ namespace Its.Log.Monitoring
             }
             else
             {
-                var voidRunMethod = Expression.Lambda<Action<T>>(
-                    Expression.Call(test, methodInfo),
-                    test).Compile();
+                var voidRunMethod = Expression.Lambda<Action<T>>(Expression.Call(test,
+                                                                                 methodInfo,
+                                                                                 methodParametersExpression),
+                                                                 test).Compile();
 
                 executeTestMethod = testClassInstance =>
-                {
-                    voidRunMethod(testClassInstance);
-                    return new object();
-                };
+                                    {
+                                        voidRunMethod(testClassInstance);
+                                        return new object();
+                                    };
             }
         }
 
@@ -64,7 +70,7 @@ namespace Its.Log.Monitoring
         {
             resolver = resolver ??
                        (t => (T) context.ControllerContext.Configuration.DependencyResolver.GetService(typeof (T)) ??
-                             (Activator.CreateInstance<T>()));
+                             Activator.CreateInstance<T>());
 
             var testClassInstance = (T) resolver(typeof (T));
 
