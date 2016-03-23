@@ -87,6 +87,7 @@
     <Compile Include="AssertionFailedException.cs" />
     <Compile Include="AuthorizeSensorsAttribute.cs" />
     <Compile Include="Enumerable.cs" />
+    <Compile Include="MonitorParameterFormatException.cs" />
     <Compile Include="Percentage.cs" />
     <Compile Include="Aggregation.cs" />
     <Compile Include="AggregationAssertionException.cs" />
