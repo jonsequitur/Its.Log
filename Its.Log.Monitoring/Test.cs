@@ -17,6 +17,6 @@ namespace Its.Log.Monitoring
         public string[] Tags { get; set; }
 
         [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
-        public TestParameter[] QueryParameters { get; set; }
+        public Parameter[] Parameters { get; set; }
     }
 }

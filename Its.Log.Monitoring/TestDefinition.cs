@@ -14,7 +14,7 @@ namespace Its.Log.Monitoring
 {
     internal abstract class TestDefinition
     {
-        private IEnumerable<TestParameter> testParameters;
+        private IEnumerable<Parameter> testParameters;
         public abstract string TestName { get; }
 
         public string RouteName => "Its-Log-Monitoring-Test-" + TestName;
@@ -38,14 +38,14 @@ namespace Its.Log.Monitoring
                 new object[] { methodInfo },
                 null);
             testDefinition.TestType = testType;
-            testDefinition.TestParameters = methodInfo.GetParameters().Select(p => 
-            new TestParameter(p.Name, p.DefaultValue));
+            testDefinition.Parameters = methodInfo.GetParameters().Select(p => 
+            new Parameter(p.Name, p.DefaultValue));
             return testDefinition;
         }
 
-        public IEnumerable<TestParameter> TestParameters
+        public IEnumerable<Parameter> Parameters
         {
-            get { return testParameters ?? System.Linq.Enumerable.Empty<TestParameter>(); }
+            get { return testParameters ?? (testParameters = System.Linq.Enumerable.Empty<Parameter>()); }
             set { testParameters = value; }
         }
     }

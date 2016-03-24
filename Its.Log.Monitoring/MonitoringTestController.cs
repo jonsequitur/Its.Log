@@ -67,7 +67,7 @@ namespace Its.Log.Monitoring
                                                                            ea.Environment
                                                                        }),
                                                         Tags = t.Tags,
-                                                        QueryParameters = t.TestParameters.Any() ? t.TestParameters.ToArray() : null
+                                                        Parameters = t.Parameters.Any() ? t.Parameters.ToArray() : null
                                                     })
                                             .Where(l => l.Url != null))
                                             .OrderBy(t => t.Url.ToString())

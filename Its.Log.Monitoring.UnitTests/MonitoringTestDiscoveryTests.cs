@@ -484,9 +484,9 @@ namespace Its.Log.Monitoring.UnitTests
             var content = JsonConvert.DeserializeObject<TestDiscoveryResponse>(response.Content.ReadAsStringAsync().Result);
 
             content.Tests.Single(t => t.Url == "http://blammo.com/tests/staging/widgetapi/string_returning_test_with_optional_parameters")
-                   .QueryParameters.Should().ContainSingle(p => p.Name == "foo");
+                   .Parameters.Should().ContainSingle(p => p.Name == "foo");
             content.Tests.Single(t => t.Url == "http://blammo.com/tests/staging/widgetapi/string_returning_test_with_optional_parameters")
-                   .QueryParameters.Should().ContainSingle(p => p.Name == "count");
+                   .Parameters.Should().ContainSingle(p => p.Name == "count");
         }
 
         [Test]
@@ -498,9 +498,9 @@ namespace Its.Log.Monitoring.UnitTests
             var content = JsonConvert.DeserializeObject<TestDiscoveryResponse>(response.Content.ReadAsStringAsync().Result);
 
             content.Tests.Single(t => t.Url == "http://blammo.com/tests/staging/widgetapi/string_returning_test_with_optional_parameters")
-                   .QueryParameters.Single(p => p.Name == "foo").DefaultValue.ShouldBeEquivalentTo("bar");
+                   .Parameters.Single(p => p.Name == "foo").DefaultValue.ShouldBeEquivalentTo("bar");
             content.Tests.Single(t => t.Url == "http://blammo.com/tests/staging/widgetapi/string_returning_test_with_optional_parameters")
-                   .QueryParameters.Single(p => p.Name == "count").DefaultValue.ShouldBeEquivalentTo(1);
+                   .Parameters.Single(p => p.Name == "count").DefaultValue.ShouldBeEquivalentTo(1);
         }
 
         [Test]
@@ -512,7 +512,7 @@ namespace Its.Log.Monitoring.UnitTests
             var content = JsonConvert.DeserializeObject<TestDiscoveryResponse>(response.Content.ReadAsStringAsync().Result);
 
             content.Tests.Single(t => t.Url == "http://blammo.com/tests/staging/widgetapi/passing_test_returns_object")
-                   .QueryParameters.Should().BeNull();
+                   .Parameters.Should().BeNull();
 
         }
     }
@@ -727,9 +727,9 @@ namespace Its.Log.Monitoring.UnitTests
             public string Application { get; set; }
             public string Environment { get; set; }
             public string Url { get; set; }
-            public QueryParameter[] QueryParameters { get; set; }
+            public Parameter[] Parameters { get; set; }
 
-            public class QueryParameter
+            public class Parameter
             {
                 public string Name { get; set; }
                 public object DefaultValue { get; set; }
