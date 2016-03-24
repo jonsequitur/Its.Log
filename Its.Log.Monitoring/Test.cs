@@ -1,7 +1,6 @@
 // Copyright (c) Microsoft. All rights reserved. 
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using System;
 using Newtonsoft.Json;
 
 namespace Its.Log.Monitoring
@@ -16,5 +15,8 @@ namespace Its.Log.Monitoring
 
         [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
         public string[] Tags { get; set; }
+
+        [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
+        public TestParameter[] QueryParameters { get; set; }
     }
 }

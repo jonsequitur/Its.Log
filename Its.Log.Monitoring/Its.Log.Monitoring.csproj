@@ -92,6 +92,7 @@
     <Compile Include="Aggregation.cs" />
     <Compile Include="AggregationAssertionException.cs" />
     <Compile Include="AggregationAssertions.cs" />
+    <Compile Include="TestParameter.cs" />
     <Compile Include="TagConstraint.cs" />
     <Compile Include="CacheExtensions.cs" />
     <Compile Include="EnvironmentConstraint.cs" />
