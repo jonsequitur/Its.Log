@@ -78,7 +78,7 @@ namespace Its.Log.Instrumentation.UnitTests
             telemetryEvents.Single()
                            .ElapsedMilliseconds
                            .Should()
-                           .BeInRange(1000, 1100);
+                           .BeInRange(900, 1100);
         }
 
         [Test]
