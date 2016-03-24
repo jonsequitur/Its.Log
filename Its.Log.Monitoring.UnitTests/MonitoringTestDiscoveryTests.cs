@@ -6,6 +6,7 @@ using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
+using System.Web;
 using System.Web.Http;
 using FluentAssertions;
 using Its.Log.Instrumentation.Extensions;
@@ -154,8 +155,6 @@ namespace Its.Log.Monitoring.UnitTests
         {
             var response = apiClient.GetAsync("http://blammo.com/tests/production/widgetapiz/is_reachable").Result;
 
-            var message = response.Content.ReadAsStringAsync().Result;
-
             response.ShouldFailWith(HttpStatusCode.NotFound);
         }
 
@@ -220,7 +219,7 @@ namespace Its.Log.Monitoring.UnitTests
         }
 
         [Test]
-        public async Task Specific_tests_can_be_routed_using_the_testTypes_argument()
+        public void Specific_tests_can_be_routed_using_the_testTypes_argument()
         {
             var configuration = new HttpConfiguration();
             configuration.MapTestRoutes(configureTargets: targets =>
@@ -252,10 +251,7 @@ namespace Its.Log.Monitoring.UnitTests
             var response = apiClient.GetAsync("http://blammo.com/tests/staging/widgetapi/?apple=true").Result;
 
             response.ShouldSucceed();
-
-            var json = response.Content.ReadAsStringAsync().Result;
-
-            json.Should().Contain("honeycrisp");
+            response.Content.ReadAsStringAsync().Result.Should().Contain("honeycrisp");
         }
 
         [Category("Tags")]
@@ -265,10 +261,7 @@ namespace Its.Log.Monitoring.UnitTests
             var response = apiClient.GetAsync("http://blammo.com/tests/staging/widgetapi/?apple=true").Result;
 
             response.ShouldSucceed();
-
-            var json = response.Content.ReadAsStringAsync().Result;
-
-            json.Should().NotContain("passing_test");
+            response.Content.ReadAsStringAsync().Result.Should().NotContain("passing_test");
         }
 
         [Category("Tags")]
@@ -278,10 +271,7 @@ namespace Its.Log.Monitoring.UnitTests
             var response = apiClient.GetAsync("http://blammo.com/tests/staging/widgetapi/?apple=true").Result;
 
             response.ShouldSucceed();
-
-            var json = response.Content.ReadAsStringAsync().Result;
-
-            json.Should().NotContain("tangerine");
+            response.Content.ReadAsStringAsync().Result.Should().NotContain("tangerine");
         }
 
         [Category("Tags")]
@@ -291,10 +281,7 @@ namespace Its.Log.Monitoring.UnitTests
             var response = apiClient.GetAsync("http://blammo.com/tests/staging/widgetapi/").Result;
 
             response.ShouldSucceed();
-
-            var json = response.Content.ReadAsStringAsync().Result;
-
-            json.Should().Contain("honeycrisp");
+            response.Content.ReadAsStringAsync().Result.Should().Contain("honeycrisp");
         }
 
         [Category("Tags")]
@@ -304,10 +291,7 @@ namespace Its.Log.Monitoring.UnitTests
             var response = apiClient.GetAsync("http://blammo.com/tests/staging/widgetapi/?fruit=true").Result;
 
             response.ShouldSucceed();
-
-            var json = response.Content.ReadAsStringAsync().Result;
-
-            json.Should().Contain("honeycrisp");
+            response.Content.ReadAsStringAsync().Result.Should().Contain("honeycrisp");
         }
 
         [Category("Tags")]
@@ -317,10 +301,7 @@ namespace Its.Log.Monitoring.UnitTests
             var response = apiClient.GetAsync("http://blammo.com/tests/staging/widgetapi/?apple=false").Result;
 
             response.ShouldSucceed();
-
-            var json = response.Content.ReadAsStringAsync().Result;
-
-            json.Should().NotContain("honeycrisp");
+            response.Content.ReadAsStringAsync().Result.Should().NotContain("honeycrisp");
         }
 
         [Category("Tags")]
@@ -330,10 +311,7 @@ namespace Its.Log.Monitoring.UnitTests
             var response = apiClient.GetAsync("http://blammo.com/tests/staging/widgetapi/?apple=false").Result;
 
             response.ShouldSucceed();
-
-            var json = response.Content.ReadAsStringAsync().Result;
-
-            json.Should().Contain("tangerine");
+            response.Content.ReadAsStringAsync().Result.Should().Contain("tangerine");
         }
 
         [Category("Tags")]
@@ -343,10 +321,7 @@ namespace Its.Log.Monitoring.UnitTests
             var response = apiClient.GetAsync("http://blammo.com/tests/staging/widgetapi/?apple=false").Result;
 
             response.ShouldSucceed();
-
-            var json = response.Content.ReadAsStringAsync().Result;
-
-            json.Should().Contain("passing_test_returns_object");
+            response.Content.ReadAsStringAsync().Result.Should().Contain("passing_test_returns_object");
         }
 
         [Category("Tags")]
@@ -391,23 +366,113 @@ namespace Its.Log.Monitoring.UnitTests
             var response = apiClient.GetAsync("http://blammo.com/tests/staging/widgetapi/?Brooklyn=true").Result;
 
             response.ShouldSucceed();
-
-            var json = response.Content.ReadAsStringAsync().Result;
-
-            json.Should().Contain("manhattan");            
+            response.Content.ReadAsStringAsync().Result.Should().Contain("manhattan");            
         }
 
         [Test]
-        public void properties_should_not_be_shows_as_tests()
+        public void when_a_test_class_has_a_public_property_then_it_is_not_discovered_as_a_test()
         {
             var response = apiClient.GetAsync("http://blammo.com/tests/staging/widgetapi/").Result;
 
             response.ShouldSucceed();
-
-            var json = response.Content.ReadAsStringAsync().Result;
-
-            json.Should().NotContain("SomeProperty");
+            response.Content.ReadAsStringAsync().Result.Should().NotContain("SomeProperty");
         }
+
+        [Test]
+        public void when_a_public_void_method_has_optional_parameters_then_it_is_discovered_as_a_test()
+        {
+            var response = apiClient.GetAsync("http://blammo.com/tests/staging/widgetapi/").Result;
+
+            response.ShouldSucceed();
+            response.Content.ReadAsStringAsync().Result.Should().Contain("void_test_with_optional_parameters");
+        }
+
+        [Test]
+        public void when_public_type_returning_methods_have_optional_parameters_then_they_are_discovered_as_a_tests()
+        {
+            var response = apiClient.GetAsync("http://blammo.com/tests/staging/widgetapi/").Result;
+
+            response.ShouldSucceed();
+            response.Content.ReadAsStringAsync().Result.Should().Contain("string_returning_test_with_optional_parameters");
+        }
+
+        [Test]
+        public void when_a_public_method_has_non_optional_parameters_then_it_is_not_discovered_as_a_test()
+        {
+            var response = apiClient.GetAsync("http://blammo.com/tests/staging/widgetapi/").Result;
+
+            response.ShouldSucceed();
+            response.Content.ReadAsStringAsync().Result.Should().NotContain("test_with_non_optional_parameters");
+        }
+
+        [Test]
+        public void when_a_test_with_optional_parameters_is_called_then_the_parameter_is_set_to_the_default_value()
+        {
+            var response = apiClient.GetAsync("http://blammo.com/tests/staging/widgetapi/" +
+                                              "string_returning_test_with_optional_parameters").Result;
+
+            response.ShouldSucceed();
+            response.Content.ReadAsStringAsync().Result.Should().Contain("bar");
+        }
+
+        [Test]
+        public void when_a_test_with_optional_parameters_is_called_then_the_parameters_can_be_set_with_a_query_string_parameter()
+        {
+            var response = apiClient.GetAsync("http://blammo.com/tests/staging/widgetapi/" +
+                                              "string_returning_test_with_optional_parameters?foo=notbar").Result;
+
+            response.ShouldSucceed();
+            response.Content.ReadAsStringAsync().Result.Should().Contain("notbar");
+        }
+
+        [Test]
+        public void when_passing_query_parameters_that_are_not_test_parameters_then_the_test_still_executes()
+        {
+            var response = apiClient.GetAsync("http://blammo.com/tests/staging/widgetapi/" +
+                                              "string_returning_test_with_optional_parameters?foo=notbar&apikey=iHaveNothingToDoWithYourTest").Result;
+
+            response.ShouldSucceed();
+            response.Content.ReadAsStringAsync().Result.Should().Contain("notbar");
+            response.Content.ReadAsStringAsync().Result.Should().NotContain("iHaveNothingToDoWithYourTest");
+        }
+
+        [Test]
+        public void when_a_parameter_of_the_wrong_type_is_supplied_then_a_useful_error_message_is_returned()
+        {
+            var response = apiClient.GetAsync("http://blammo.com/tests/staging/widgetapi/" +
+                                              "string_returning_test_with_optional_parameters?count=gronk").Result;
+
+            response.ShouldFailWith(HttpStatusCode.BadRequest);
+            response.Content.ReadAsStringAsync().Result.Should().Contain("The value specified for parameter 'count' could not be parsed as System.Int32");
+        }
+
+        [Test]
+        public void when_the_first_optional_parameter_is_not_specified_then_the_test_still_works()
+        {
+            var response = apiClient.GetAsync("http://blammo.com/tests/staging/widgetapi/" +
+                                              "string_returning_test_with_optional_parameters?count=5").Result;
+
+            response.ShouldSucceed();
+            response.Content.ReadAsStringAsync().Result.Should().Contain("bar");
+            response.Content.ReadAsStringAsync().Result.Should().Contain("5");
+        }
+
+        [Test]
+        public void when_tests_with_parameters_are_called_repeatedly_with_different_parameters_then_the_different_parameters_are_used()
+        {
+            var response = apiClient.GetAsync("http://blammo.com/tests/staging/widgetapi/" +
+                                              "string_returning_test_with_optional_parameters?foo=1").Result;
+            response.Content.ReadAsStringAsync().Result.Should().Contain("1");
+
+            response = apiClient.GetAsync("http://blammo.com/tests/staging/widgetapi/" +
+                                          "string_returning_test_with_optional_parameters").Result;
+            response.Content.ReadAsStringAsync().Result.Should().Contain("bar");
+
+            response = apiClient.GetAsync("http://blammo.com/tests/staging/widgetapi/" +
+                                          "string_returning_test_with_optional_parameters?foo=final").Result;
+            response.Content.ReadAsStringAsync().Result.Should().Contain("final");
+        }
+
     }
 
     public class GotTests : IMonitoringTest
@@ -431,6 +496,19 @@ namespace Its.Log.Monitoring.UnitTests
 
         public void passing_void_test()
         {
+        }
+
+        public void void_test_with_optional_parameters(string foo = "bar")
+        {
+        }
+
+        public void test_with_non_optional_parameters(string foo)
+        {
+        }
+
+        public string string_returning_test_with_optional_parameters(string foo = "bar", int count = 1)
+        {
+            return $"{foo} - {count}";
         }
 
         public void failing_void_test()

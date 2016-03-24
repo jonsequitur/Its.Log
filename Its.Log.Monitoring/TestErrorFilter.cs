@@ -37,10 +37,15 @@ namespace Its.Log.Monitoring
                 return;
             }
 
+            var statusCode = actionExecutedContext.Exception
+                                                  .IfTypeIs<MonitorParameterFormatException>()
+                                                  .Then(_ => HttpStatusCode.BadRequest)
+                                                  .Else(() => HttpStatusCode.InternalServerError);
+
             actionExecutedContext.Response = actionExecutedContext
                 .Exception
                 .IfTypeIs<AggregationAssertionException<IEnumerable<Telemetry>>>()
-                .Then(e => new HttpResponseMessage(HttpStatusCode.InternalServerError)
+                .Then(e => new HttpResponseMessage(statusCode)
                 {
                     Content = new StringContent(JsonConvert.SerializeObject(new
                     {
@@ -51,7 +56,7 @@ namespace Its.Log.Monitoring
                                                 Encoding.UTF8,
                                                 "application/json")
                 })
-                .Else(() => new HttpResponseMessage(HttpStatusCode.InternalServerError)
+                .Else(() => new HttpResponseMessage(statusCode)
                 {
                     Content = new StringContent(JsonConvert.SerializeObject(new
                     {

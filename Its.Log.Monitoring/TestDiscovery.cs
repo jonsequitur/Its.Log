@@ -21,7 +21,7 @@ namespace Its.Log.Monitoring
                               .GetMethods(BindingFlags.Public |
                                           BindingFlags.Instance |
                                           BindingFlags.DeclaredOnly)
-                              .Where(m => !m.GetParameters().Any())
+                              .Where(m => m.GetParameters().All(p => p.HasDefaultValue))
                               .Where(m => !m.IsSpecialName)
                               .Select(TestDefinition.Create));
 
