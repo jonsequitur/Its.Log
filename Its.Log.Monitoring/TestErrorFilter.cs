@@ -27,7 +27,11 @@ namespace Its.Log.Monitoring
 
         public override void OnException(HttpActionExecutedContext actionExecutedContext)
         {
-            if (!actionExecutedContext.ActionContext.ControllerContext.RouteData.Route.RouteTemplate
+            if (!actionExecutedContext.ActionContext
+                                      .ControllerContext
+                                      .RouteData
+                                      .Route
+                                      .RouteTemplate
                                       .StartsWith(testUriRouteRoot + "/", StringComparison.OrdinalIgnoreCase))
             {
                 return;
@@ -42,25 +46,26 @@ namespace Its.Log.Monitoring
                 .Exception
                 .IfTypeIs<AggregationAssertionException<IEnumerable<Telemetry>>>()
                 .Then(e => new HttpResponseMessage(statusCode)
-                           {
-                               Content = new StringContent(JsonConvert.SerializeObject(new
-                                                                                       {
-                                                                                           Message = e.Message,
-                                                                                           RelatedEvents = e.State,
-                                                                                           Exception = e.ToLogString()
-                                                                                       }),
-                                                           Encoding.UTF8,
-                                                           "application/json")
-                           }).Else(() => new HttpResponseMessage(statusCode)
-                                         {
-                                             Content = new StringContent(JsonConvert.SerializeObject(new
-                                                                                                     {
-                                                                                                         Message = actionExecutedContext.Exception.Message,
-                                                                                                         Exception = actionExecutedContext.Exception.ToLogString()
-                                                                                                     }),
-                                                                         Encoding.UTF8,
-                                                                         "application/json")
-                                         });
+                {
+                    Content = new StringContent(JsonConvert.SerializeObject(new
+                    {
+                        Message = e.Message,
+                        RelatedEvents = e.State,
+                        Exception = e.ToLogString()
+                    }),
+                                                Encoding.UTF8,
+                                                "application/json")
+                })
+                .Else(() => new HttpResponseMessage(statusCode)
+                {
+                    Content = new StringContent(JsonConvert.SerializeObject(new
+                    {
+                        Message = actionExecutedContext.Exception.Message,
+                        Exception = actionExecutedContext.Exception.ToLogString()
+                    }),
+                                                Encoding.UTF8,
+                                                "application/json")
+                });
         }
     }
 }
