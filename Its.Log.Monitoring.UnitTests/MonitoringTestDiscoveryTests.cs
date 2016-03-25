@@ -11,6 +11,7 @@ using System.Web.Http;
 using FluentAssertions;
 using Its.Log.Instrumentation.Extensions;
 using Its.Recipes;
+using Newtonsoft.Json;
 using NUnit.Framework;
 using Newtonsoft.Json.Linq;
 
@@ -223,7 +224,8 @@ namespace Its.Log.Monitoring.UnitTests
         {
             var configuration = new HttpConfiguration();
             configuration.MapTestRoutes(configureTargets: targets =>
-                                                          targets.Add("production", "widgetapi", new Uri("http://widgets.com")), testTypes: new[] { typeof (WidgetApiTests) });
+                                                          targets.Add("production", "widgetapi", new Uri("http://widgets.com")),
+                                        testTypes: new[] {typeof (WidgetApiTests)});
             configuration.EnsureInitialized();
 
             var api = new HttpClient(new HttpServer(configuration));
@@ -366,7 +368,7 @@ namespace Its.Log.Monitoring.UnitTests
             var response = apiClient.GetAsync("http://blammo.com/tests/staging/widgetapi/?Brooklyn=true").Result;
 
             response.ShouldSucceed();
-            response.Content.ReadAsStringAsync().Result.Should().Contain("manhattan");            
+            response.Content.ReadAsStringAsync().Result.Should().Contain("manhattan");
         }
 
         [Test]
@@ -473,6 +475,46 @@ namespace Its.Log.Monitoring.UnitTests
             response.Content.ReadAsStringAsync().Result.Should().Contain("final");
         }
 
+        [Test]
+        public void when_a_test_accepts_input_parameters_then_the_input_parameter_names_are_discoverable()
+        {
+            var response = apiClient.GetAsync("http://blammo.com/tests/staging/widgetapi/").Result;
+
+            response.ShouldSucceed();
+            var content = JsonConvert.DeserializeObject<TestDiscoveryResponse>(response.Content.ReadAsStringAsync().Result);
+
+            content.Tests.Single(t => t.Url == "http://blammo.com/tests/staging/widgetapi/string_returning_test_with_optional_parameters")
+                   .Parameters.Should().ContainSingle(p => p.Name == "foo");
+            content.Tests.Single(t => t.Url == "http://blammo.com/tests/staging/widgetapi/string_returning_test_with_optional_parameters")
+                   .Parameters.Should().ContainSingle(p => p.Name == "count");
+        }
+
+        [Test]
+        public void when_a_test_accepts_input_parameters_then_the_input_parameter_default_values_are_discoverable()
+        {
+            var response = apiClient.GetAsync("http://blammo.com/tests/staging/widgetapi/").Result;
+
+            response.ShouldSucceed();
+            var content = JsonConvert.DeserializeObject<TestDiscoveryResponse>(response.Content.ReadAsStringAsync().Result);
+
+            content.Tests.Single(t => t.Url == "http://blammo.com/tests/staging/widgetapi/string_returning_test_with_optional_parameters")
+                   .Parameters.Single(p => p.Name == "foo").DefaultValue.ShouldBeEquivalentTo("bar");
+            content.Tests.Single(t => t.Url == "http://blammo.com/tests/staging/widgetapi/string_returning_test_with_optional_parameters")
+                   .Parameters.Single(p => p.Name == "count").DefaultValue.ShouldBeEquivalentTo(1);
+        }
+
+        [Test]
+        public void when_a_test_does_not_accept_input_parameters_then_queryParameters_is_null()
+        {
+            var response = apiClient.GetAsync("http://blammo.com/tests/staging/widgetapi/").Result;
+
+            response.ShouldSucceed();
+            var content = JsonConvert.DeserializeObject<TestDiscoveryResponse>(response.Content.ReadAsStringAsync().Result);
+
+            content.Tests.Single(t => t.Url == "http://blammo.com/tests/staging/widgetapi/passing_test_returns_object")
+                   .Parameters.Should().BeNull();
+
+        }
     }
 
     public class GotTests : IMonitoringTest
@@ -673,6 +715,25 @@ namespace Its.Log.Monitoring.UnitTests
         public dynamic name_collision()
         {
             return GetType().Name;
+        }
+    }
+
+    public class TestDiscoveryResponse
+    {
+        public Test[] Tests { get; set; }
+
+        public class Test
+        {
+            public string Application { get; set; }
+            public string Environment { get; set; }
+            public string Url { get; set; }
+            public Parameter[] Parameters { get; set; }
+
+            public class Parameter
+            {
+                public string Name { get; set; }
+                public object DefaultValue { get; set; }
+            }
         }
     }
 }
