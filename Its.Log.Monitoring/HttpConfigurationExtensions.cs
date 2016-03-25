@@ -142,31 +142,31 @@ namespace Its.Log.Monitoring
             configuration.TestDefinitionsAre(testDefinitions);
 
             testDefinitions.Select(p => p.Value)
-                .ForEach(test =>
-                {
-                    var targetConstraint = new TargetConstraint(test);
+                           .ForEach(test =>
+                           {
+                               var targetConstraint = new TargetConstraint(test);
+                               
+                               targetRegistry.ForEach(target => { Task.Run(() => targetConstraint.Match(target)); });
 
-                    targetRegistry.ForEach(target => { Task.Run(() => targetConstraint.Match(target)); });
-
-                    configuration.Routes.MapHttpRoute(
-                        test.RouteName,
-                        testRootRouteTemplate.AppendSegment(test.TestName),
-                        defaults: new
-                        {
-                            controller = "MonitoringTest",
-                            action = "run",
-                            testName = test.TestName
-                        },
-                        constraints: new
-                        {
-                            tag = new TagConstraint(test),
-                            application = new ApplicationConstraint(test),
-                            environment = new EnvironmentConstraint(test),
-                            target = targetConstraint
-                        },
-                        handler: handler
-                        );
-                });
+                               configuration.Routes.MapHttpRoute(
+                                   test.RouteName,
+                                   testRootRouteTemplate.AppendSegment(test.TestName),
+                                   defaults: new
+                                   {
+                                       controller = "MonitoringTest",
+                                       action = "run",
+                                       testName = test.TestName
+                                   },
+                                   constraints: new
+                                   {
+                                       tag = new TagConstraint(test),
+                                       application = new ApplicationConstraint(test),
+                                       environment = new EnvironmentConstraint(test),
+                                       target = targetConstraint
+                                   },
+                                   handler: handler
+                                   );
+                           });
 
             return configuration;
         }
