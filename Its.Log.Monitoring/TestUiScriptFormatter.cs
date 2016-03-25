@@ -2,8 +2,10 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Formatting;
@@ -16,15 +18,17 @@ namespace Its.Log.Monitoring
     {
         private readonly string bootstrapHtml;
 
-        public TestUiScriptFormatter(string scriptUrl)
+        public TestUiScriptFormatter(string scriptUrl, IEnumerable<string> libraryUrls)
         {
             var version = FileVersionInfo.GetVersionInfo(typeof (TestUiScriptFormatter).Assembly.Location).FileVersion;
+            var libraryScriptRefs = string.Join("\n", libraryUrls.Select(u => $@"<script src=""{u}""></script>"));
 
             bootstrapHtml =
                 $@"<!doctype html>
 <html lang=""en"">
     <head>
 	    <meta charset=""UTF-8"">
+        {libraryScriptRefs}
 	    <script src=""{scriptUrl}?monitoringVersion={version}""></script>
     </head>
     <body>

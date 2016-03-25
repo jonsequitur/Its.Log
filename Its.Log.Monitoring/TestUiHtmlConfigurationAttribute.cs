@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using System.Collections.Generic;
 using System.Web.Http.Controllers;
 using Its.Recipes;
 
@@ -19,6 +20,12 @@ namespace Its.Log.Monitoring
                                             .IfContains("Its.Log.Monitoring.TestUiUri")
                                             .And()
                                             .IfTypeIs<string>()
-                                            .Else(() => "http://itsmonitoringux.azurewebsites.net/its.log.monitoring.js")));
+                                            .Else(() => "http://itsmonitoringux.azurewebsites.net/its.log.monitoring.js"),
+                        controllerDescriptor.Configuration
+                                            .Properties
+                                            .IfContains("Its.Log.Monitoring.TestLibraryUris")
+                                            .And()
+                                            .IfTypeIs<IEnumerable<string>>()
+                                            .Else(() => new string [] {})));
     }
 }
