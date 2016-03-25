@@ -20,7 +20,7 @@ namespace Its.Log.Monitoring.UnitTests
         [Test]
         public void When_HTML_is_requested_then_the_tests_endpoint_returns_UI_bootstrap_HTML()
         {
-            var response = ReqestTestsHtml();
+            var response = RequestTestsHtml();
 
             var result = response.Content.ReadAsStringAsync().Result;
 
@@ -30,7 +30,7 @@ namespace Its.Log.Monitoring.UnitTests
         [Test]
         public void When_HTML_is_requested_then_it_contains_a_semantically_versioned_script_link()
         {
-            var response = ReqestTestsHtml();
+            var response = RequestTestsHtml();
 
             var result = response.Content.ReadAsStringAsync().Result;
 
@@ -40,20 +40,31 @@ namespace Its.Log.Monitoring.UnitTests
         [Test]
         public void The_script_location_for_the_UI_can_be_configured()
         {
-            var response = ReqestTestsHtml("//itscdn.azurewebsites.net/monitoring/1.0.0/monitoring.js");
+            var response = RequestTestsHtml("//itscdn.azurewebsites.net/monitoring/1.0.0/monitoring.js");
 
             var result = response.Content.ReadAsStringAsync().Result;
 
             result.Should().Contain(@"<script src=""//itscdn.azurewebsites.net/monitoring/1.0.0/monitoring.js?monitoringVersion=");
         }
 
-        private static HttpResponseMessage ReqestTestsHtml(string testUiScript = null)
+        [Test]
+        public void The_library_script_locations_for_the_UI_can_be_configured()
+        {
+            var response = RequestTestsHtml(testUiLibraryUrls: new []{ "/jquery.js", "/knockout.js" });
+
+            var result = response.Content.ReadAsStringAsync().Result;
+
+            result.Should().Contain(@"<script src=""/jquery.js""></script>");
+            result.Should().Contain(@"<script src=""/knockout.js""></script>");
+        }
+
+        private static HttpResponseMessage RequestTestsHtml(string testUiScript = null, string [] testUiLibraryUrls = null)
         {
             configuration = new HttpConfiguration();
             var constraintResolver = new DefaultInlineConstraintResolver();
             constraintResolver.ConstraintMap.Add("among", typeof(AmongConstraint));
             configuration.MapHttpAttributeRoutes(constraintResolver);
-            configuration.MapTestRoutes(testUiScriptUrl: testUiScript);
+            configuration.MapTestRoutes(testUiScriptUrl: testUiScript, testUiLibraryUrls: testUiLibraryUrls);
             configuration.EnsureInitialized();
 
             var server = new HttpServer(configuration);
