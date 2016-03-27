@@ -97,6 +97,26 @@ namespace Its.Log.Monitoring.UnitTests
             var response = api.GetAsync("http://blammo.com/tests/production/widgetapi/failing_void_test").Result;
 
             response.ShouldFailWith(HttpStatusCode.InternalServerError);
+
+            response.Content
+                    .ReadAsStringAsync()
+                    .Result
+                    .Should()
+                    .Contain("oops!");
+        }
+
+        [Test]
+        public void When_a_test_with_a_Task_return_value_throws_then_a_500_Test_Failed_is_returned()
+        {
+            var response = api.GetAsync("http://blammo.com/tests/production/widgetapi/failing_void_async_test").Result;
+
+            response.ShouldFailWith(HttpStatusCode.InternalServerError);
+
+            response.Content
+                    .ReadAsStringAsync()
+                    .Result
+                    .Should()
+                    .Contain("oops!");
         }
 
         [Test]

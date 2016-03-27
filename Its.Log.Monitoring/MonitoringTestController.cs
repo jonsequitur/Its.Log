@@ -6,6 +6,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Web.Http;
 using System.Web.Http.Routing;
+using Its.Recipes;
 
 namespace Its.Log.Monitoring
 {
@@ -82,10 +83,18 @@ namespace Its.Log.Monitoring
             var target = Configuration.TestTargets()
                                       .Get(environment, application);
 
-            var result = Configuration.TestDefinition(testName).Run(ActionContext, target.ResolveDependency);
+            var result = Configuration.TestDefinition(testName)
+                                      .Run(ActionContext, target.ResolveDependency);
 
             if (result is Task)
             {
+                if (result.GetType() == typeof (Task) ||
+                    result.GetType().ToString() == "System.Threading.Tasks.Task`1[System.Threading.Tasks.VoidTaskResult]")
+                {
+                    await result;
+                    return Task.FromResult(Unit.Default);
+                }
+
                 return await result;
             }
 

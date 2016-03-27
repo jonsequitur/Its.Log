@@ -2,13 +2,10 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Web.Http.Controllers;
-using System.Web.UI.WebControls;
-using Its.Recipes;
 
 namespace Its.Log.Monitoring
 {
@@ -38,15 +35,23 @@ namespace Its.Log.Monitoring
                 new object[] { methodInfo },
                 null);
             testDefinition.TestType = testType;
-            testDefinition.Parameters = methodInfo.GetParameters().Select(p => 
-            new Parameter(p.Name, p.DefaultValue));
+            testDefinition.Parameters = methodInfo.GetParameters()
+                                                  .Select(p =>
+                                                          new Parameter(p.Name, p.DefaultValue));
             return testDefinition;
         }
 
         public IEnumerable<Parameter> Parameters
         {
-            get { return testParameters ?? (testParameters = System.Linq.Enumerable.Empty<Parameter>()); }
-            set { testParameters = value; }
+            get
+            {
+                return testParameters ??
+                       (testParameters = System.Linq.Enumerable.Empty<Parameter>());
+            }
+            set
+            {
+                testParameters = value;
+            }
         }
     }
 }

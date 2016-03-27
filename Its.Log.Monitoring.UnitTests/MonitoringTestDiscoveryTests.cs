@@ -558,6 +558,11 @@ namespace Its.Log.Monitoring.UnitTests
             throw new Exception("oops!");
         }
 
+        public async Task failing_void_async_test()
+        {
+            throw new Exception("oops!");
+        }
+
         public static dynamic not_a_test()
         {
             return null;
