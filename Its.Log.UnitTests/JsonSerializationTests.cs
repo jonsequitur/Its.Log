@@ -7,8 +7,6 @@ using System.Diagnostics;
 using System.IO;
 using FluentAssertions;
 using System.Linq;
-using System.Threading.Tasks;
-using FluentAssertions;
 using Its.Log.Instrumentation.Extensions;
 using Its.Recipes;
 using Newtonsoft.Json;
@@ -106,6 +104,22 @@ namespace Its.Log.Instrumentation.UnitTests
 
             Assert.That(new FileInfo(@"c:\temp\1.log").ToLogString(),
                         Is.EqualTo("{\"$type\":\"System.IO.FileInfo, mscorlib\",\"OriginalPath\":\"c:\\\\temp\\\\1.log\",\"FullPath\":\"c:\\\\temp\\\\1.log\"}"));
+        }
+
+        [Test]
+        public void Confirmation_timings_appear_in_JSON()
+        {
+            var log = new List<LogEntry>();
+
+            using (Log.Events().Subscribe(log.Add))
+            using (var activity = Log.Enter(() => { }))
+            {
+                activity.Confirm(() => "hello");
+            }
+
+            var json = JsonConvert.SerializeObject(log.Last());
+
+            json.Should().Match("*hello (@*ms)*");
         }
 
         [Ignore("Perf test")]

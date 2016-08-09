@@ -227,8 +227,10 @@ namespace Its.Log.Instrumentation
 
             internal object ResolvedValue => value ?? (value = Accessor.InvokeSafely());
 
+            public string Value => ToString();
+
             public override string ToString() =>
-                (elapsedMilliseconds == null)
+                elapsedMilliseconds == null
                     ? ResolvedValue.ToLogString()
                     : $"{ResolvedValue.ToLogString()} (@{elapsedMilliseconds}ms)";
 
