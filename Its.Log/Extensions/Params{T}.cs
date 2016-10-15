@@ -17,7 +17,7 @@ namespace Its.Log.Instrumentation.Extensions
 
         static Params()
         {
-            Formatter.Clearing += (o, e) => RegisterFormatters();
+            LogFormatter.Clearing += (o, e) => RegisterFormatters();
             RegisterFormatters();
         }
 
@@ -25,15 +25,15 @@ namespace Its.Log.Instrumentation.Extensions
         {
             if (ShouldGenerateFormatter())
             {
-                Formatter<TAnonymous>.RegisterForMembers();
+                LogFormatter<TAnonymous>.RegisterForMembers();
             }
             formatter = (p, writer) => writer.Write(p.paramsAccessor().ToLogString());
-            Formatter<Params<TAnonymous>>.Default = formatter;
+            LogFormatter<Params<TAnonymous>>.Default = formatter;
         }
 
         private static bool ShouldGenerateFormatter()
         {
-            if (Formatter<TAnonymous>.IsCustom)
+            if (LogFormatter<TAnonymous>.IsCustom)
             {
                 return false;
             }

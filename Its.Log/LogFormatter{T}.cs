@@ -1,0 +1,298 @@
+// Copyright (c) Microsoft. All rights reserved. 
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
+using System;
+using System.Collections;
+using System.IO;
+using System.Linq;
+using System.Linq.Expressions;
+using System.Reflection;
+using Its.Log.Instrumentation.Extensions;
+
+namespace Its.Log.Instrumentation
+{
+    /// <summary>
+    /// Provides formatting functionality for a specific type.
+    /// </summary>
+    /// <typeparam name="T">The type for which formatting is provided.</typeparam>
+    public static class LogFormatter<T>
+    {
+        private static readonly bool isAnonymous = typeof (T).IsAnonymous();
+        private static Action<T, TextWriter> Custom;
+        private static readonly bool isException = typeof (Exception).IsAssignableFrom(typeof (T));
+        private static readonly bool writeHeader = !isAnonymous && typeof (T).BaseType != typeof (Params);
+        private static readonly bool isLogEntry = typeof (LogEntry).IsAssignableFrom(typeof (T));
+        private static int? listExpansionLimit;
+
+        /// <summary>
+        /// Initializes the <see cref="LogFormatter{T}"/> class.
+        /// </summary>
+        static LogFormatter()
+        {
+            LogFormatter.Clearing += (o, e) => Custom = null;
+        }
+
+        /// <summary>
+        /// Gets or sets the default formatter for type <typeparamref name="T" />.
+        /// </summary>
+        public static Action<T, TextWriter> Default { get; set; } = WriteDefault;
+
+        /// <summary>
+        /// Generates a formatter action that will write out all properties and fields from instances of type <typeparamref name="T" />.
+        /// </summary>
+        /// <param name="includeInternals">if set to <c>true</c> include internal and private members.</param>
+        public static Action<T, TextWriter> GenerateForAllMembers(bool includeInternals = false) =>
+            CreateCustom(typeof (T).GetAllMembers(includeInternals).ToArray());
+
+        /// <summary>
+        /// Generates a formatter action that will write out all properties and fields from instances of type <typeparamref name="T"/>.
+        /// </summary>
+        /// <param name="members">Expressions specifying the members to include in formatting.</param>
+        /// <returns></returns>
+        public static Action<T, TextWriter> GenerateForMembers(params Expression<Func<T, object>>[] members) =>
+            CreateCustom(typeof (T).GetMembers(members).ToArray());
+
+        /// <summary>
+        /// Registers a formatter to be used when formatting instances of type <typeparamref name="T" />.
+        /// </summary>
+        public static void Register(Action<T, TextWriter> formatter)
+        {
+            if (formatter == null)
+            {
+                throw new ArgumentNullException(nameof(formatter));
+            }
+
+            if (typeof (T) == typeof (Type))
+            {
+                // special treatment is needed since typeof(Type) == System.RuntimeType, which is not public
+                // ReSharper disable once PossibleMistakenCallToGetType.2
+                LogFormatter.Register(typeof (Type).GetType(), (o, writer) => formatter((T) o, writer));
+            }
+
+            Custom = formatter;
+        }
+
+        /// <summary>
+        /// Registers a formatter to be used when formatting instances of type <typeparamref name="T" />.
+        /// </summary>
+        public static void Register(Func<T, string> formatter) =>
+            Register((obj, writer) => writer.Write(formatter(obj)));
+
+        /// <summary>
+        /// Registers a formatter to be used when formatting instances of type <typeparamref name="T" />.
+        /// </summary>
+        public static void RegisterForAllMembers(bool includeInternals = false) =>
+            Register(GenerateForAllMembers(includeInternals));
+
+        /// <summary>
+        /// Registers a formatter to be used when formatting instances of type <typeparamref name="T" />.
+        /// </summary>
+        public static void RegisterForMembers(params Expression<Func<T, object>>[] members)
+        {
+            if (members == null || !members.Any())
+            {
+                Register(GenerateForAllMembers());
+            }
+            else
+            {
+                Register(GenerateForMembers(members));
+            }
+        }
+
+        internal static string Format(T obj)
+        {
+            var writer = LogFormatter.CreateWriter();
+            Format(obj, writer);
+            return writer.ToString();
+        }
+
+        /// <summary>
+        /// Formats an object and writes it to a writer.
+        /// </summary>
+        /// <param name="obj">The obj.</param>
+        /// <param name="writer">The writer.</param>
+        public static void Format(T obj, TextWriter writer)
+        {
+            // TODO: (Format) is it worth caching the result of this for LogEntry objects? it could be done directly in the default formatter.
+            if (obj == null)
+            {
+                writer.Write(LogFormatter.NullString);
+                return;
+            }
+
+            // find a formatter for the object type, and possibly register one on the fly
+            using (LogFormatter.RecursionCounter.Enter())
+            {
+                if (LogFormatter.RecursionCounter.Depth <= LogFormatter.RecursionLimit)
+                {
+                    if (Custom == null)
+                    {
+                        if (isAnonymous || isException)
+                        {
+                            Custom = GenerateForAllMembers();
+                        }
+                        else if (isLogEntry)
+                        {
+                            // TODO: (Format) this shouldn't happen, but it occurs after formatter have been cleared. find a better way to do this. this really only occurs in testing, usually, so not highest priority.
+                            typeof (T).GetMethod("RegisterFormatters", BindingFlags.Static | BindingFlags.NonPublic).Invoke(null, null);
+                        }
+                        else if (Default == WriteDefault)
+                        {
+                            if (LogFormatter.AutoGenerateForType(typeof (T)))
+                            {
+                                Custom = GenerateForAllMembers();
+                            }
+                            else
+                            {
+                                // short circuit for future checks 
+                                Custom = (o, w) => Default(o, w);
+                            }
+                        }
+                    }
+                    (Custom ?? Default)(obj, writer);
+                }
+                else
+                {
+                    Default(obj, writer);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Creates a custom formatter for the specified members.
+        /// </summary>
+        private static Action<T, TextWriter> CreateCustom(MemberInfo[] forMembers)
+        {
+            var accessors = forMembers.GetMemberAccessors<T>();
+
+            if (isException)
+            {
+                // filter out internal values from the Data dictionary, since they're intended to be surfaced in other ways
+                var dataAccessor = accessors.SingleOrDefault(a => a.MemberName == "Data");
+                if (dataAccessor != null)
+                {
+                    var originalGetData = dataAccessor.GetValue;
+                    dataAccessor.GetValue = e => ((IDictionary) originalGetData(e))
+                                                     .Cast<DictionaryEntry>()
+                                                     .Where(de => !de.Key.ToString().StartsWith(ExceptionExtensions.ExceptionDataPrefix))
+                                                     .ToDictionary(de => de.Key, de => de.Value);
+                }
+
+                // replace the default stack trace with the full stack trace when present
+                var stackTraceAccessor = accessors.SingleOrDefault(a => a.MemberName == "StackTrace");
+                if (stackTraceAccessor != null)
+                {
+                    stackTraceAccessor.GetValue = e =>
+                    {
+                        var ex = e as Exception;
+                        if (ex.Data.Contains(ExceptionExtensions.FullStackTraceKey))
+                        {
+                            return ex.Data[ExceptionExtensions.FullStackTraceKey];
+                        }
+                        return ex.StackTrace;
+                    };
+                }
+            }
+
+            return (target, writer) =>
+            {
+                LogFormatter.TextFormatter.WriteStartObject(writer);
+
+                if (writeHeader)
+                {
+                    var entry = target as LogEntry;
+
+                    if (entry != null)
+                    {
+                        LogFormatter.TextFormatter.WriteLogEntryHeader(entry, writer);
+                    }
+                    else
+                    {
+                        LogFormatter<Type>.Format(typeof (T), writer);
+                    }
+
+                    LogFormatter.TextFormatter.WriteEndHeader(writer);
+                }
+
+                for (var i = 0; i < accessors.Length; i++)
+                {
+                    try
+                    {
+                        var accessor = accessors[i];
+
+                        if (accessor.Ignore)
+                        {
+                            continue;
+                        }
+
+                        var value = accessor.GetValue(target);
+
+                        if (accessor.SkipOnNull && value == null)
+                        {
+                            continue;
+                        }
+
+                        LogFormatter.TextFormatter.WriteStartProperty(writer);
+                        writer.Write(accessor.MemberName);
+                        LogFormatter.TextFormatter.WriteNameValueDelimiter(writer);
+                        value.FormatTo(writer);
+                        LogFormatter.TextFormatter.WriteEndProperty(writer);
+
+                        if (i < accessors.Length - 1)
+                        {
+                            LogFormatter.TextFormatter.WritePropertyDelimiter(writer);
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        ex.RaiseErrorEvent();
+                        if (ex.ShouldThrow())
+                        {
+                            throw;
+                        }
+                    }
+                }
+
+                LogFormatter.TextFormatter.WriteEndObject(writer);
+            };
+        }
+
+        /// <summary>
+        ///   Gets or sets the limit to the number of items that will be written out in detail from an IEnumerable sequence of <typeparamref name="T" />.
+        /// </summary>
+        /// <value> The list expansion limit.</value>
+        internal static int ListExpansionLimit
+        {
+            get
+            {
+                return listExpansionLimit ?? LogFormatter.ListExpansionLimit;
+            }
+            set
+            {
+                listExpansionLimit = value;
+            }
+        }
+
+        internal static bool IsCustom =>
+            Custom != null || Default != WriteDefault;
+
+        private static void WriteDefault(T obj, TextWriter writer)
+        {
+            if (obj is string)
+            {
+                writer.Write(obj);
+                return;
+            }
+
+            var enumerable = obj as IEnumerable;
+            if (enumerable != null)
+            {
+                LogFormatter.Join(enumerable, writer, listExpansionLimit);
+            }
+            else
+            {
+                writer.Write(obj.ToString());
+            }
+        }
+    }
+}

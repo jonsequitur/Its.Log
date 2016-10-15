@@ -20,7 +20,7 @@ namespace Its.Log.Instrumentation.UnitTests
         [TearDown]
         public void TearDown()
         {
-            Formatter.ResetToDefault();
+            LogFormatter.ResetToDefault();
         }
 
         [Ignore("Scenario under development")]
@@ -35,7 +35,7 @@ namespace Its.Log.Instrumentation.UnitTests
             var log = "";
             var thereWereErrors = false;
 
-            Formatter<LogEntry>.Register((entry, writer) =>
+            LogFormatter<LogEntry>.Register((entry, writer) =>
             {
                 serializer.Serialize(writer, entry);
                 writer.WriteLine();
@@ -65,7 +65,7 @@ namespace Its.Log.Instrumentation.UnitTests
             var log = "";
             var thereWereErrors = false;
 
-            Formatter.Default = (obj, writer) =>
+            LogFormatter.Default = (obj, writer) =>
             {
                 serializer.Serialize(writer, obj);
                 writer.WriteLine();
@@ -100,7 +100,7 @@ namespace Its.Log.Instrumentation.UnitTests
                 ReferenceLoopHandling = ReferenceLoopHandling.Ignore
             };
 
-            Formatter.Default = (o, writer) => serializer.Serialize(writer, o);
+            LogFormatter.Default = (o, writer) => serializer.Serialize(writer, o);
 
             Assert.That(new FileInfo(@"c:\temp\1.log").ToLogString(),
                         Is.EqualTo("{\"$type\":\"System.IO.FileInfo, mscorlib\",\"OriginalPath\":\"c:\\\\temp\\\\1.log\",\"FullPath\":\"c:\\\\temp\\\\1.log\"}"));
@@ -138,7 +138,7 @@ namespace Its.Log.Instrumentation.UnitTests
                 TypeNameHandling = TypeNameHandling.All,
                 ReferenceLoopHandling = ReferenceLoopHandling.Ignore
             };
-            Formatter<LogEntry>.Register((entry, writer) =>
+            LogFormatter<LogEntry>.Register((entry, writer) =>
             {
                 serializer.Serialize(writer, entry);
                 writer.WriteLine();

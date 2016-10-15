@@ -18,14 +18,14 @@ namespace Its.Log.Instrumentation.UnitTests
         public void SetUp()
         {
             Log.UnsubscribeAllFromEntryPosted();
-            Formatter.ResetToDefault();
+            LogFormatter.ResetToDefault();
             Extension.EnableAll();
         }
 
         [TearDown]
         public void TearDown()
         {
-            Formatter.TextFormatter = new SingleLineTextFormatter();    
+            LogFormatter.TextFormatter = new SingleLineTextFormatter();    
         }
 
         private void WriteSomething()
@@ -33,7 +33,7 @@ namespace Its.Log.Instrumentation.UnitTests
             Log.EntryPosted += (sender, e) => Console.WriteLine(e.LogEntry.ToLogString());
 
             // again, isolating just the parts that are specific to boundary logging:
-            Formatter<LogEntry>.RegisterForMembers(
+            LogFormatter<LogEntry>.RegisterForMembers(
                 e => e.Message,
                 e => e.Params,
                 e => e.ElapsedMilliseconds);
@@ -50,7 +50,7 @@ namespace Its.Log.Instrumentation.UnitTests
         [Test]
         public void MultiLine()
         {
-            Formatter.TextFormatter = new MultiLineTextFormatter();
+            LogFormatter.TextFormatter = new MultiLineTextFormatter();
             WriteSomething();
             // TODO (SingleLineTextFormatter) write test
             Assert.Fail("Test not written yet.");

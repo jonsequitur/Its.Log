@@ -22,7 +22,7 @@ namespace Its.Log.Instrumentation.UnitTests
         [SetUp]
         public void SetUp()
         {
-            Formatter.ResetToDefault();
+            LogFormatter.ResetToDefault();
         }
 
         [Test]
@@ -144,7 +144,7 @@ namespace Its.Log.Instrumentation.UnitTests
         [Test]
         public virtual void Write_passing_func_that_returns_anonymous_type_describes_subject_properties_using_formatter()
         {
-            Formatter<Widget>.RegisterForAllMembers();
+            LogFormatter<Widget>.RegisterForAllMembers();
             var log = "";
             var widget = new Widget { Name = "Hula Hoop" };
 

@@ -19,9 +19,9 @@ namespace Its.Log.Instrumentation.UnitTests
         public void SetUp()
         {
             Log.UnsubscribeAllFromEntryPosted();
-            Formatter.ResetToDefault();
+            LogFormatter.ResetToDefault();
             Extension.EnableAll();
-            Formatter.TextFormatter = new MultiLineTextFormatter();
+            LogFormatter.TextFormatter = new MultiLineTextFormatter();
             MultiLineTextFormatter.DebugMode = false;
 
             log = "";
@@ -32,7 +32,7 @@ namespace Its.Log.Instrumentation.UnitTests
         public void TearDown()
         {
             Console.WriteLine(log);
-            Formatter.TextFormatter = new SingleLineTextFormatter();
+            LogFormatter.TextFormatter = new SingleLineTextFormatter();
             subscription.Dispose();
         }
 

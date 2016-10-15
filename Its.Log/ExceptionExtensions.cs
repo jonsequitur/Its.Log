@@ -112,7 +112,7 @@ namespace Its.Log.Instrumentation
                 key = ExceptionDataKey + index++;
             }
 
-            exception.Data[key] = Formatter.Format(obj);
+            exception.Data[key] = LogFormatter.Format(obj);
             return exception;
         }
 

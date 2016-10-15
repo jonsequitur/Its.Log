@@ -101,9 +101,9 @@
     <Compile Include="ExceptionExtensions.cs" />
     <Compile Include="ExpressionExtensions.cs" />
     <Compile Include="Extensions\Telemetry.cs" />
-    <Compile Include="Formatter.cs" />
+    <Compile Include="LogFormatter.cs" />
     <Compile Include="FormatterIgnoresAttribute.cs" />
-    <Compile Include="Formatter{T}.cs" />
+    <Compile Include="LogFormatter{T}.cs" />
     <Compile Include="IApplyOnEnter.cs" />
     <Compile Include="IApplyOnExit.cs" />
     <Compile Include="ILogExtension.cs" />

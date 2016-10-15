@@ -276,11 +276,11 @@ namespace Its.Log.Instrumentation.UnitTests
             var count = 0;
             for (var i = 1; i <= 20; i++)
             {
-                Formatter.RecursionLimit = i;
+                LogFormatter.RecursionLimit = i;
                 using (TestHelper.LogToConsole())
                 using (Log.Events().Subscribe(e => count++))
                 {
-                    Log.WithParams(() => new { Formatter.RecursionLimit }).Write("testing...");
+                    Log.WithParams(() => new { LogFormatter.RecursionLimit }).Write("testing...");
                 }
             }
 
