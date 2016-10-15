@@ -28,14 +28,14 @@ namespace Its.Log.Instrumentation.UnitTests
         [SetUp]
         public void SetUp()
         {
-            Formatter.ResetToDefault();
+            LogFormatter.ResetToDefault();
             Extension.EnableAll();
         }
 
         [Test]
         public virtual void Generate_creates_a_function_that_emits_the_property_names_and_values_for_a_specific_type()
         {
-            var write = Formatter<Widget>.GenerateForAllMembers();
+            var write = LogFormatter<Widget>.GenerateForAllMembers();
 
             var writer = new StringWriter();
             write(new Widget { Name = "Bob" }, writer);
@@ -48,7 +48,7 @@ namespace Its.Log.Instrumentation.UnitTests
         [Test]
         public virtual void GenerateFor_creates_a_function_that_emits_the_specified_property_names_and_values_for_a_specific_type()
         {
-            Formatter<SomethingWithLotsOfProperties>.RegisterForMembers(
+            LogFormatter<SomethingWithLotsOfProperties>.RegisterForMembers(
                 o => o.DateProperty,
                 o => o.StringProperty);
 
@@ -68,7 +68,7 @@ namespace Its.Log.Instrumentation.UnitTests
         [Test]
         public void GenerateForMembers_throws_when_an_expression_is_not_a_MemberExpression()
         {
-            var ex = Assert.Throws<ArgumentException>(() => Formatter<SomethingWithLotsOfProperties>.GenerateForMembers(
+            var ex = Assert.Throws<ArgumentException>(() => LogFormatter<SomethingWithLotsOfProperties>.GenerateForMembers(
                 o => o.DateProperty.ToShortDateString(),
                 o => o.StringProperty));
 
@@ -82,11 +82,11 @@ namespace Its.Log.Instrumentation.UnitTests
         {
             var node = new Node { Id = "1", Nodes = new[] { new Node { Id = "1.1" }, new Node { Id = "1.2" } } };
 
-            Formatter<Node>.RegisterForAllMembers();
+            LogFormatter<Node>.RegisterForAllMembers();
 
             Console.WriteLine(node.ToLogString());
 
-            Formatter<Node>.GenerateForMembers(
+            LogFormatter<Node>.GenerateForMembers(
                 di => di.Id,
                 di => di.Nodes.Select(n => n.Id).ToLogString());
 
@@ -104,8 +104,8 @@ namespace Its.Log.Instrumentation.UnitTests
             var widget = new Widget();
             widget.Parts = new List<Part> { new Part { Widget = widget } };
 
-            Formatter<Widget>.RegisterForMembers();
-            Formatter<Part>.RegisterForMembers();
+            LogFormatter<Widget>.RegisterForMembers();
+            LogFormatter<Part>.RegisterForMembers();
 
             // this should not throw
             var s = widget.ToLogString();
@@ -128,7 +128,7 @@ namespace Its.Log.Instrumentation.UnitTests
             dynamic expando = new ExpandoObject();
             expando.Name = "socks";
             expando.Parts = null;
-            Formatter<Widget>.RegisterForMembers();
+            LogFormatter<Widget>.RegisterForMembers();
 
             dynamic expandoString = Log.ToLogString(expando);
 
@@ -142,8 +142,8 @@ namespace Its.Log.Instrumentation.UnitTests
             var widget = new Widget();
             widget.Parts = new List<Part> { new Part { Widget = widget } };
 
-            Formatter<Widget>.RegisterForMembers();
-            Formatter<Part>.RegisterForMembers();
+            LogFormatter<Widget>.RegisterForMembers();
+            LogFormatter<Part>.RegisterForMembers();
 
             // this should not throw
             var s = widget.ToLogString();
@@ -200,7 +200,7 @@ namespace Its.Log.Instrumentation.UnitTests
         [Test]
         public void Custom_formatter_for_Type_can_be_registered()
         {
-            Formatter<Type>.Register(t => t.GUID.ToString());
+            LogFormatter<Type>.Register(t => t.GUID.ToString());
 
             Assert.That(GetType().ToLogString(),
                         Is.EqualTo(GetType().GUID.ToString()));
@@ -226,7 +226,7 @@ namespace Its.Log.Instrumentation.UnitTests
                 new Widget { Name = "widget z" }
             };
 
-            Formatter<Widget>.Register(
+            LogFormatter<Widget>.Register(
                 w => w.Name + ", Parts: " +
                      (w.Parts == null ? "0" : w.Parts.Count.ToString()));
             var formatted = list.ToLogString();
@@ -244,7 +244,7 @@ namespace Its.Log.Instrumentation.UnitTests
             {
                 list.Add("number " + i);
             }
-            Formatter.ListExpansionLimit = 4;
+            LogFormatter.ListExpansionLimit = 4;
 
             var formatted = list.ToLogString();
 
@@ -265,7 +265,7 @@ namespace Its.Log.Instrumentation.UnitTests
         [Test]
         public virtual void Formatter_iterates_IEnumerable_property_when_its_actual_type_is_an_array_of_objects()
         {
-            Formatter<Node>.RegisterForMembers();
+            LogFormatter<Node>.RegisterForMembers();
 
             var node = new Node
             {
@@ -289,7 +289,7 @@ namespace Its.Log.Instrumentation.UnitTests
         [Test]
         public virtual void Formatter_iterates_IEnumerable_property_when_its_reflected_type_is_array()
         {
-            Formatter<Node>.RegisterForMembers();
+            LogFormatter<Node>.RegisterForMembers();
 
             var node = new Node
             {
@@ -314,7 +314,7 @@ namespace Its.Log.Instrumentation.UnitTests
         public virtual void Default_LogEntry_formatter_can_be_set()
         {
             var log = "";
-            Formatter<LogEntry>.Register(e => string.Format("Here's a log entry!"));
+            LogFormatter<LogEntry>.Register(e => string.Format("Here's a log entry!"));
 
             using (Log.Events().Subscribe(e => log += e.ToLogString()))
             {
@@ -328,7 +328,7 @@ namespace Its.Log.Instrumentation.UnitTests
         public virtual void When_default_LogEntry_formatter_is_changed_it_controls_formatting_of_newly_registered_LogEntry_generic_types()
         {
             var log = "";
-            Formatter<LogEntry>.Register(e => "Here's a log entry!");
+            LogFormatter<LogEntry>.Register(e => "Here's a log entry!");
 
             using (Log.Events().Subscribe(e => log += e.ToLogString()))
             {
@@ -347,7 +347,7 @@ namespace Its.Log.Instrumentation.UnitTests
             using (Log.Events().Subscribe(e => log += e.ToLogString()))
             {
                 Log.Write(() => new { msg = "one" });
-                Formatter<LogEntry>.Register(e => "Here's a log entry!");
+                LogFormatter<LogEntry>.Register(e => "Here's a log entry!");
                 Log.Write(() => new { msg = "two" });
             }
 
@@ -359,7 +359,7 @@ namespace Its.Log.Instrumentation.UnitTests
         [Test]
         public virtual void GenerateForAllMembers_expands_properties_of_structs()
         {
-            var write = Formatter<EntityId>.GenerateForAllMembers();
+            var write = LogFormatter<EntityId>.GenerateForAllMembers();
             var id = new EntityId("the typename", "the id");
             var writer = new StringWriter();
 
@@ -375,7 +375,7 @@ namespace Its.Log.Instrumentation.UnitTests
         [Test]
         public void Static_fields_are_not_written()
         {
-            Formatter<BoundaryTests.NestedWidget>.RegisterForMembers();
+            LogFormatter<BoundaryTests.NestedWidget>.RegisterForMembers();
 
             Assert.That(new Widget().ToLogString(),
                         !Contains.Substring("StaticField"));
@@ -384,7 +384,7 @@ namespace Its.Log.Instrumentation.UnitTests
         [Test]
         public void Static_properties_are_not_written()
         {
-            Formatter<BoundaryTests.NestedWidget>.RegisterForMembers();
+            LogFormatter<BoundaryTests.NestedWidget>.RegisterForMembers();
 
             Assert.That(new Widget().ToLogString(),
                         !Contains.Substring("StaticProperty"));
@@ -393,7 +393,7 @@ namespace Its.Log.Instrumentation.UnitTests
         [Test]
         public virtual void GenerateForAllMembers_expands_fields_of_objects()
         {
-            var write = Formatter<SomeStruct>.GenerateForAllMembers();
+            var write = LogFormatter<SomeStruct>.GenerateForAllMembers();
             var today = DateTime.Today;
             var tomorrow = DateTime.Today.AddDays(1);
             var id = new SomeStruct
@@ -507,7 +507,7 @@ namespace Its.Log.Instrumentation.UnitTests
         public void When_a_property_throws_it_does_not_prevent_other_properties_from_being_written()
         {
             var log = new StringBuilder();
-            Formatter<SomePropertyThrows>.RegisterForMembers();
+            LogFormatter<SomePropertyThrows>.RegisterForMembers();
 
             using (Log.Events().Subscribe(e => log.AppendLine(e.ToLogString())))
             using (TestHelper.LogToConsole())
@@ -527,7 +527,7 @@ namespace Its.Log.Instrumentation.UnitTests
             using (Log.Events().Subscribe(e => log += e.ToLogString()))
             {
                 Log.WithParams(() => new { ints = new[] { 1, 2, 3 } }).Write("1");
-                Formatter.ResetToDefault();
+                LogFormatter.ResetToDefault();
                 Log.WithParams(() => new { ints = new[] { 4, 5, 6 } }).Write("1");
             }
 
@@ -542,7 +542,7 @@ namespace Its.Log.Instrumentation.UnitTests
             using (Log.Events().Subscribe(e => log += e.ToLogString()))
             {
                 Log.Write(() => new { ints = new[] { 1, 2, 3 } });
-                Formatter.ResetToDefault();
+                LogFormatter.ResetToDefault();
                 Log.Write(() => new { ints = new[] { 4, 5, 6 } });
             }
 
@@ -553,7 +553,7 @@ namespace Its.Log.Instrumentation.UnitTests
         [Test]
         public void GenerateForAllMembers_can_include_internal_fields()
         {
-            var write = Formatter<Node>.GenerateForAllMembers(true);
+            var write = LogFormatter<Node>.GenerateForAllMembers(true);
             var writer = new StringWriter();
 
             write(new Node { Id = "5" }, writer);
@@ -564,7 +564,7 @@ namespace Its.Log.Instrumentation.UnitTests
         [Test]
         public void GenerateForAllMembers_does_not_include_autoproperty_backing_fields()
         {
-            var formatter = Formatter<Node>.GenerateForAllMembers(true);
+            var formatter = LogFormatter<Node>.GenerateForAllMembers(true);
             var writer = new StringWriter();
 
             formatter(new Node(), writer);
@@ -577,7 +577,7 @@ namespace Its.Log.Instrumentation.UnitTests
         [Test]
         public void GenerateForAllMembers_can_include_internal_properties()
         {
-            var formatter = Formatter<Node>.GenerateForAllMembers(true);
+            var formatter = LogFormatter<Node>.GenerateForAllMembers(true);
             var writer = new StringWriter();
 
             formatter(new Node { Id = "6" }, writer);
@@ -592,12 +592,12 @@ namespace Its.Log.Instrumentation.UnitTests
 
             var before = logEntry.ToLogString();
 
-            Formatter<LogEntry>.Register(e => "hello!");
+            LogFormatter<LogEntry>.Register(e => "hello!");
 
             Assert.That(logEntry.ToLogString(),
                         Is.Not.EqualTo(before));
 
-            Formatter.ResetToDefault();
+            LogFormatter.ResetToDefault();
 
             Assert.That(logEntry.ToLogString(),
                         Is.EqualTo(before));
@@ -620,12 +620,12 @@ namespace Its.Log.Instrumentation.UnitTests
             bool widgetFormatterCalled = false;
             bool inheritedWidgetFormatterCalled = false;
 
-            Formatter<Widget>.Register(w =>
+            LogFormatter<Widget>.Register(w =>
             {
                 widgetFormatterCalled = true;
                 return "";
             });
-            Formatter<InheritedWidget>.Register(w =>
+            LogFormatter<InheritedWidget>.Register(w =>
             {
                 inheritedWidgetFormatterCalled = true;
                 return "";
@@ -704,16 +704,16 @@ namespace Its.Log.Instrumentation.UnitTests
         [Test]
         public void Params_formatters_are_not_subject_recursion_limits()
         {
-            Formatter.RecursionLimit = 2;
+            LogFormatter.RecursionLimit = 2;
 
-            using (Formatter.RecursionCounter.Enter())
-            using (Formatter.RecursionCounter.Enter())
-            using (Formatter.RecursionCounter.Enter())
+            using (LogFormatter.RecursionCounter.Enter())
+            using (LogFormatter.RecursionCounter.Enter())
+            using (LogFormatter.RecursionCounter.Enter())
             {
                 var p = new Params<Widget>();
                 p.SetAccessor(() => new Widget());
                 var writer = new StringWriter();
-                Formatter<Params<Widget>>.Format(p, writer);
+                LogFormatter<Params<Widget>>.Format(p, writer);
                 Assert.That(writer.ToString(), !Contains.Substring(typeof (Widget).ToString()));
             }
         }
@@ -721,7 +721,7 @@ namespace Its.Log.Instrumentation.UnitTests
         [Test]
         public void Custom_formatters_can_be_registered_for_types_not_known_until_runtime()
         {
-            Formatter.Register(
+            LogFormatter.Register(
                 type: typeof (FileInfo),
                 formatter: (filInfo, writer) => writer.Write("hello"));
 
@@ -740,11 +740,11 @@ namespace Its.Log.Instrumentation.UnitTests
                 StringProperty = "oh hai",
                 UriProperty = new Uri("http://blammo.com")
             };
-            var reference = Formatter<SomethingWithLotsOfProperties>.GenerateForAllMembers();
+            var reference = LogFormatter<SomethingWithLotsOfProperties>.GenerateForAllMembers();
             var writer = new StringWriter();
             reference(obj, writer);
 
-            Formatter.RegisterForAllMembers(typeof (SomethingWithLotsOfProperties));
+            LogFormatter.RegisterForAllMembers(typeof (SomethingWithLotsOfProperties));
             
             Assert.That(obj.ToLogString(),
                         Is.EqualTo(writer.ToString()));
@@ -782,8 +782,8 @@ namespace Its.Log.Instrumentation.UnitTests
         [Test]
         public void ListExpansionLimit_can_be_specified_per_type()
         {
-            Formatter<Dictionary<string, int>>.ListExpansionLimit = 1000;
-            Formatter.ListExpansionLimit = 4;
+            LogFormatter<Dictionary<string, int>>.ListExpansionLimit = 1000;
+            LogFormatter.ListExpansionLimit = 4;
             var dictionary = new Dictionary<string, int>
             {
                 { "zero", 0 },
@@ -809,7 +809,7 @@ namespace Its.Log.Instrumentation.UnitTests
         [Test]
         public void FormatAllTypes_allows_formatters_to_be_registered_on_fly_for_all_types()
         {
-            Formatter.AutoGenerateForType = t => true;
+            LogFormatter.AutoGenerateForType = t => true;
 
             Assert.That(new FileInfo(@"c:\temp\foo.txt").ToLogString(),
                         Is.StringContaining(@"DirectoryName = c:\temp"));
@@ -825,7 +825,7 @@ namespace Its.Log.Instrumentation.UnitTests
         public void FormatAllTypes_does_not_reregister_formatters_for_types_having_special_default_formatters()
         {
             var log = "";
-            Formatter.AutoGenerateForType = t => true;
+            LogFormatter.AutoGenerateForType = t => true;
             using (Log.Events().Subscribe(e => log += e.ToLogString()))
             {
                 Log.Write(() => "hello");

@@ -16,7 +16,7 @@ namespace Its.Log.Instrumentation
 
         static LogEntry()
         {
-            Formatter.Clearing += (o, e) => RegisterFormatters();
+            LogFormatter.Clearing += (o, e) => RegisterFormatters();
             RegisterFormatters();
         }
 
@@ -24,11 +24,11 @@ namespace Its.Log.Instrumentation
         {
             if (isAnonymous)
             {
-                Formatter<TSubject>.RegisterForMembers();
+                LogFormatter<TSubject>.RegisterForMembers();
             }
 
             // register the default formatter for this LogEntry type, which should be the non-generic LogEntry formatter
-            Formatter<LogEntry<TSubject>>.Register((e, writer) => Formatter<LogEntry>.Format(e, writer));
+            LogFormatter<LogEntry<TSubject>>.Register((e, writer) => LogFormatter<LogEntry>.Format(e, writer));
         }
 
         /// <summary>
@@ -65,7 +65,7 @@ namespace Its.Log.Instrumentation
         /// </returns>
         public override string ToString()
         {
-            return Formatter<LogEntry<TSubject>>.Format(this);
+            return LogFormatter<LogEntry<TSubject>>.Format(this);
         }
 
         /// <summary>

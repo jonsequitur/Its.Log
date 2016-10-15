@@ -20,7 +20,7 @@ namespace Its.Log.Instrumentation.Extensions
         /// </summary>
         static Telemetry()
         {
-            Formatter<Telemetry>.RegisterForAllMembers();
+            LogFormatter<Telemetry>.RegisterForAllMembers();
         }
 
         /// <summary>

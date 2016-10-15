@@ -10,7 +10,7 @@ namespace Its.Log.Monitoring
     {
         static TestTarget()
         {
-            Formatter<TestTarget>.RegisterForAllMembers();  
+            LogFormatter<TestTarget>.RegisterForAllMembers();  
         }
 
         internal TestTarget()

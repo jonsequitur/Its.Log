@@ -183,7 +183,7 @@ namespace Its.Log.Instrumentation
         ///     Formats an object to a string based on the framework configuration for its <see cref="Type" />.
         /// </summary>
         /// <param name="obj">The object to be formatted.</param>
-        public static string ToLogString<T>(this T obj) => Formatter.Format(obj);
+        public static string ToLogString<T>(this T obj) => LogFormatter.Format(obj);
 
         /// <summary>
         /// Gets an observable sequence of telemetry events.

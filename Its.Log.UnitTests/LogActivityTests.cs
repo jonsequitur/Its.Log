@@ -539,7 +539,7 @@ namespace Its.Log.Instrumentation.UnitTests
         public void When_there_are_a_large_number_of_Confirm_calls_they_are_not_truncated_in_the_log_output()
         {
             var log = new List<LogEntry>();
-            Formatter.ListExpansionLimit = 4;
+            LogFormatter.ListExpansionLimit = 4;
 
             using (Log.Events().Subscribe(log.Add))
             using (var activity = Log.Enter(() => { }))
@@ -577,7 +577,7 @@ namespace Its.Log.Instrumentation.UnitTests
         public void Activity_Confirm_outputs_include_timings()
         {
             var log = new List<LogEntry>();
-            Formatter.ListExpansionLimit = 4;
+            LogFormatter.ListExpansionLimit = 4;
 
             using (Log.Events().Subscribe(log.Add))
             using (var activity = Log.Enter(() => { }))

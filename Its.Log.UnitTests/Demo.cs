@@ -59,8 +59,8 @@ namespace Its.Log.Instrumentation.UnitTests
         public void Formatting1_Format_the_log_output_so_that_it_is_more_descriptive()
         {
             Log.EntryPosted += (sender, e) => Console.WriteLine(e.LogEntry.ToLogString());
-            Formatter<Movie>.RegisterForAllMembers();
-            Formatter<Person>.RegisterForAllMembers();
+            LogFormatter<Movie>.RegisterForAllMembers();
+            LogFormatter<Person>.RegisterForAllMembers();
 
             Log.Write(() => Movie.StarWars);
         }
@@ -71,10 +71,10 @@ namespace Its.Log.Instrumentation.UnitTests
             Log.EntryPosted += (sender, e) => Console.WriteLine(e.LogEntry.ToLogString());
 
             // only certain properties...
-            Formatter<Movie>.RegisterForMembers(m => m.Title, m => m.Stars);
+            LogFormatter<Movie>.RegisterForMembers(m => m.Title, m => m.Stars);
 
             // or specify your own function...
-            Formatter<Person>.Register(p => string.Format("{0} (born: {1})", p.Name, p.DateOfBirth));
+            LogFormatter<Person>.Register(p => string.Format("{0} (born: {1})", p.Name, p.DateOfBirth));
 
             Log.Write(() => Movie.StarWars);
         }
@@ -104,10 +104,10 @@ namespace Its.Log.Instrumentation.UnitTests
             Log.EntryPosted += (sender, e) => Console.WriteLine(e.LogEntry.ToLogString());
 
             // scope down the formatting to show just the relevant bits
-            Formatter<LogEntry>.RegisterForMembers(e => e.ExceptionId, e => e.EventType, e => e.Subject);
-            Formatter<DataException>.RegisterForMembers(e => e.Data, e => e.InnerException);
-            Formatter<NullReferenceException>.RegisterForMembers(e => e.Data, e => e.InnerException);
-            Formatter<InvalidOperationException>.RegisterForMembers(e => e.Data, e => e.InnerException);
+            LogFormatter<LogEntry>.RegisterForMembers(e => e.ExceptionId, e => e.EventType, e => e.Subject);
+            LogFormatter<DataException>.RegisterForMembers(e => e.Data, e => e.InnerException);
+            LogFormatter<NullReferenceException>.RegisterForMembers(e => e.Data, e => e.InnerException);
+            LogFormatter<InvalidOperationException>.RegisterForMembers(e => e.Data, e => e.InnerException);
             ;
 
             var dataException = new DataException("oops!");
@@ -129,8 +129,8 @@ namespace Its.Log.Instrumentation.UnitTests
         public void Formatting5_Logging_several_objects()
         {
             Log.EntryPosted += (sender, e) => Console.WriteLine(e.LogEntry.ToLogString());
-            Formatter<Movie>.RegisterForAllMembers();
-            Formatter<Person>.RegisterForAllMembers();
+            LogFormatter<Movie>.RegisterForAllMembers();
+            LogFormatter<Person>.RegisterForAllMembers();
 
             var carrie = Person.CarrieFisher;
             Log.Write(() => new { carrie, Person.GeorgeLucas });
@@ -140,13 +140,13 @@ namespace Its.Log.Instrumentation.UnitTests
         public void Formatting6_What_about_long_lists()
         {
             Log.EntryPosted += (sender, e) => Console.WriteLine(e.LogEntry.ToLogString());
-            Formatter<Movie>.RegisterForAllMembers();
-            Formatter<Person>.RegisterForAllMembers();
+            LogFormatter<Movie>.RegisterForAllMembers();
+            LogFormatter<Person>.RegisterForAllMembers();
 
-            Formatter.ListExpansionLimit = 5;
+            LogFormatter.ListExpansionLimit = 5;
             Log.Write(() => Movie.StarWars);
 
-            Formatter.ListExpansionLimit = 10;
+            LogFormatter.ListExpansionLimit = 10;
             Log.Write(() => Movie.StarWars);
         }
 
@@ -154,16 +154,16 @@ namespace Its.Log.Instrumentation.UnitTests
         public void Formatting8_What_about_recursion()
         {
             Log.EntryPosted += (sender, e) => Console.WriteLine(e.LogEntry.ToLogString());
-            Formatter<Movie>.RegisterForAllMembers();
-            Formatter<Person>.RegisterForAllMembers();
+            LogFormatter<Movie>.RegisterForAllMembers();
+            LogFormatter<Person>.RegisterForAllMembers();
 
             // set up a recursive relationship that the above properties formatters will traverse
             Person.GeorgeLucas.Movies = new[] { Movie.StarWars };
 
-            Formatter.RecursionLimit = 3;
+            LogFormatter.RecursionLimit = 3;
             Log.Write(() => Person.GeorgeLucas);
 
-            Formatter.RecursionLimit = 10;
+            LogFormatter.RecursionLimit = 10;
             Log.Write(() => Person.GeorgeLucas);
         }
 
@@ -183,7 +183,7 @@ namespace Its.Log.Instrumentation.UnitTests
             Log.EntryPosted += (sender, e) => Console.WriteLine(e.LogEntry.ToLogString());
 
             // this is already in the default output, but it's also in the LogEntry object, so we'll create a formatter that exposes it directly
-            Formatter<LogEntry>.RegisterForMembers(
+            LogFormatter<LogEntry>.RegisterForMembers(
                 e => e.CallingType,
                 e => e.CallingMethod);
 
@@ -195,7 +195,7 @@ namespace Its.Log.Instrumentation.UnitTests
         {
             Log.EntryPosted += (sender, e) => Console.WriteLine(e.LogEntry.ToLogString());
 
-            Formatter<LogEntry>.RegisterForMembers(e => e.TimeStamp);
+            LogFormatter<LogEntry>.RegisterForMembers(e => e.TimeStamp);
 
             Log.Write(() => new { Person.GeorgeLucas });
         }
@@ -205,7 +205,7 @@ namespace Its.Log.Instrumentation.UnitTests
         {
             Log.EntryPosted += (sender, e) => Console.WriteLine(e.LogEntry.ToLogString());
 
-            Formatter<LogEntry>.RegisterForMembers(e => e.ExceptionId);
+            LogFormatter<LogEntry>.RegisterForMembers(e => e.ExceptionId);
 
             Log.Write(() => new { Person.GeorgeLucas });
             Log.Write(() => new Exception("oops"));
@@ -217,7 +217,7 @@ namespace Its.Log.Instrumentation.UnitTests
             Log.EntryPosted += (sender, e) => Console.WriteLine(e.LogEntry.ToLogString());
 
             // again, isolating just the parts that are specific to boundary logging:
-            Formatter<LogEntry>.RegisterForMembers(
+            LogFormatter<LogEntry>.RegisterForMembers(
                 e => e.Message,
                 e => e.Params,
                 e => e.ElapsedMilliseconds);
@@ -366,7 +366,7 @@ namespace Its.Log.Instrumentation.UnitTests
         public void SetUp()
         {
             Log.UnsubscribeAllFromEntryPosted();
-            Formatter.ResetToDefault();
+            LogFormatter.ResetToDefault();
             Extension.EnableAll();
         }
     }

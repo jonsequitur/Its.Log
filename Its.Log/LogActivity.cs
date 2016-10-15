@@ -243,7 +243,7 @@ namespace Its.Log.Instrumentation
 
             static ConfirmationList()
             {
-                Formatter<ConfirmationList>.ListExpansionLimit = 100;
+                LogFormatter<ConfirmationList>.ListExpansionLimit = 100;
             }
 
             public void Add(Confirmation confirmation)

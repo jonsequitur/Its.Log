@@ -23,11 +23,11 @@ namespace Its.Log.Instrumentation
         {
             get
             {
-                return Formatter.ListExpansionLimit;
+                return LogFormatter.ListExpansionLimit;
             }
             set
             {
-                Formatter.ListExpansionLimit = value;
+                LogFormatter.ListExpansionLimit = value;
             }
         }
 
@@ -41,11 +41,11 @@ namespace Its.Log.Instrumentation
         {
             get
             {
-                return Formatter.NullString;
+                return LogFormatter.NullString;
             }
             set
             {
-                Formatter.NullString = value ?? "";
+                LogFormatter.NullString = value ?? "";
             }
         }
 
@@ -59,18 +59,18 @@ namespace Its.Log.Instrumentation
         {
             get
             {
-                return Formatter.RecursionLimit;
+                return LogFormatter.RecursionLimit;
             }
             set
             {
-                Formatter.RecursionLimit = value;
+                LogFormatter.RecursionLimit = value;
             }
         }
 
         /// <summary>
         ///   Clears all formatters in the <see cref = "FormatterSet" />.
         /// </summary>
-        public void Clear() => Formatter.ResetToDefault();
+        public void Clear() => LogFormatter.ResetToDefault();
 
         /// <summary>
         /// Dynamically generates a formatter function that will output the specified properties of objects of type <typeparamref name="T"/> as a string.
@@ -82,10 +82,10 @@ namespace Its.Log.Instrumentation
         /// </returns>
         public Func<T, string> CreateFormatterFor<T>(params Expression<Func<T, object>>[] members)
         {
-            var write = Formatter<T>.GenerateForMembers(members);
+            var write = LogFormatter<T>.GenerateForMembers(members);
             return t =>
             {
-                var writer = Formatter.CreateWriter();
+                var writer = LogFormatter.CreateWriter();
                 write(t, writer);
                 return writer.ToString();
             };
@@ -98,10 +98,10 @@ namespace Its.Log.Instrumentation
         /// <returns>A formatter function.</returns>
         public Func<T, string> CreatePropertiesFormatter<T>(bool includeInternals = false)
         {
-            var write = Formatter<T>.GenerateForAllMembers(includeInternals);
+            var write = LogFormatter<T>.GenerateForAllMembers(includeInternals);
             return t =>
             {
-                var writer = Formatter.CreateWriter();
+                var writer = LogFormatter.CreateWriter();
                 write(t, writer);
                 return writer.ToString();
             };
@@ -121,7 +121,7 @@ namespace Its.Log.Instrumentation
         /// <param name = "format">A function that returs a string representation of instances of <typeparamref name="T" />.</param>
         public FormatterSet RegisterFormatter<T>(Func<T, string> format)
         {
-            Formatter<T>.Register(format);
+            LogFormatter<T>.Register(format);
             return this;
         }
 

@@ -18,19 +18,19 @@ namespace Its.Log.Monitoring
     {
         static AssertionExtensions()
         {
-            Formatter<ObjectContent>.RegisterForAllMembers();
-            Formatter<StringContent>.Register(c => new
+            LogFormatter<ObjectContent>.RegisterForAllMembers();
+            LogFormatter<StringContent>.Register(c => new
             {
                 c.ReadAsStringAsync().Result,
                 c.Headers
             }.ToLogString());
-            Formatter<StreamContent>.Register(c => new
+            LogFormatter<StreamContent>.Register(c => new
             {
                 c.ReadAsStringAsync().Result,
                 c.Headers
             }.ToLogString());
-            Formatter<HttpContentHeaders>.RegisterForAllMembers();
-            Formatter<HttpError>.RegisterForAllMembers();
+            LogFormatter<HttpContentHeaders>.RegisterForAllMembers();
+            LogFormatter<HttpError>.RegisterForAllMembers();
         }
 
         public static HttpResponseMessage ShouldSucceed(

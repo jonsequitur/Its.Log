@@ -13,8 +13,8 @@ namespace Its.Log.Instrumentation.Extensions
     {
         static EventLogInfo()
         {
-            Formatter.Clearing += (o, e) => Formatter<EventLogInfo>.RegisterForAllMembers();
-            Formatter<EventLogInfo>.RegisterForAllMembers();
+            LogFormatter.Clearing += (o, e) => LogFormatter<EventLogInfo>.RegisterForAllMembers();
+            LogFormatter<EventLogInfo>.RegisterForAllMembers();
         }
 
         /// <summary>

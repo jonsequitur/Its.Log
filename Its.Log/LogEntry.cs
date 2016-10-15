@@ -286,7 +286,7 @@ namespace Its.Log.Instrumentation
         /// <returns>
         /// A <see cref="T:System.String"/> that represents the current <see cref="T:System.Object"/>.
         /// </returns>
-        public override string ToString() => Formatter<LogEntry>.Format(this);
+        public override string ToString() => LogFormatter<LogEntry>.Format(this);
 
         /// <summary> 
         /// Adds info to the <see cref="LogEntry"/>.

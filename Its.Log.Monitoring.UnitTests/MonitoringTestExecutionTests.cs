@@ -20,7 +20,7 @@ namespace Its.Log.Monitoring.UnitTests
 
         public MonitoringTestExecutionTests()
         {
-            Formatter<TraceBuffer>.Register(b => new
+            LogFormatter<TraceBuffer>.Register(b => new
             {
                 b.HasContent,
                 HashCode = b.GetHashCode()
