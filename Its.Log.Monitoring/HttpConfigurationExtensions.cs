@@ -135,8 +135,8 @@ namespace Its.Log.Monitoring
             configuration.TestTargetsAre(targetRegistry);
             configureTargets?.Invoke(targetRegistry);
 
-            testTypes = testTypes ?? Discover.ConcreteTypes()
-                .DerivedFrom(typeof (IMonitoringTest));
+            testTypes = testTypes ?? Discover.AppDomainTypes()
+                                             .DerivedFrom(typeof(IMonitoringTest));
 
             var testDefinitions = testTypes.GetTestDefinitions();
             configuration.TestDefinitionsAre(testDefinitions);

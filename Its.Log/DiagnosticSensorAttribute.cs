@@ -2,7 +2,6 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.ComponentModel.Composition;
 
 namespace Its.Log.Instrumentation
 {
@@ -11,13 +10,7 @@ namespace Its.Log.Instrumentation
     /// </summary>
     /// <remarks>The method can be a static or instance member and need not be public.</remarks>
     [AttributeUsage(AttributeTargets.Method)]
-    public class DiagnosticSensorAttribute : ExportAttribute
+    public class DiagnosticSensorAttribute : Attribute
     {
-        /// <summary>
-        /// Initializes a new instance of the <see cref="DiagnosticSensorAttribute"/> class.
-        /// </summary>
-        public DiagnosticSensorAttribute() : base("DiagnosticSensor")
-        {
-        }
     }
 }

@@ -5,11 +5,10 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.ComponentModel.Composition.Hosting;
-using System.ComponentModel.Composition.Primitives;
-using System.IO;
-using System.Linq;
 using System.Reflection;
+using System.Linq;
+using System.Linq.Expressions;
+using static Its.Log.Instrumentation.Discover;
 
 namespace Its.Log.Instrumentation
 {
@@ -27,20 +26,41 @@ namespace Its.Log.Instrumentation
         /// <summary>
         ///   Initializes a new instance of the <see cref="DiagnosticSensor" /> class.
         /// </summary>
-        internal DiagnosticSensor(ExportedDelegate export)
+        internal DiagnosticSensor(MethodInfo method)
         {
-            if (export == null)
+            if (method == null)
             {
-                throw new ArgumentNullException(nameof(export));
+                throw new ArgumentNullException(nameof(method));
             }
 
-            @delegate = export.CreateDelegate(typeof (Delegate));
-            if (@delegate != null)
+            name = GetName(method);
+            declaringType = method.DeclaringType;
+            returnType = method.ReturnType;
+
+            NewExpression newExpression;
+
+            if (method.IsStatic)
             {
-                name = GetName(@delegate.Method);
-                declaringType = @delegate.Method.DeclaringType;
-                returnType = @delegate.Method.ReturnType;
+                newExpression = null;
             }
+            else
+            {
+                var defaultConstructor = method.DeclaringType?.GetConstructors().FirstOrDefault(c => !c.GetParameters().Any());
+
+                if (defaultConstructor == null)
+                {
+                    throw new ArgumentException($"Type {method.DeclaringType} must have a default public constructor in order to expose a non-static diagnostic sensor.");
+                }
+
+                newExpression = Expression.New(defaultConstructor);
+            }
+
+            var expression = Expression.Lambda<Func<object>>(
+                Expression.Call(
+                    newExpression,
+                    method));
+
+            @delegate = expression.Compile();
 
             ValidateAndInitialize();
         }
@@ -131,45 +151,39 @@ namespace Its.Log.Instrumentation
         /// Discovers sensors found in all loaded assemblies.
         /// </summary>
         public static ConcurrentDictionary<string, DiagnosticSensor> Discover() =>
-            AppDomain.CurrentDomain
-                     .GetAssemblies()
-                     .Where(a => !a.IsDynamic && !a.GlobalAssemblyCache)
-                     .SelectMany(a =>
-                     {
-                         try
-                         {
-                             return new CompositionContainer(new AggregateCatalog(new AssemblyCatalog(a)))
-                                 .GetExports<object>("DiagnosticSensor")
-                                 .Select(lazy => lazy.Value)
-                                 .OfType<ExportedDelegate>()
-                                 .Select(sensorMethod => new DiagnosticSensor(sensorMethod));
-                         }
-                         catch (Exception ex)
-                         {
-                             if (ex is TypeLoadException ||
-                                 ex is ReflectionTypeLoadException ||
-                                 ex is FileNotFoundException ||
-                                 ex is FileLoadException)
-                             {
-                                 return new[]
-                                 {
-                                     new DiagnosticSensor(typeof (Exception),
-                                                          "AssemblyLoadError-" + a.FullName,
-                                                          typeof (DiagnosticSensor),
-                                                          new Func<Exception>(() => ex))
-                                 };
-                             }
-                             throw;
-                         }
-                     })
-                     .OrderBy(sensor => sensor.Name)
-                     .ThenBy(sensor => sensor.DeclaringType.Assembly.FullName)
-                     .Aggregate(new ConcurrentDictionary<string, DiagnosticSensor>(), (sensors, sensor) =>
-                     {
-                         // FIX: (Discover) we should be graceful about collisions or deterministic about ordering
-                         sensors[sensor.Name] = sensor;
-                         return sensors;
-                     });
+            AppDomainTypes(true)
+                .SelectMany(t =>
+                                t.GetMethods(
+                                     BindingFlags.InvokeMethod |
+                                     BindingFlags.Instance |
+                                     BindingFlags.Static |
+                                     BindingFlags.Public |
+                                     BindingFlags.NonPublic)
+                                 .Where(m => m.GetCustomAttributes()
+                                              .Any(a =>
+                                              {
+                                                  if (a.GetType().Name == nameof(DiagnosticSensorAttribute))
+                                                  {
+                                                      return true;
+                                                  }
+
+                                                  if (a.GetType().Name != "ExportAttribute")
+                                                  {
+                                                      return false;
+                                                  }
+
+                                                  return ((dynamic) a).ContractName == "DiagnosticSensor";
+                                              })))
+                .Select(methodInfo => new DiagnosticSensor(methodInfo))
+                .OrderBy(sensor => sensor.Name)
+                .ThenBy(sensor => sensor.DeclaringType.Assembly.FullName)
+                .Aggregate(new ConcurrentDictionary<string, DiagnosticSensor>(),
+                           (sensors, sensor) =>
+                           {
+                               // FIX: (Discover) we should be graceful about collisions or deterministic about ordering
+                               sensors[sensor.Name] = sensor;
+                               return sensors;
+                           });
 
         /// <summary>
         /// Gets the name of a sensor.
@@ -180,7 +194,7 @@ namespace Its.Log.Instrumentation
         public static string GetName(MethodInfo sensorMethod)
         {
             var displayName = sensorMethod
-                .GetCustomAttributes(typeof (DisplayNameAttribute), false)
+                .GetCustomAttributes(typeof(DisplayNameAttribute), false)
                 .OfType<DisplayNameAttribute>()
                 .FirstOrDefault();
 
@@ -205,7 +219,7 @@ namespace Its.Log.Instrumentation
             name = name ?? anonymousMethodInfo.MethodName;
             allSensors.Value[name] = new DiagnosticSensor(
                 @delegate: sensor,
-                returnType: typeof (T),
+                returnType: typeof(T),
                 name: name,
                 declaringType: anonymousMethodInfo.EnclosingType);
         }

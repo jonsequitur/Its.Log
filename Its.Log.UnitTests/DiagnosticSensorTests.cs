@@ -6,15 +6,14 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.ComponentModel.Composition;
 using System.IO;
+using FluentAssertions;
 using System.Linq;
 using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
 using AssemblyWithMissingDependency;
-using FluentAssertions;
 using Its.Recipes;
 using NUnit.Framework;
-using Assert = NUnit.Framework.Assert;
 
 namespace Its.Log.Instrumentation.UnitTests
 {
@@ -58,7 +57,7 @@ namespace Its.Log.Instrumentation.UnitTests
         [Test]
         public void Sensor_methods_can_be_static_methods()
         {
-            var sensors = DiagnosticSensor.KnownSensors().Where(s => s.DeclaringType == typeof (StaticTestSensors));
+            var sensors = DiagnosticSensor.KnownSensors().Where(s => s.DeclaringType == typeof(StaticTestSensors));
 
             Assert.That(sensors.Count(), Is.AtLeast(1));
         }
@@ -66,7 +65,7 @@ namespace Its.Log.Instrumentation.UnitTests
         [Test]
         public void Sensor_methods_can_be_instance_methods()
         {
-            var sensors = DiagnosticSensor.KnownSensors().Where(s => s.DeclaringType == typeof (TestSensors));
+            var sensors = DiagnosticSensor.KnownSensors().Where(s => s.DeclaringType == typeof(TestSensors));
 
             Assert.That(sensors.Count(), Is.AtLeast(1));
         }
@@ -74,7 +73,7 @@ namespace Its.Log.Instrumentation.UnitTests
         [Test]
         public void Sensor_info_can_be_queried_based_on_sensor_declaring_type()
         {
-            var sensors = DiagnosticSensor.KnownSensors().Where(s => s.DeclaringType == typeof (TestSensors));
+            var sensors = DiagnosticSensor.KnownSensors().Where(s => s.DeclaringType == typeof(TestSensors));
 
             Assert.That(sensors.Count(), Is.AtLeast(2));
         }
@@ -82,7 +81,7 @@ namespace Its.Log.Instrumentation.UnitTests
         [Test]
         public void Sensors_can_be_queried_based_on_return_type()
         {
-            var sensors = DiagnosticSensor.KnownSensors().Where(s => s.ReturnType == typeof (FileInfo));
+            var sensors = DiagnosticSensor.KnownSensors().Where(s => s.ReturnType == typeof(FileInfo));
 
             Assert.That(sensors.Count(), Is.EqualTo(1));
         }
@@ -92,7 +91,8 @@ namespace Its.Log.Instrumentation.UnitTests
         {
             DiagnosticSensor.KnownSensors()
                             .Count(s => s.Name == "custom-name")
-                            .Should().Be(1);
+                            .Should()
+                            .Be(1);
         }
 
         [Test]
@@ -121,7 +121,7 @@ namespace Its.Log.Instrumentation.UnitTests
             var sensor = DiagnosticSensor.KnownSensors().Single(s => s.Name == sensorName);
 
             Assert.That(sensor.DeclaringType, Is.EqualTo(GetType()));
-            Assert.That(sensor.ReturnType, Is.EqualTo(typeof (string)));
+            Assert.That(sensor.ReturnType, Is.EqualTo(typeof(string)));
             Assert.That(sensor.Read(), Is.EqualTo("hello"));
         }
 
@@ -166,7 +166,7 @@ namespace Its.Log.Instrumentation.UnitTests
 
             Assert.That(
                 sensor.DeclaringType,
-                Is.EqualTo(typeof (StaticTestSensors)));
+                Is.EqualTo(typeof(StaticTestSensors)));
         }
 
         [Test]
@@ -206,14 +206,16 @@ namespace Its.Log.Instrumentation.UnitTests
             DiagnosticSensor.Register(() => "hello", MethodBase.GetCurrentMethod().Name);
             new Thread(() =>
             {
-                DiagnosticSensor.KnownSensors().Select(s =>
-                {
-                    Console.WriteLine(s.Name);
-                    return s.Read();
-                }).ToArray();
+                DiagnosticSensor.KnownSensors()
+                                .Select(s =>
+                                {
+                                    Console.WriteLine(s.Name);
+                                    return s.Read();
+                                })
+                                .ToArray();
             }).Start();
 
-            StaticTestSensors.Barrier.SignalAndWait();
+            StaticTestSensors.Barrier.SignalAndWait(1000);
 
             DiagnosticSensor.Register(SensorNameTester);
             DiagnosticSensor.Remove(MethodBase.GetCurrentMethod().Name);
@@ -248,23 +250,6 @@ namespace Its.Log.Instrumentation.UnitTests
             var o = new ClassWithoutReferenceToMissingAssembly();
 
             DiagnosticSensor.Discover().Count().Should().BeGreaterThan(0);
-        }
-
-        [Test]
-        public void ReflectionTypeLoadException_due_to_missing_assembly_is_signalled_by_sensor_output()
-        {
-            // force loading of the problem assembly. this assembly has a dependency which is deliberately not included in the project so that unprotected MEF usage will trigger a TypeLoadException. sensor discovery is intended to ignore this issue and swallow the exception. 
-            var o = new ClassWithoutReferenceToMissingAssembly();
-
-            dynamic reading = DiagnosticSensor.Discover()
-                                              .Values
-                                              .Select(s => s.Read())
-                                              .OfType<ReflectionTypeLoadException>()
-                                              .First();
-
-            var loaderException = ((IEnumerable<Exception>) reading.LoaderExceptions).Single();
-
-            loaderException.Message.Should().Contain("Could not load file or assembly 'MissingDependency, Version=1.0.0.0, Culture=neutral, PublicKeyToken=e9ed0c9abcf549e2' or one of its dependencies. The system cannot find the file specified.");
         }
 
         public static async Task<dynamic> AsyncTask()
@@ -323,7 +308,7 @@ namespace Its.Log.Instrumentation.UnitTests
         }
 
         [DiagnosticSensor]
-        internal static object CounterSensor()
+        public static object CounterSensor()
         {
             return callCount++;
         }
@@ -342,13 +327,13 @@ namespace Its.Log.Instrumentation.UnitTests
         }
 
         [DiagnosticSensor]
-        private static object Sensor_for_Discovered_sensors_can_be_removed_at_runtime()
+        public static object Sensor_for_Discovered_sensors_can_be_removed_at_runtime()
         {
             return new object();
         }
 
         [DiagnosticSensor]
-        private static object ConcurrencySensor()
+        public static object ConcurrencySensor()
         {
             Barrier.SignalAndWait();
             return new object();
