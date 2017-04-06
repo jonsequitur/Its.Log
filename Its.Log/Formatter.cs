@@ -10,7 +10,6 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Linq.Expressions;
-using System.Reflection;
 using Its.Log.Instrumentation.Extensions;
 
 namespace Its.Log.Instrumentation

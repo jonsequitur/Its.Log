@@ -73,13 +73,11 @@
   <ItemGroup>
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System" />
-    <Reference Include="System.ComponentModel.Composition" />
     <Reference Include="System.Core">
       <RequiredTargetFramework>3.5</RequiredTargetFramework>
     </Reference>
     <Reference Include="System.Data" />
     <Reference Include="System.Web" />
-    <Reference Include="System.Web.Services" />
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
@@ -98,6 +96,7 @@
     </Compile>
     <Compile Include="DiagnosticSensorAttribute.cs" />
     <Compile Include="DiagnosticSensor.cs" />
+    <Compile Include="Discover.cs" />
     <Compile Include="ExceptionExtensions.cs" />
     <Compile Include="ExpressionExtensions.cs" />
     <Compile Include="Extensions\Telemetry.cs" />
