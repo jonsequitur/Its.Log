@@ -2,13 +2,13 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 using FluentAssertions;
 using Its.Log.Instrumentation.Extensions;
 using NUnit.Framework;
-using Moq;
 using Assert = NUnit.Framework.Assert;
 
 namespace Its.Log.Instrumentation.UnitTests
@@ -107,38 +107,32 @@ namespace Its.Log.Instrumentation.UnitTests
         [Test]
         public void Write_passing_func_that_returns_string_correctly_describes_subject()
         {
-            var observer = new Mock<IObserver<LogEntry>>();
-            observer.Setup(
-                e => e.OnNext(It.Is<LogEntry>((LogEntry entry) => entry.Message == "hello")));
+            var log = new List<LogEntry>();
 
-            using (observer.Object.SubscribeToLogEvents())
+            using (Log.Events().Subscribe(log.Add))
             {
                 Log.Write(() => "hello");
             }
 
-            observer.VerifyAll();
+            log.Should()
+               .ContainSingle(e => e.Message == "hello");
         }
 
         [Test]
         public void Write_passing_func_that_returns_anonymous_type_describes_subject_properties_without_formatter()
         {
-            var observer = new Mock<IObserver<LogEntry>>();
-            observer.Setup(
-                e => e.OnNext(
-                    It.Is<LogEntry>(
-                        entry => entry.ToString().Contains("hello") &&
-                                 entry.ToString().Contains("there") &&
-                                 entry.ToString().Contains("number") &&
-                                 entry.ToString().Contains("42")
-                        )));
+            var log = new List<LogEntry>();
 
-            using (TestHelper.LogToConsole())
-            using (observer.Object.SubscribeToLogEvents())
+            using (Log.Events().Subscribe(log.Add))
             {
                 Log.Write(() => new { hello = "there", number = 42 });
             }
 
-            observer.VerifyAll();
+            log.Should()
+               .ContainSingle(e => e.ToString().Contains("hello") &&
+                                   e.ToString().Contains("there") &&
+                                   e.ToString().Contains("number") &&
+                                   e.ToString().Contains("42"));
         }
 
         [Test]
@@ -160,18 +154,15 @@ namespace Its.Log.Instrumentation.UnitTests
         public virtual void Write_passing_func_LogEntry_has_correct_calling_method()
         {
             var thisMethodName = MethodBase.GetCurrentMethod().Name;
-            var observer = new Mock<IObserver<LogEntry>>();
-            observer.Setup(
-                e => e.OnNext(It.Is<LogEntry>(entry =>
-                                                    entry.CallingMethod == thisMethodName)));
+            var log = new List<LogEntry>();
 
-            using (TestHelper.OnEntryPosted(e => Console.WriteLine(e.ToLogString())))
-            using (observer.Object.SubscribeToLogEvents())
+            using (Log.Events().Subscribe(log.Add))
             {
                 Log.Write(() => "hello");
             }
 
-            observer.VerifyAll();
+            log.Should()
+               .ContainSingle(e => e.CallingMethod == thisMethodName);
         }
 
         [Test]

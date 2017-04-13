@@ -4,21 +4,19 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using FluentAssertions;
 using System.Linq;
 using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
-using FluentAssertions;
-using Moq;
 using NUnit.Framework;
 
 namespace Its.Log.Instrumentation.UnitTests
 {
     [TestFixture]
-    public class AsyncTests
+    public class AsyncTests : IDisposable
     {
-        [TearDown]
-        public void TearDown()
+        public void Dispose()
         {
             Log.UnsubscribeAllFromEntryPosted();
         }
@@ -26,19 +24,13 @@ namespace Its.Log.Instrumentation.UnitTests
         [Test]
         public void LogActivity_Trace_captures_current_method_name()
         {
-            var observer = new Mock<IObserver<LogEntry>>();
-            observer.Setup(o => o.OnNext(
-                It.Is<LogEntry>(
-                    e => e.CallingMethod.Contains("BeginSomething"))));
-            observer.Setup(o => o.OnNext(
-                It.Is<LogEntry>(
-                    e => e.CallingMethod.Contains("EndSomething"))));
+            var log = new List<LogEntry>();
 
             var helper = new AsyncTestHelper();
 
             using (var activity = Log.Enter(() => { }))
             using (TestHelper.LogToConsole())
-            using (observer.Object.SubscribeToLogEvents())
+            using (Log.Events().Subscribe(log.Add))
             {
                 var result = helper.BeginSomething(
                     _ => activity.Complete(() => { }),
@@ -46,26 +38,23 @@ namespace Its.Log.Instrumentation.UnitTests
                 helper.EndSomething(result);
             }
 
-            observer.VerifyAll();
+            log.Select(e => e.CallingMethod)
+               .Should()
+               .BeEquivalentTo("BeginSomething",
+                               "EndSomething", 
+                               nameof(LogActivity_Trace_captures_current_method_name));
         }
 
         [Test]
         public void LogActivity_Complete_writes_current_method_name()
         {
+            var log = new List<LogEntry>();
             var methodName = MethodBase.GetCurrentMethod().Name;
-            var observer = new Mock<IObserver<LogEntry>>();
-            observer
-                .Setup(
-                    o => o.OnNext(
-                        It.Is<LogEntry>(
-                            e => e.CallingMethod == methodName &&
-                                 e.EventType == TraceEventType.Stop)));
-
             var helper = new AsyncTestHelper();
 
             using (var activity = Log.Enter(() => { }))
             using (TestHelper.LogToConsole())
-            using (observer.Object.SubscribeToLogEvents())
+            using (Log.Events().Subscribe(log.Add))
             {
                 var result = helper.BeginSomething(
                     _ => activity.Complete(() => { }),
@@ -73,7 +62,9 @@ namespace Its.Log.Instrumentation.UnitTests
                 helper.EndSomething(result);
             }
 
-            observer.VerifyAll();
+            log.Should()
+               .ContainSingle(e => e.CallingMethod == methodName &&
+                                   e.EventType == TraceEventType.Stop);
         }
 
         [Test]
@@ -81,7 +72,7 @@ namespace Its.Log.Instrumentation.UnitTests
         {
             var events = new List<LogEntry>();
 
-            using(Log.Events().Subscribe(events.Add))
+            using (Log.Events().Subscribe(events.Add))
             {
                 await new AsyncTestHelper().DoSomethingAsync();
             }
@@ -101,9 +92,9 @@ namespace Its.Log.Instrumentation.UnitTests
             }
 
             return new AsyncResult
-                       {
-                           AsyncState = new Tuple<AsyncCallback, ILogActivity>(callback, state as ILogActivity)
-                       };
+            {
+                AsyncState = new Tuple<AsyncCallback, ILogActivity>(callback, state as ILogActivity)
+            };
         }
 
         public void EndSomething(IAsyncResult result)

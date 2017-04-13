@@ -11,7 +11,6 @@ using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
 using Its.Log.Instrumentation.Extensions;
-using Moq;
 using NUnit.Framework;
 
 namespace Its.Log.Instrumentation.UnitTests
@@ -29,51 +28,39 @@ namespace Its.Log.Instrumentation.UnitTests
         [Test]
         public void Calling_Complete_then_Dispose_on_LogActivity_does_not_generate_second_log_event()
         {
-            var observer = new Mock<IObserver<LogEntry>>();
-            observer
-                .Setup(o => o.OnNext(It.IsAny<LogEntry>()));
+            var log = new List<LogEntry>();
 
-            using (TestHelper.LogToConsole())
-            using (Log.Events().Subscribe(observer.Object))
+            using (Log.Events().Subscribe(log.Add))
             {
                 var activity = Log.Enter(() => { });
                 activity.Complete(() => { });
                 activity.Dispose();
             }
 
-            observer.Verify(
-                o => o.OnNext(It.IsAny<LogEntry>()),
-                Times.Exactly(2));
+            log.Should().HaveCount(2);
         }
 
         [Test]
         public virtual void Calling_complete_twice_onLogActivity_does_not_generate_second_log_event()
         {
-            var observer = new Mock<IObserver<LogEntry>>();
-            observer
-                .Setup(o => o.OnNext(It.IsAny<LogEntry>()));
+            var log = new List<LogEntry>();
 
-            using (TestHelper.LogToConsole())
-            using (Log.Events().Subscribe(observer.Object))
+            using (Log.Events().Subscribe(log.Add))
             {
                 var activity = Log.Enter(() => { });
                 activity.Complete(() => { });
                 activity.Complete(() => { });
             }
 
-            observer.Verify(
-                o => o.OnNext(It.IsAny<LogEntry>()),
-                Times.Exactly(2));
+            log.Should().HaveCount(2);
         }
 
         [Test]
         public void Calling_dispose_twice_on_LogActivity_does_not_generate_second_log_event()
         {
-            var observer = new Mock<IObserver<LogEntry>>();
-            observer.Setup(o => o.OnNext(It.IsAny<LogEntry>()));
+            var log = new List<LogEntry>();
 
-            using (TestHelper.LogToConsole())
-            using (Log.Events().Subscribe(observer.Object))
+            using (Log.Events().Subscribe(log.Add))
             {
                 var activity = Log.Enter(() => { });
                 activity.Dispose();
@@ -81,30 +68,24 @@ namespace Its.Log.Instrumentation.UnitTests
             }
 
             var methodName = MethodBase.GetCurrentMethod().Name;
-            observer.Verify(
-                o => o.OnNext(It.Is<LogEntry>(e => e.EventType == TraceEventType.Stop &&
-                                                   e.CallingMethod == methodName)),
-                Times.Once());
+            log.Should()
+               .ContainSingle(e => e.EventType == TraceEventType.Stop &&
+                                                   e.CallingMethod == methodName);
         }
 
         [Test]
         public void Calling_trace_on_disposed_LogActivity_does_not_generate_log_event()
         {
-            var observer = new Mock<IObserver<LogEntry>>();
-            observer
-                .Setup(o => o.OnNext(It.IsAny<LogEntry>()));
+            var log = new List<LogEntry>();
 
-            using (TestHelper.LogToConsole())
-            using (Log.Events().Subscribe(observer.Object))
+            using (Log.Events().Subscribe(log.Add))
             {
                 var activity = Log.Enter(() => { });
                 activity.Dispose();
                 activity.Trace(() => new { something = "something" });
             }
 
-            observer.Verify(
-                o => o.OnNext(It.IsAny<LogEntry>()),
-                Times.Exactly(2));
+            log.Should().HaveCount(2);
         }
 
         [Test]
@@ -215,19 +196,17 @@ namespace Its.Log.Instrumentation.UnitTests
             try
             {
                 Extension<Stopwatch>.Disable();
-                var observer = new Mock<IObserver<LogEntry>>();
-                observer.Setup(
-                    w => w.OnNext(
-                        It.Is(
-                            (LogEntry e) =>
-                                e.EventType == TraceEventType.Stop && e.HasExtension<Stopwatch>() == false)));
 
-                using (observer.Object.SubscribeToLogEvents())
+                var log = new List<LogEntry>();
+
+                using (Log.Events().Subscribe(log.Add))
                 using (Log.Enter(() => { }))
                 {
                 }
 
-                observer.VerifyAll();
+                log.Should()
+                   .ContainSingle(  e =>
+                                e.EventType == TraceEventType.Stop && e.HasExtension<Stopwatch>() == false);
             }
             finally
             {
@@ -254,16 +233,17 @@ namespace Its.Log.Instrumentation.UnitTests
         [Test]
         public virtual void Writes_on_enter_and_exit()
         {
-            var observer = new Mock<IObserver<LogEntry>>();
-            observer.Setup(w => w.OnNext(It.IsAny<LogEntry>()));
+            var log = new List<LogEntry>();
 
-            using (observer.Object.SubscribeToLogEvents())
+            using (Log.Events().Subscribe(log.Add))
             using (Log.Enter(() => { }))
             {
             }
 
-            observer.Verify(o => o.OnNext(It.Is<LogEntry>(e => e.EventType == TraceEventType.Start)));
-            observer.Verify(o => o.OnNext(It.Is<LogEntry>(e => e.EventType == TraceEventType.Stop)));
+            log.Should()
+               .ContainSingle(e => e.EventType == TraceEventType.Start);
+            log.Should()
+               .ContainSingle(e => e.EventType == TraceEventType.Stop);
         }
 
         [Test]

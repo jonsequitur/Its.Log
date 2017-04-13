@@ -6,10 +6,10 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Reactive;
 using System.Threading.Tasks;
 using FluentAssertions;
 using Its.Log.Instrumentation.Extensions;
-using Moq;
 using NUnit.Framework;
 
 namespace Its.Log.Instrumentation.UnitTests
@@ -30,59 +30,56 @@ namespace Its.Log.Instrumentation.UnitTests
         public void Boundary_logging_can_be_disabled_globally_when_calling_with_no_params()
         {
             Extension<Boundaries>.Disable();
-            var observer = new Mock<IObserver<LogEntry>>();
-            observer.Setup(o => o.OnNext(It.IsAny<LogEntry>()));
+            var log = new List<LogEntry>();
 
-            using (Log.Events().Subscribe(observer.Object))
+            using (Log.Events().Subscribe(log.Add))
             using (Log.Enter(() => { }))
             {
             }
 
-            observer.Verify(o => o.OnNext(It.IsAny<LogEntry>()), Times.Never());
+            log.Should().BeEmpty();
         }
 
         [Test]
         public void Boundary_logging_can_be_disabled_globally_when_calling_with_params()
         {
             Extension<Boundaries>.Disable();
-            var observer = new Mock<IObserver<LogEntry>>();
-            observer.Setup(o => o.OnNext(It.IsAny<LogEntry>()));
+            var log = new List<LogEntry>();
 
-            using (Log.Events().Subscribe(observer.Object))
-            using (Log.Enter(() => new { observer }))
+            using (Log.Events().Subscribe(log.Add))
+            using (Log.Enter(() => new { hello = "hello" }))
             {
             }
 
-            observer.Verify(o => o.OnNext(It.IsAny<LogEntry>()), Times.Never());
+            log.Should().BeEmpty();
         }
 
         [Test]
         public void Boundary_logging_can_be_disabled_per_class_when_calling_with_no_params()
         {
             Extension<Boundaries>.DisableFor<BoundaryTests>();
-            var list = new List<LogEntry>();
+            var log = new List<LogEntry>();
 
-            using (Log.Events().Subscribe(list.Add))
+            using (Log.Events().Subscribe(log.Add))
             using (Log.Enter(() => { }))
             {
             }
 
-            list.Should().BeEmpty();
+            log.Should().BeEmpty();
         }
 
         [Test]
         public void Boundary_logging_can_be_disabled_per_class_with_params()
         {
             Extension<Boundaries>.DisableFor<BoundaryTests>();
-            var observer = new Mock<IObserver<LogEntry>>();
-            observer.Setup(o => o.OnNext(It.IsAny<LogEntry>()));
+            var log = new List<LogEntry>();
 
-            using (Log.Events().Subscribe(observer.Object))
-            using (Log.Enter(() => new { observer }))
+            using (Log.Events().Subscribe(log.Add))
+            using (Log.Enter(() => new { hello = "hello" }))
             {
             }
 
-            observer.Verify(o => o.OnNext(It.IsAny<LogEntry>()), Times.Never());
+            log.Should().BeEmpty();
         }
 
         [Test]
@@ -106,34 +103,34 @@ namespace Its.Log.Instrumentation.UnitTests
         [Test]
         public void Log_Enter_with_no_params_does_not_throw_exceptions_thrown_from_observer()
         {
-            var observer = new Mock<IObserver<LogEntry>>();
-            observer.Setup(w => w.OnNext(It.IsAny<LogEntry>())).Throws(new Exception());
-
-            using (Log.Events().Subscribe(observer.Object))
+            var observer = Observer.Create<LogEntry>(e =>
             {
-                using (Log.Enter(() => { }))
-                {
-                }
+                throw new Exception();
+            });
+
+            using (Log.Events().Subscribe(observer))
+            using (Log.Enter(() => { }))
+            {
             }
-            observer.VerifyAll();
+
+            // no exception. success!
         }
 
         [Test]
         public void Log_Enter_with_params_does_not_throw_exceptions_thrown_from_writer()
         {
-            // set up a policy where any write operation will hit a writer that throws an exception
-            var observer = new Mock<IObserver<LogEntry>>();
-            observer.Setup(w => w.OnNext(It.IsAny<LogEntry>())).Throws(new Exception());
-
-            using (Log.Events().Subscribe(observer.Object))
+            var observer = Observer.Create<LogEntry>(e =>
             {
-                string someParam = "whee";
-                using (Log.Enter(() => new { someParam }))
-                {
-                }
+                throw new Exception();
+            });
+
+            string someParam = "whee";
+            using (Log.Events().Subscribe(observer))
+            using (Log.Enter(() => new { someParam }))
+            {
             }
 
-            observer.VerifyAll();
+            // no exception. success!
         }
 
         [Test]

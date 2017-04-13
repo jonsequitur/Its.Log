@@ -3,12 +3,13 @@
 
 using System;
 using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.Linq;
 using System.Reactive.Linq;
 using System.Threading;
 using System.Web;
+using FluentAssertions;
 using Its.Log.Instrumentation.Extensions;
-using Moq;
 using NUnit.Framework;
 using Assert = NUnit.Framework.Assert;
 
@@ -163,13 +164,13 @@ namespace Its.Log.Instrumentation.UnitTests
         [Test]
         public virtual void Log_only_after_a_threshold_is_reached()
         {
-            var problems = LogEvents().SkipUntil(
-                LogEvents().Where(e => e.Subject is Exception));
-            var observer = new Mock<IObserver<LogEntry>>();
-            observer.Setup(o => o.OnNext(It.IsAny<LogEntry>()));
+            var log = new List<LogEntry>();
+            var problems = LogEvents()
+                .SkipUntil(
+                    LogEvents().Where(e => e.Subject is Exception));
 
             using (problems.Subscribe(e => Console.WriteLine(e.Message)))
-            using (problems.Subscribe(observer.Object))
+            using (problems.Subscribe(log.Add))
             {
                 var thread = new Thread(
                     () =>
@@ -190,9 +191,7 @@ namespace Its.Log.Instrumentation.UnitTests
                 thread.Abort();
             }
 
-            observer.Verify(
-                o => o.OnNext(It.IsAny<LogEntry>()),
-                Times.AtMost(8));
+            log.Should().HaveCount(i => i <= 8);
         }
     }
 }
