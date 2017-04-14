@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using FluentAssertions;
 using Its.Log.Instrumentation;
 using System.Linq;
@@ -13,7 +14,6 @@ using System.Threading.Tasks;
 using System.Web.Http.Controllers;
 using System.Web.Http.Hosting;
 using Its.Log.Instrumentation.Extensions;
-using Moq;
 using NUnit.Framework;
 
 namespace Recipes.Tests
@@ -153,9 +153,8 @@ namespace Recipes.Tests
             using (Log.With<Telemetry>(t => t.WithPropertiesBasedOn(response)).Enter(() => { }))
             {
                 var request = new HttpRequestMessage(HttpMethod.Get, @"http://contoso.com/");
-                var actionDescriptor = new Mock<HttpActionDescriptor>();
-                actionDescriptor.Setup(a => a.ActionName).Returns("operationName6");
-                request.Properties[HttpPropertyKeys.HttpActionDescriptorKey] = actionDescriptor.Object;
+                var actionDescriptor = new FakeHttpActionDescriptor();
+                request.Properties[HttpPropertyKeys.HttpActionDescriptorKey] = actionDescriptor;
 
                 response = new HttpResponseMessage(HttpStatusCode.OK)
                 {
@@ -167,6 +166,23 @@ namespace Recipes.Tests
                            .IsIncomingRequest()
                            .Should()
                            .BeTrue();
+        }
+
+        private class FakeHttpActionDescriptor : HttpActionDescriptor
+        {
+            public override Collection<HttpParameterDescriptor> GetParameters()
+            {
+                return null;
+            }
+
+            public override Task<object> ExecuteAsync(HttpControllerContext controllerContext, IDictionary<string, object> arguments, CancellationToken cancellationToken)
+            {
+                return null;
+            }
+
+            public override string ActionName => "operationName6";
+
+            public override Type ReturnType { get; }
         }
 
         [Test]
@@ -199,9 +215,8 @@ namespace Recipes.Tests
             using (Log.With<Telemetry>(t => t.WithPropertiesBasedOn(response)).Enter(() => { }))
             {
                 var request = new HttpRequestMessage(HttpMethod.Get, @"http://contoso.com/operationName5");
-                var actionDescriptor = new Mock<HttpActionDescriptor>();
-                actionDescriptor.Setup(a => a.ActionName).Returns("operationName6");
-                request.Properties[HttpPropertyKeys.HttpActionDescriptorKey] = actionDescriptor.Object;
+                var actionDescriptor = new FakeHttpActionDescriptor();
+                request.Properties[HttpPropertyKeys.HttpActionDescriptorKey] = actionDescriptor;
 
                 response = new HttpResponseMessage(HttpStatusCode.OK)
                 {
