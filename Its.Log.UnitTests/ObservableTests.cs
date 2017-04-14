@@ -102,7 +102,7 @@ namespace Its.Log.Instrumentation.UnitTests
             errorCount.Should().Be(numberOfEvents);
         }
 
-        [NUnit.Framework.Ignore("Scenario under development")]
+        [Ignore("Scenario under development")]
         [Test]
         public void WriteToConsole_can_be_used_to_send_log_entries_to_the_console()
         {

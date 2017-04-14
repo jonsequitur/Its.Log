@@ -2,9 +2,10 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
-using Moq;
+using FluentAssertions;
 using NUnit.Framework;
 using Assert = NUnit.Framework.Assert;
 
@@ -31,16 +32,14 @@ namespace Its.Log.Instrumentation.UnitTests
         [Test]
         public void Category_is_set_correctly_for_trace_write_overload_string_string()
         {
-            var observer = new Mock<IObserver<LogEntry>>();
-            observer.Setup(
-                e => e.OnNext(It.Is<LogEntry>(entry => entry.Category == "the category")));
+            var log = new List<LogEntry>();
 
-            using (Log.Events().Subscribe(observer.Object))
+            using (Log.Events().Subscribe(log.Add))
             {
                 Trace.Write("test", "the category");
             }
 
-            observer.VerifyAll();
+            log.Should().ContainSingle(e => e.Category =="the category");
         }
 
         /// <summary>
@@ -49,14 +48,14 @@ namespace Its.Log.Instrumentation.UnitTests
         [Test]
         public void Category_is_set_correctly_for_trace_write_overload_object_string()
         {
-            var observer = new Mock<IObserver<LogEntry>>();
-            observer.Setup(
-                e => e.OnNext(It.Is<LogEntry>(entry => entry.Category == "the category")));
-            using (Log.Events().Subscribe(observer.Object))
+            var log = new List<LogEntry>();
+
+            using (Log.Events().Subscribe(log.Add))
             {
                 Trace.Write(new object(), "the category");
             }
-            observer.VerifyAll();
+
+            log.Should().ContainSingle(e => e.Category == "the category");
         }
 
         /// <summary>
@@ -65,16 +64,14 @@ namespace Its.Log.Instrumentation.UnitTests
         [Test]
         public void Category_is_set_correctly_for_trace_write_line_overload_string_string()
         {
-            var observer = new Mock<IObserver<LogEntry>>();
-            observer.Setup(
-                e => e.OnNext(It.Is<LogEntry>(entry => entry.Category == "the category")));
+            var log = new List<LogEntry>();
 
-            using (Log.Events().Subscribe(observer.Object))
+            using (Log.Events().Subscribe(log.Add))
             {
                 Trace.WriteLine("test", "the category");
             }
 
-            observer.VerifyAll();
+            log.Should().ContainSingle(e => e.Category == "the category");
         }
 
         /// <summary>
@@ -83,16 +80,14 @@ namespace Its.Log.Instrumentation.UnitTests
         [Test]
         public void Category_is_set_correctly_for_trace_write_line_overload_object_string()
         {
-            var observer = new Mock<IObserver<LogEntry>>();
-            observer.Setup(
-                e => e.OnNext(It.Is<LogEntry>(entry => entry.Category == "the category")));
+            var log = new List<LogEntry>();
 
-            using (Log.Events().Subscribe(observer.Object))
+            using (Log.Events().Subscribe(log.Add))
             {
                 Trace.WriteLine(new object(), "the category");
             }
 
-            observer.VerifyAll();
+            log.Should().ContainSingle(e => e.Category == "the category");
         }
 
         [Test]

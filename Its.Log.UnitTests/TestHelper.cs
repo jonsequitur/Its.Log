@@ -22,18 +22,6 @@ namespace Its.Log.Instrumentation.UnitTests
                 .Select(e => e.EventArgs.LogEntry);
         }
 
-        public static IDisposable SubscribeToLogEvents(this IObserver<LogEntry> observer)
-        {
-            var subscription = Log.Events().Subscribe(observer);
-            return subscription;
-        }
-
-        public static IDisposable SubscribeToLogInternalErrors(this IObserver<LogEntry> observer)
-        {
-            var subscription = InternalErrors().Subscribe(observer);
-            return subscription;
-        }
-
         public static IDisposable OnEntryPosted(Action<LogEntry> doSomething)
         {
             return Observable
