@@ -258,11 +258,11 @@ namespace Its.Log.Instrumentation.UnitTests
 
             Assert.That(
                 logEntry.ToString(),
-                Is.StringContaining("some_guid"));
+                Does.Contain("some_guid"));
 
             Assert.That(
                 logEntry.ToString(),
-                Is.StringContaining(guid.ToString()));
+                Does.Contain(guid.ToString()));
         }
     }
 }

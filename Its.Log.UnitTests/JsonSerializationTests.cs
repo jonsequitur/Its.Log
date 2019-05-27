@@ -166,7 +166,7 @@ namespace Its.Log.Instrumentation.UnitTests
             json.Should().Contain("\"ActivityId\":\"" + activityId + "\"");
         }
 
-        [Ignore]
+        [Ignore("")]
         [Test]
         public void ActivityId_is_a_JSON_property_when_added_using_WithExtension_Tracing_is_called()
         {
@@ -182,7 +182,7 @@ namespace Its.Log.Instrumentation.UnitTests
             json.Should().Contain("\"ActivityId\":\"" + activityId + "\"");
         }
 
-        [Ignore]
+        [Ignore("")]
         [Test]
         public void CallingType_is_serialized_as_the_full_type_name()
         {
@@ -190,7 +190,7 @@ namespace Its.Log.Instrumentation.UnitTests
             Assert.Fail("Test not written yet.");
         }
 
-        [Ignore]
+        [Ignore("")]
         [Test]
         public void EventType_can_be_serialized_as_a_string()
         {

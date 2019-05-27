@@ -171,8 +171,11 @@ namespace Its.Log.Instrumentation.UnitTests
         public void LogEntryObject1_Has_a_subject()
         {
             Log.EntryPosted += (sender, e) =>
-                               Assert.That(e.LogEntry.Subject,
-                                           Is.EqualTo(Person.GeorgeLucas));
+            {
+                var subject = e.LogEntry.Subject as Person;
+                Assert.That(subject.Name, Is.EqualTo(Person.GeorgeLucas.Name));
+                Assert.That(subject.DateOfBirth, Is.EqualTo(Person.GeorgeLucas.DateOfBirth));
+            };
 
             Log.Write(() => new { Person.GeorgeLucas });
         }

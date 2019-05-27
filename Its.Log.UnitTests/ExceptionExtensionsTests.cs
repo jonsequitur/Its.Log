@@ -134,7 +134,7 @@ namespace Its.Log.Instrumentation.UnitTests
 
             Assert.That(
                 log.Single().ToLogString(),
-                Is.StringContaining(MethodBase.GetCurrentMethod().Name));
+                Does.Contain(MethodBase.GetCurrentMethod().Name));
         }
 
         [Test]
@@ -150,7 +150,7 @@ namespace Its.Log.Instrumentation.UnitTests
             // TODO: (When_an_exception_is_augmented_with_WithFullStackTrace_then_exception_stack_trace_is_included_in_augmented_stack_trace) the stack trace is a little weird... maybe try to remove the Its.Log frames?
             Assert.That(
                 log.Single().ToLogString(),
-                Is.StringContaining("at Its.Log.Instrumentation.UnitTests.ExceptionExtensionsTests.ThrowException"));
+                Does.Contain("at Its.Log.Instrumentation.UnitTests.ExceptionExtensionsTests.ThrowException"));
         }
 
         [Test]

@@ -92,7 +92,7 @@ namespace Its.Log.Instrumentation.UnitTests
 
             Assert.That(
                 node.ToLogString(),
-                Is.StringContaining("Nodes = {  }"));
+                Does.Contain("Nodes = {  }"));
 
             // TODO (GenerateForMembers_compiles_expressions_that_are_not_MemberExpressions) write test
             Assert.Fail("Test not written yet.");
@@ -800,10 +800,10 @@ namespace Its.Log.Instrumentation.UnitTests
 
             var output = dictionary.ToLogString();
 
-            Assert.That(output, Is.StringContaining("zero"));
-            Assert.That(output, Is.StringContaining("0"));
-            Assert.That(output, Is.StringContaining("ninety-nine"));
-            Assert.That(output, Is.StringContaining("99"));
+            Assert.That(output, Does.Contain("zero"));
+            Assert.That(output, Does.Contain("0"));
+            Assert.That(output, Does.Contain("ninety-nine"));
+            Assert.That(output, Does.Contain("99"));
         }
 
         [Test]
@@ -812,13 +812,13 @@ namespace Its.Log.Instrumentation.UnitTests
             Formatter.AutoGenerateForType = t => true;
 
             Assert.That(new FileInfo(@"c:\temp\foo.txt").ToLogString(),
-                        Is.StringContaining(@"DirectoryName = c:\temp"));
+                        Does.Contain(@"DirectoryName = c:\temp"));
             Assert.That(new FileInfo(@"c:\temp\foo.txt").ToLogString(),
-                        Is.StringContaining("Parent = "));
+                        Does.Contain("Parent = "));
             Assert.That(new FileInfo(@"c:\temp\foo.txt").ToLogString(),
-                        Is.StringContaining("Root = "));
+                        Does.Contain("Root = "));
             Assert.That(new FileInfo(@"c:\temp\foo.txt").ToLogString(),
-                        Is.StringContaining("Exists = "));
+                        Does.Contain("Exists = "));
         }
 
         [Test]
@@ -831,7 +831,7 @@ namespace Its.Log.Instrumentation.UnitTests
                 Log.Write(() => "hello");
             }
 
-            Assert.That(log, Is.StringContaining("hello"));
+            Assert.That(log, Does.Contain("hello"));
             Assert.That(log, Is.Not.StringContaining("Length"));
         }
     }

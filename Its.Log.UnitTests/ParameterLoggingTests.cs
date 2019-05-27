@@ -51,7 +51,7 @@ namespace Its.Log.Instrumentation.UnitTests
                 Log.WithParams(nullFunc).Write("hello!");
             }
 
-            Assert.That(log, Is.StringContaining("hello!"));
+            Assert.That(log, Does.Contain("hello!"));
         }
 
         [NUnit.Framework.Ignore("Perf timing test")]

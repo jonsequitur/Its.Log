@@ -133,7 +133,7 @@ namespace Its.Log.Instrumentation.UnitTests
 
             var sensor = DiagnosticSensor.KnownSensors().Single(s => s.Read().Equals(newGuid));
 
-            Assert.That(sensor.Name, Is.StringContaining(MethodBase.GetCurrentMethod().Name));
+            Assert.That(sensor.Name, Does.Contain(MethodBase.GetCurrentMethod().Name));
         }
 
         [Test]
