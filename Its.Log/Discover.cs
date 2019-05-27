@@ -14,7 +14,7 @@ namespace Its.Log.Instrumentation
     /// <summary>
     /// Provides methods of discovering types within the application.
     /// </summary>
-    internal static class Discover
+    public static class Discover
     {
         /// <summary>
         /// Gets concrete types derived from from specified type.

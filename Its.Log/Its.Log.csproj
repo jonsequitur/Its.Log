@@ -1,15 +1,10 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="12.0">
+﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
-    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <TargetFramework>net462</TargetFramework>
+  </PropertyGroup>
+  <PropertyGroup>
     <ProductVersion>9.0.30729</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>{870A5A29-7744-41F1-89E7-90300954AD07}</ProjectGuid>
-    <OutputType>Library</OutputType>
-    <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Its.Log.Instrumentation</RootNamespace>
-    <AssemblyName>Its.Log</AssemblyName>
     <StartupObject>
     </StartupObject>
     <FileUpgradeFlags>
@@ -17,7 +12,6 @@
     <OldToolsVersion>3.5</OldToolsVersion>
     <UpgradeBackupLocation>
     </UpgradeBackupLocation>
-    <TargetFrameworkVersion>v4.6.2</TargetFrameworkVersion>
     <SccProjectName>SAK</SccProjectName>
     <SccLocalPath>SAK</SccLocalPath>
     <SccAuxPath>SAK</SccAuxPath>
@@ -81,69 +75,6 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="%28Its.Recipes%29\AnonymousDisposable.cs" />
-    <Compile Include="%28Its.Recipes%29\MaybeExtensions.cs" />
-    <Compile Include="..\ProductInfo.cs">
-      <Link>Properties\ProductInfo.cs</Link>
-    </Compile>
-    <Compile Include="ActionExtension.cs" />
-    <Compile Include="AnonymousMethodInfo.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="AnonymousMethodInfo{T}.cs" />
-    <Compile Include="DefaultDiagnosticSensors.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="DiagnosticSensorAttribute.cs" />
-    <Compile Include="DiagnosticSensor.cs" />
-    <Compile Include="Discover.cs" />
-    <Compile Include="ExceptionExtensions.cs" />
-    <Compile Include="ExpressionExtensions.cs" />
-    <Compile Include="Extensions\Telemetry.cs" />
-    <Compile Include="Formatter.cs" />
-    <Compile Include="FormatterIgnoresAttribute.cs" />
-    <Compile Include="Formatter{T}.cs" />
-    <Compile Include="IApplyOnEnter.cs" />
-    <Compile Include="IApplyOnExit.cs" />
-    <Compile Include="ILogExtension.cs" />
-    <Compile Include="InstrumentationEventArgs{T}.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="Extensions\Boundaries.cs" />
-    <Compile Include="Extensions\Counter.cs" />
-    <Compile Include="Extensions\EventLogInfo.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="Extensions\Extension{T}.cs" />
-    <Compile Include="Extensions\Params.cs" />
-    <Compile Include="Extensions\Params{T}.cs" />
-    <Compile Include="FormatterSet.cs" />
-    <Compile Include="ILogActivity.cs" />
-    <Compile Include="Extensions\Extension.cs" />
-    <Compile Include="Extensions\Tracing.cs" />
-    <Compile Include="LogActivity.cs" />
-    <Compile Include="Log.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="LogEntryExtensions.cs" />
-    <Compile Include="LogEntry{T}.cs" />
-    <Compile Include="MemberAccessor.cs" />
-    <Compile Include="ObservableExtensions.cs" />
-    <Compile Include="TelemetryExtensions.cs" />
-    <Compile Include="Text\ILogTextFormatter.cs" />
-    <Compile Include="Text\MultiLineTextFormatter.cs" />
-    <Compile Include="NullLogActivity.cs" />
-    <Compile Include="LogEntry.cs" />
-    <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="RecursionCounter.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="FormatterSkipsOnNullAttribute.cs" />
-    <Compile Include="Text\SingleLineTextFormatter.cs" />
-    <Compile Include="TraceListener.cs" />
-    <Compile Include="TypeExtensions.cs" />
-  </ItemGroup>
-  <ItemGroup>
     <BootstrapperPackage Include="Microsoft.Net.Client.3.5">
       <Visible>False</Visible>
       <ProductName>.NET Framework 3.5 SP1 Client Profile</ProductName>
@@ -161,25 +92,13 @@
     </BootstrapperPackage>
   </ItemGroup>
   <ItemGroup>
-    <None Include="Its.Log.nuspec" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System" />
+    <Reference Include="System.Core">
+      <RequiredTargetFramework>3.5</RequiredTargetFramework>
+    </Reference>
+    <Reference Include="System.Data" />
+    <Reference Include="System.Web" />
+    <Reference Include="System.Xml" />
   </ItemGroup>
-  <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
-  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
-       Other similar extension points exist, see Microsoft.Common.targets.
-  <Target Name="BeforeBuild">
-  </Target>
-  <Target Name="AfterBuild">
-  </Target>
-  -->
-  <PropertyGroup>
-    <PostBuildEvent>
-    </PostBuildEvent>
-  </PropertyGroup>
-  <Import Project="$(SolutionDir)\.nuget\NuGet.targets" Condition="Exists('$(SolutionDir)\.nuget\NuGet.targets')" />
-  <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
-    <PropertyGroup>
-      <ErrorText>This project references NuGet package(s) that are missing on this computer. Enable NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
-    </PropertyGroup>
-    <Error Condition="!Exists('$(SolutionDir)\.nuget\NuGet.targets')" Text="$([System.String]::Format('$(ErrorText)', '$(SolutionDir)\.nuget\NuGet.targets'))" />
-  </Target>
 </Project>
