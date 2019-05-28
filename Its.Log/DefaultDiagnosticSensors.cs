@@ -10,6 +10,10 @@ using System.Linq;
 using System.Reflection;
 using System.Web;
 
+#if NETSTANDARD20
+using Microsoft.Extensions.Caching.Memory;
+#endif
+
 namespace Its.Log.Instrumentation
 {
     internal static class DefaultDiagnosticSensors
@@ -48,6 +52,17 @@ namespace Its.Log.Instrumentation
                 { "Server", System.Environment.MachineName }
             };
 
+#if NETSTANDARD20
+        /// <summary>
+        ///   Returns diagnostic information related to the <see cref="MemoryCache" />.
+        /// </summary>
+        [DiagnosticSensor]
+        public static IDictionary<string, object> Cache(MemoryCache memoryCache) =>
+            new Dictionary<string, object>
+            {
+                { "Count", memoryCache.Count },
+            };
+#else
         /// <summary>
         ///   Returns diagnostic information related to the <see cref="HttpRuntime.Cache" />.
         /// </summary>
@@ -60,5 +75,6 @@ namespace Its.Log.Instrumentation
                 { "EffectivePrivateBytesLimit", HttpRuntime.Cache.EffectivePrivateBytesLimit },
                 { "Keys", HttpRuntime.Cache.Cast<DictionaryEntry>().Select(item => item.Key).OrderBy(key => key) },
             };
+#endif
     }
 }
