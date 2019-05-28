@@ -6,7 +6,7 @@ using System.Diagnostics;
 
 namespace Its.Log.Instrumentation
 {
-    public static class ObservableExtensions
+    internal static class ObservableExtensions
     {
         public static IDisposable WriteToTrace(this IObservable<LogEntry> source) =>
             source.Subscribe(new TraceObserver());
