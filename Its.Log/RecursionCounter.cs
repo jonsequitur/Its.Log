@@ -7,7 +7,7 @@ using System.Diagnostics;
 namespace Its.Log.Instrumentation
 {
     [DebuggerStepThrough]
-    internal class RecursionCounter : IDisposable
+    public class RecursionCounter : IDisposable
     {
         [ThreadStatic]
         private static int depth = 0;

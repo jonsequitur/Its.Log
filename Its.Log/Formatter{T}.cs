@@ -261,7 +261,7 @@ namespace Its.Log.Instrumentation
         ///   Gets or sets the limit to the number of items that will be written out in detail from an IEnumerable sequence of <typeparamref name="T" />.
         /// </summary>
         /// <value> The list expansion limit.</value>
-        internal static int ListExpansionLimit
+        public static int ListExpansionLimit
         {
             get
             {

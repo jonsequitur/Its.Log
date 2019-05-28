@@ -27,12 +27,12 @@ namespace Its.Log.Instrumentation.UnitTests
         {
             var aggregateWithOneInner = new AggregateException("oops", new Exception());
             Assert.That(
-                aggregateWithOneInner.InnerExceptions().Count(),
+                aggregateWithOneInner.InnerExceptions.Count(),
                 Is.EqualTo(1));
 
             var aggregateWithSeveralInners = new AggregateException(new Exception(), new ExecutionEngineException(), new InvalidOperationException());
             Assert.That(
-                aggregateWithSeveralInners.InnerExceptions().Count(),
+                aggregateWithSeveralInners.InnerExceptions.Count(),
                 Is.EqualTo(3));
         }
 

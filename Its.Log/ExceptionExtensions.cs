@@ -16,7 +16,7 @@ namespace Its.Log.Instrumentation
     {
         private const string ExceptionDataKey = "ItsLog_ExceptionData_";
         internal const string ExceptionDataPrefix = "__Its_Log_";
-        internal const string FullStackTraceKey = ExceptionDataPrefix + "StackTrace__";
+        public const string FullStackTraceKey = ExceptionDataPrefix + "StackTrace__";
 
         /// <summary>
         /// Returns all of the inner exceptions of an exception in a single sequence.

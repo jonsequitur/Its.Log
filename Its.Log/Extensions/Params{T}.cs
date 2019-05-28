@@ -62,6 +62,6 @@ namespace Its.Log.Instrumentation.Extensions
         /// </returns>
         public override string ToString() => this.ToLogString();
 
-        internal void SetAccessor(Func<TAnonymous> accessor) => paramsAccessor = accessor;
+        public void SetAccessor(Func<TAnonymous> accessor) => paramsAccessor = accessor;
     }
 }

@@ -5,7 +5,7 @@ using System.IO;
 
 namespace Its.Log.Instrumentation
 {
-    internal class SingleLineTextFormatter : ILogTextFormatter
+    public class SingleLineTextFormatter : ILogTextFormatter
     {
         private const string PropertySeparator = " | ";
         private const string OpeningDelimiter = "{ ";

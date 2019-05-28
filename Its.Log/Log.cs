@@ -29,7 +29,7 @@ namespace Its.Log.Instrumentation
         /// <summary>
         ///     Unsubscribes all subscribers to the <see cref="Log.EntryPosted" /> event.
         /// </summary>
-        internal static void UnsubscribeAllFromEntryPosted()
+        public static void UnsubscribeAllFromEntryPosted()
         {
             var handler = EntryPosted;
             if (handler == null)

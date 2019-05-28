@@ -22,7 +22,7 @@ namespace Its.Log.Instrumentation
         private static Func<Type, bool> autoGenerateForType = t => false;
         private static int defaultListExpansionLimit;
         private static int recursionLimit;
-        internal static readonly RecursionCounter RecursionCounter = new RecursionCounter();
+        public static readonly RecursionCounter RecursionCounter = new RecursionCounter();
 
         private static readonly ConcurrentDictionary<Type, Action<object, TextWriter>> genericFormatters = new ConcurrentDictionary<Type, Action<object, TextWriter>>();
 
@@ -39,9 +39,9 @@ namespace Its.Log.Instrumentation
         /// </summary>
         public static Func<TextWriter> CreateWriter = () => new StringWriter(CultureInfo.InvariantCulture);
 
-        internal static ILogTextFormatter TextFormatter = new SingleLineTextFormatter();
+        public static ILogTextFormatter TextFormatter = new SingleLineTextFormatter();
 
-        internal static Action<object, TextWriter> Default { get; set; }
+        public static Action<object, TextWriter> Default { get; set; }
 
         /// <summary>
         /// Gets or sets the limit to the number of items that will be written out in detail from an IEnumerable sequence.
