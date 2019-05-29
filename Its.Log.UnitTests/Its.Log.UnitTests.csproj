@@ -52,9 +52,6 @@
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
     <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(TargetFramework)'=='net462'">
-    <DefineConstants>NET462</DefineConstants>
-  </PropertyGroup>
   <ItemGroup>
     <Reference Include="AssemblyWithMissingDependency">
       <HintPath>Resources\AssemblyWithMissingDependency.dll</HintPath>
