@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFramework>net462</TargetFramework>
+    <TargetFramework>netcoreapp2.2</TargetFramework>
   </PropertyGroup>
   <PropertyGroup>
     <ProductVersion>9.0.30729</ProductVersion>
@@ -31,6 +31,7 @@
     <BootstrapperEnabled>true</BootstrapperEnabled>
     <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\</SolutionDir>
     <RestorePackages>true</RestorePackages>
+    <LangVersion>7.0</LangVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -40,7 +41,7 @@
     <DefineConstants>TRACE;DEBUG</DefineConstants>
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
     <Prefer32Bit>false</Prefer32Bit>
-    <LangVersion>6</LangVersion>
+    <LangVersion>7</LangVersion>
     <NoWarn>CS1998</NoWarn>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
@@ -51,6 +52,9 @@
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
     <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(TargetFramework)'=='net462'">
+    <DefineConstants>NET462</DefineConstants>
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="AssemblyWithMissingDependency">
       <HintPath>Resources\AssemblyWithMissingDependency.dll</HintPath>
@@ -58,7 +62,6 @@
     <Reference Include="FluentAssertions" Version="4.0.0">
       <SpecificVersion>False</SpecificVersion>
     </Reference>
-    <Reference Include="FluentAssertions.Core" />
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="Newtonsoft.Json" Version="4.5.0">
       <SpecificVersion>False</SpecificVersion>
@@ -90,15 +93,14 @@
     <Reference Include="System.Xml.Linq" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="FluentAssertions" Version="4.0.0" />
-    <PackageReference Include="Newtonsoft.Json" Version="5.0.6" />
+    <PackageReference Include="FluentAssertions" Version="5.6.0" />
+    <PackageReference Include="Newtonsoft.Json" Version="12.0.2" />
     <PackageReference Include="NUnit" Version="3.12.0" />
     <PackageReference Include="NUnit3TestAdapter" Version="3.13.0" />
-    <PackageReference Include="Rx-Core" Version="2.1.30214" />
-    <PackageReference Include="Rx-Interfaces" Version="2.1.30214" />
-    <PackageReference Include="Rx-Linq" Version="2.1.30214" />
-    <PackageReference Include="Rx-Main" Version="2.1.30214" />
-    <PackageReference Include="Rx-PlatformServices" Version="2.1.30214" />
+    <PackageReference Include="System.Reactive" Version="4.1.5" />
+    <PackageReference Include="Microsoft.Composition" Version="1.0.31" />
+    <PackageReference Include="System.Diagnostics.EventLog" Version="4.6.0-preview5.19224.8" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.1.0" />
   </ItemGroup>
   <ItemGroup>
     <BootstrapperPackage Include="Microsoft.Net.Client.3.5">
@@ -132,5 +134,21 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Its.Log\Its.Log.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Update="SampleApp.tt">
+      <Generator>TextTemplatingFileGenerator</Generator>
+      <LastGenOutput>SampleApp.cs</LastGenOutput>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Service Include="{508349b6-6b84-4df5-91f0-309beebad82d}" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Update="SampleApp.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>SampleApp.tt</DependentUpon>
+    </Compile>
   </ItemGroup>
 </Project>

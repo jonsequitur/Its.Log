@@ -27,6 +27,9 @@ namespace Its.Log.Instrumentation
                                                           .IfNotNull()
                                                           .Then(c => c.Remove(c.LastIndexOf("/", StringComparison.InvariantCultureIgnoreCase)))
                                                           .ElseDefault();
+#if NETSTANDARD20
+        private static readonly MemoryCache memoryCache = new MemoryCache(new MemoryCacheOptions());
+#endif
 
         /// <summary>
         ///   Returns diagnostic information related to the deployed application.
@@ -57,7 +60,7 @@ namespace Its.Log.Instrumentation
         ///   Returns diagnostic information related to the <see cref="MemoryCache" />.
         /// </summary>
         [DiagnosticSensor]
-        public static IDictionary<string, object> Cache(MemoryCache memoryCache) =>
+        public static IDictionary<string, object> Cache() =>
             new Dictionary<string, object>
             {
                 { "Count", memoryCache.Count },
