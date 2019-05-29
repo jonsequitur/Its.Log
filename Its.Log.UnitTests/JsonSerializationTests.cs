@@ -4,9 +4,8 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.IO;
-using FluentAssertions;
 using System.Linq;
+using FluentAssertions;
 using Its.Log.Instrumentation.Extensions;
 using Its.Recipes;
 using Newtonsoft.Json;
@@ -91,8 +90,6 @@ namespace Its.Log.Instrumentation.UnitTests
             Assert.Fail("Test not written yet.");
         }
 
-        // TODO: The Newtonsoft JsonSerializer cannot serialize the FileInfo object in .NET Core. Not sure why.
-#if NET462
         [Test]
         public void ToLogString_can_be_made_to_output_JSON()
         {
@@ -104,10 +101,9 @@ namespace Its.Log.Instrumentation.UnitTests
 
             Formatter.Default = (o, writer) => serializer.Serialize(writer, o);
 
-            Assert.That(new FileInfo(@"c:\temp\1.log").ToLogString(),
-                        Is.EqualTo("{\"$type\":\"System.IO.FileInfo, mscorlib\",\"OriginalPath\":\"c:\\\\temp\\\\1.log\",\"FullPath\":\"c:\\\\temp\\\\1.log\"}"));
+            StringAssert.StartsWith("{\"$type\":\"Its.Log.Instrumentation.LogEntry, Its.Log\",\"CallingType\":null,\"CallingMethod\":\"\",\"Category\":null,\"EventType\":8,\"ExceptionId\":null,\"Message\":\"A test log message.\",\"Subject\":\"A test log message.\",\"TimeStamp\":",
+                new LogEntry("A test log message.").ToLogString());
         }
-#endif
 
         [Test]
         public void Confirmation_timings_appear_in_JSON()
