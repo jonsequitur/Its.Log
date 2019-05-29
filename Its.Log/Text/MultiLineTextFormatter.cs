@@ -6,7 +6,7 @@ using System.IO;
 
 namespace Its.Log.Instrumentation
 {
-    public class MultiLineTextFormatter : ILogTextFormatter
+    internal class MultiLineTextFormatter : ILogTextFormatter
     {
         public static bool DebugMode = false;
 

@@ -130,9 +130,6 @@
     </BootstrapperPackage>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="..\Its.Log\ObservableExtensions.cs" Link="ObservableExtensions.cs" />
-  </ItemGroup>
-  <ItemGroup>
     <ProjectReference Include="..\Its.Log\Its.Log.csproj" />
   </ItemGroup>
   <ItemGroup>

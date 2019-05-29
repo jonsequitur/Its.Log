@@ -5,7 +5,7 @@ using System.IO;
 
 namespace Its.Log.Instrumentation
 {
-    public interface ILogTextFormatter
+    internal interface ILogTextFormatter
     {
         void WriteStartProperty(TextWriter writer);
         void WriteEndProperty(TextWriter writer);
