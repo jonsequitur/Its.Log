@@ -432,7 +432,8 @@ namespace Its.Log.Instrumentation.UnitTests
         [Test]
         public async Task Confirm_is_threadsafe()
         {
-            var barrier = new Barrier(10);
+            var barrierBefore = new Barrier(10);
+            var barrierAfter = new Barrier(10);
             var log = new List<LogEntry>();
 
             using (Log.Events().Subscribe(log.Add))
@@ -440,61 +441,71 @@ namespace Its.Log.Instrumentation.UnitTests
             {
                 new Thread(() =>
                 {
+                    barrierBefore.SignalAndWait(5000);
                     activity.Confirm(() => 1);
-                    barrier.SignalAndWait(5000);
+                    barrierAfter.SignalAndWait(5000);
                     Console.WriteLine("   activity.Confirm(() => 1)");
                 }).Start();
                 new Thread(() =>
                 {
+                    barrierBefore.SignalAndWait(5000);
                     activity.Confirm(() => 2);
-                    barrier.SignalAndWait(5000);
+                    barrierAfter.SignalAndWait(5000);
                     Console.WriteLine("   activity.Confirm(() => 2)");
                 }).Start();
                 new Thread(() =>
                 {
+                    barrierBefore.SignalAndWait(5000);
                     activity.Confirm(() => 3);
-                    barrier.SignalAndWait(5000);
+                    barrierAfter.SignalAndWait(5000);
                     Console.WriteLine("   activity.Confirm(() => 3)");
                 }).Start();
                 new Thread(() =>
                 {
+                    barrierBefore.SignalAndWait(5000);
                     activity.Confirm(() => 4);
-                    barrier.SignalAndWait(5000);
+                    barrierAfter.SignalAndWait(5000);
                     Console.WriteLine("   activity.Confirm(() => 4)");
                 }).Start();
                 new Thread(() =>
                 {
+                    barrierBefore.SignalAndWait(5000);
                     activity.Confirm(() => 5);
-                    barrier.SignalAndWait(5000);
+                    barrierAfter.SignalAndWait(5000);
                     Console.WriteLine("   activity.Confirm(() => 5)");
                 }).Start();
                 new Thread(() =>
                 {
+                    barrierBefore.SignalAndWait(5000);
                     activity.Confirm(() => 6);
-                    barrier.SignalAndWait(5000);
+                    barrierAfter.SignalAndWait(5000);
                     Console.WriteLine("   activity.Confirm(() => 6)");
                 }).Start();
                 new Thread(() =>
                 {
+                    barrierBefore.SignalAndWait(5000);
                     activity.Confirm(() => 7);
-                    barrier.SignalAndWait(5000);
+                    barrierAfter.SignalAndWait(5000);
                     Console.WriteLine("   activity.Confirm(() => 7)");
                 }).Start();
                 new Thread(() =>
                 {
+                    barrierBefore.SignalAndWait(5000);
                     activity.Confirm(() => 8);
-                    barrier.SignalAndWait(5000);
+                    barrierAfter.SignalAndWait(5000);
                     Console.WriteLine("   activity.Confirm(() => 8)");
                 }).Start();
                 new Thread(() =>
                 {
+                    barrierBefore.SignalAndWait(5000);
                     activity.Confirm(() => 9);
-                    barrier.SignalAndWait(5000);
+                    barrierAfter.SignalAndWait(5000);
                     Console.WriteLine("   activity.Confirm(() => 9)");
                 }).Start();
 
+                barrierBefore.SignalAndWait(5000);
                 activity.Confirm(() => 10);
-                barrier.SignalAndWait(5000);
+                barrierAfter.SignalAndWait(5000);
                 Console.WriteLine("   activity.Confirm(() => 10)");
             }
 
