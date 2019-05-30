@@ -430,7 +430,6 @@ namespace Its.Log.Instrumentation.UnitTests
         }
 
         [Test]
-        [Ignore("It sometimes fails.")]
         public async Task Confirm_is_threadsafe()
         {
             var barrier = new Barrier(10);
