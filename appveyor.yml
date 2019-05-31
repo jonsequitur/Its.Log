@@ -12,7 +12,8 @@ build:
 
 after_build:
     - nuget pack Recipes\AssemblyVersionSensor.nuspec -p "Configuration=Release;Platform=AnyCPU" 
-    - nuget pack Recipes\WebApiTelemetry.nuspec -p "Configuration=Release;Platform=AnyCPU" 
+    - nuget pack Recipes\WebApiTelemetry.nuspec -p "Configuration=Release;Platform=AnyCPU"
+    - nuget pack Its.Log\Its.Log.nuspec -p "Configuration=Release;Platform=AnyCPU" 
 
 test:
   assemblies:
