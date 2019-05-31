@@ -42,7 +42,7 @@ namespace Its.Log.Instrumentation.UnitTests
             Log.Write(() => "hello");
 
             Assert.That(log,
-                        Is.StringStarting("Information"));
+                        Does.StartWith("Information"));
         }
 
         [Test]

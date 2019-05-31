@@ -1,4 +1,4 @@
-// Copyright (c) Microsoft. All rights reserved. 
+﻿// Copyright (c) Microsoft. All rights reserved. 
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
@@ -25,7 +25,4 @@ using System.Runtime.InteropServices;
 // These attributes should be changed for each assembly.
 
 [assembly: AssemblyTitle("Its.Log")]
-[assembly: InternalsVisibleTo("Its.Log.Monitoring")]
 [assembly: InternalsVisibleTo("Its.Log.UnitTests")]
-[assembly: InternalsVisibleTo("Its.Log.Incubation.UnitTests")]
-[assembly: InternalsVisibleTo("Its.Log.Incubation")]

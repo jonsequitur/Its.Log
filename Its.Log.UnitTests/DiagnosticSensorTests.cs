@@ -4,14 +4,13 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.ComponentModel.Composition;
 using System.IO;
-using FluentAssertions;
 using System.Linq;
 using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
 using AssemblyWithMissingDependency;
+using FluentAssertions;
 using Its.Recipes;
 using NUnit.Framework;
 
@@ -133,7 +132,7 @@ namespace Its.Log.Instrumentation.UnitTests
 
             var sensor = DiagnosticSensor.KnownSensors().Single(s => s.Read().Equals(newGuid));
 
-            Assert.That(sensor.Name, Is.StringContaining(MethodBase.GetCurrentMethod().Name));
+            Assert.That(sensor.Name, Does.Contain(MethodBase.GetCurrentMethod().Name));
         }
 
         [Test]
@@ -295,7 +294,7 @@ namespace Its.Log.Instrumentation.UnitTests
 
         public static Barrier Barrier;
 
-        [Export("DiagnosticSensor")]
+        [DiagnosticSensor]
         internal static object InternalSensor()
         {
             return new object();

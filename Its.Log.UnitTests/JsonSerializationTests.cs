@@ -4,9 +4,8 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.IO;
-using FluentAssertions;
 using System.Linq;
+using FluentAssertions;
 using Its.Log.Instrumentation.Extensions;
 using Its.Recipes;
 using Newtonsoft.Json;
@@ -102,8 +101,8 @@ namespace Its.Log.Instrumentation.UnitTests
 
             Formatter.Default = (o, writer) => serializer.Serialize(writer, o);
 
-            Assert.That(new FileInfo(@"c:\temp\1.log").ToLogString(),
-                        Is.EqualTo("{\"$type\":\"System.IO.FileInfo, mscorlib\",\"OriginalPath\":\"c:\\\\temp\\\\1.log\",\"FullPath\":\"c:\\\\temp\\\\1.log\"}"));
+            StringAssert.StartsWith("{\"$type\":\"Its.Log.Instrumentation.LogEntry, Its.Log\",\"CallingType\":null,\"CallingMethod\":\"\",\"Category\":null,\"EventType\":8,\"ExceptionId\":null,\"Message\":\"A test log message.\",\"Subject\":\"A test log message.\",\"TimeStamp\":",
+                new LogEntry("A test log message.").ToLogString());
         }
 
         [Test]
@@ -166,7 +165,7 @@ namespace Its.Log.Instrumentation.UnitTests
             json.Should().Contain("\"ActivityId\":\"" + activityId + "\"");
         }
 
-        [Ignore]
+        [Ignore("")]
         [Test]
         public void ActivityId_is_a_JSON_property_when_added_using_WithExtension_Tracing_is_called()
         {
@@ -182,7 +181,7 @@ namespace Its.Log.Instrumentation.UnitTests
             json.Should().Contain("\"ActivityId\":\"" + activityId + "\"");
         }
 
-        [Ignore]
+        [Ignore("")]
         [Test]
         public void CallingType_is_serialized_as_the_full_type_name()
         {
@@ -190,7 +189,7 @@ namespace Its.Log.Instrumentation.UnitTests
             Assert.Fail("Test not written yet.");
         }
 
-        [Ignore]
+        [Ignore("")]
         [Test]
         public void EventType_can_be_serialized_as_a_string()
         {
