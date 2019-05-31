@@ -49,7 +49,7 @@ namespace Its.Log.Instrumentation
         /// <value>
         /// The list expansion limit.
         /// </value>
-        internal static int ListExpansionLimit
+        public static int ListExpansionLimit
         {
             get
             {
