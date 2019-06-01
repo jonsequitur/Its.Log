@@ -2,7 +2,14 @@
   <PropertyGroup>
     <TargetFrameworks>net462;netstandard2.0</TargetFrameworks>
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
-    <NuspecFile>Its.Log.nuspec</NuspecFile>
+    <PackageId>Its.Log</PackageId>
+    <PackageVersion>2.10.0</PackageVersion>
+    <Authors>jonsequitur,Microsoft</Authors>
+    <Title>Its.Log</Title>
+    <PackageProjectUrl>https://github.com/jonsequitur/its.log</PackageProjectUrl>
+    <PackageLicenseUrl>http://opensource.org/licenses/MIT</PackageLicenseUrl>
+    <Description>Get information out of your code at runtime to send it to log files, perf counters, consoles, services, sensors. Maximum flexibility and maintainability, minimum code.</Description>
+    <PackageTags>logging tracing instrumentation sensors diagnostics</PackageTags>
   </PropertyGroup>
   <PropertyGroup>
     <ProductVersion>9.0.30729</ProductVersion>
